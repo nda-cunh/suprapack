@@ -55,6 +55,11 @@ public struct Package {
 				installed_files += (string)buffer;
 			}
 		}
+			this.name = this.name ?? "";
+			this.version = this.version ?? "";
+			this.author = this.author ?? "";
+			this.description = this.description ?? "";
+			this.binary = this.binary ?? "";
 	}
 
 	public string []get_installed_files() {
