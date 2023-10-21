@@ -5,6 +5,7 @@ public const string INV = "\033[;7m";
 public const string RED = "\033[31m";
 public const string GREEN = "\033[32m";
 public const string YELLOW = "\033[33m";
+public const string WHITE = "\033[39m";
 public const string CYAN = "\033[96m";
 public const string PURPLE = "\033[35m";
 public const string NONE = "\033[0m";
