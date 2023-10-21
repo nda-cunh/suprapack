@@ -2,6 +2,11 @@
 void cmd_install(string []av) {
 	if (av.length == 2)
 		print_error("`suprastore install [...]`");	
+
+	if (FileUtils.test(av[2], FileTest.EXISTS)) {
+		install_package(av[2]);
+		Process.exit(0);
+	}
 	install(av[2]);
 	Process.exit(0);
 }
@@ -52,8 +57,8 @@ void cmd_uninstall(string []av) {
 void cmd_list(string []av) {
 	var installed = Query.get_all_package();
 	foreach (var i in installed) {
-		print(@"$(BOLD)$(WHITE)$(i.name) $(GREEN)$(i.version)$(NONE)\n");
-		print("\t%s%s %s%s\n", COM, i.author, i.description, NONE);
+		print(@"$(BOLD)$(WHITE)$(i.name) $(GREEN)$(i.version)$(NONE)");
+		print("\t%s<%s> %s%s\n", COM, i.author, i.description, NONE);
 	}
 	Process.exit(0);
 }
@@ -91,6 +96,24 @@ void cmd_search(string []av) {
 			print_error(e.message);
 		}
 	}
+	Process.exit(0);
+}
+
+[NoReturn]
+void cmd_run(string []av) {
+	if (av.length == 2)
+		print_error("`suprastore run [...]`");	
+	if (Query.is_exist(av[2]) == false)
+		print_error(@"$(av[2]) is not installed");
+	var pkg = Query.get_from_pkg(av[2]);
+
+	string []av_binary = {@"$(PREFIX)/bin/$(pkg.binary)"};
+
+	if (av.length >= 3) {
+		foreach (var i in av[3: av.length])
+			av_binary += i;	
+	}
+	run_cmd(av_binary);
 	Process.exit(0);
 }
 

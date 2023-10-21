@@ -14,6 +14,8 @@ public class Main {
 			return ;
 		}
 
+		if (args[1].match_string("run", true))
+			cmd_run(args);
 		if (args[1].match_string("list", true))
 			cmd_list(args);
 		if (args[1].match_string("search", true))
