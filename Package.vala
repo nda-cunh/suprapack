@@ -6,14 +6,18 @@ public struct Package {
 	string name;
 	string author;
 	string version; 
-	string icon;
+	string description;
+	string binary;
 	string installed_files;
+
+
 	// constructor
 	public Package.from_input() {
 		this.name = get_input("Name: ");
 		this.version = get_input("Version: ");
 		this.author = get_input("Author: ");
-		this.icon = get_input("Icon: ");
+		this.description = get_input("Description: ");
+		this.binary = get_input("Binary: ");
 	}
 
 	public Package.from_file(string info_file) {
@@ -36,19 +40,20 @@ public struct Package {
 				this.version = value;
 			if (start == "author")
 				this.author = value;
-			if (start == "icon")
-				this.icon = value;
+			if (start == "description")
+				this.description = value;
+			if (start == "binary")
+				this.binary = value;
 		}
-		if (line != "[FILES]")
-			return;
-
-		// read all installed files
-		uint8 buffer[8192];
-		size_t len = 0;
-		this.installed_files = "";
-		while ((len = fs.read(buffer)) > 0) {
-			buffer[len] = '\0';
-			installed_files += (string)buffer;
+		if (line == "[FILES]") {
+			// read all installed files
+			uint8 buffer[8192];
+			size_t len = 0;
+			this.installed_files = "";
+			while ((len = fs.read(buffer)) > 0) {
+				buffer[len] = '\0';
+				installed_files += (string)buffer;
+			}
 		}
 	}
 
@@ -69,7 +74,8 @@ public struct Package {
 		fs.printf("name: %s\n", this.name);
 		fs.printf("version: %s\n", this.version);
 		fs.printf("author: %s\n", this.author);
-		fs.printf("icon: %s\n", this.icon);
+		fs.printf("binary: %s\n", this.binary);
+		fs.printf("description: %s\n", this.description);
 	}
 	
 	// private func
