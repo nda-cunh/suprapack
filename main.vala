@@ -1,5 +1,6 @@
 public string? PREFIX = null;
 public string? LOCAL = null;
+public string? USERNAME = null;
 
 void build_package(string usr_dir) {
 	if (!(FileUtils.test(usr_dir, FileTest.EXISTS)) || !(FileUtils.test(usr_dir, FileTest.IS_DIR)))
@@ -35,16 +36,27 @@ void cmd_build(string []av) {
 }
 
 [NoReturn]
+void cmd_uninstall(string []av) {
+	unowned string pkg;
+	if (av.length == 2)
+		print_error("`suprastore uninstall [...]`");	
+	pkg = av[2];
+	if (Query.is_exist(pkg) == false)
+		print_error(@"the package $pkg doesn't exist");
+	var lst = Query.get_from_pkg(pkg).get_installed_files();
+	foreach(unowned string i in lst) {
+		print_info(@"Suppresion de $(i)");
+		FileUtils.unlink(i);
+	}
+	Query.remove_pkg(pkg);
+	Process.exit(0);
+}
+
+[NoReturn]
 void cmd_list(string []av) {
-	var list = SupraList.get();
-	unowned string name;
-	unowned string version;
+	var list = Repository.default().get_list_package();
 	foreach(var i in list) {
-		name = i;
-		version = i.offset(i.index_of_char('-') + 1);
-		version.data[-1] = '\0'; 
-		version.offset(version.last_index_of_char('.')).data[0] = '\0';
-		print("%s [%s]\n", name, version);
+		print("%s [%s]\n", i.name, i.version);
 	}
 	Process.exit(0);
 }
@@ -89,14 +101,17 @@ public class Main {
 			cmd_help(args);
 		if (args[1].match_string("install", true))
 			cmd_install(args);
+		if (args[1].match_string("uninstall", true))
+			cmd_uninstall(args);
 		print_error("La commande n'existe pas.");
 	}
 
 
 	// INIT
 	public Main(string []args) {
+		USERNAME = Environment.get_user_name();
 		PREFIX = Environment.get_home_dir() + "/.local";
-		LOCAL = Environment.get_home_dir() + "/suprastore";
+	 	LOCAL = Environment.get_home_dir() + "/suprastore";
 		Intl.setlocale();
 		all_cmd(args);
 	}
