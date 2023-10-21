@@ -59,7 +59,9 @@ public struct Package {
 			this.version = this.version ?? "";
 			this.author = this.author ?? "";
 			this.description = this.description ?? "";
-			this.binary = this.binary ?? "";
+			this.binary = this.binary ?? this.name;
+			if (this.binary == "")
+				this.binary = this.name;
 	}
 
 	public string []get_installed_files() {
@@ -87,8 +89,10 @@ public struct Package {
 	private string get_input(string msg) {
 		print(msg);
 		string? str = stdin.read_line();
-		if (str != null)
+		if (str != null) {
 			str = str.down();
+			str = str.strip();
+		}
 		return str;
 	}
 }
