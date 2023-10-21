@@ -7,6 +7,7 @@ public struct Package {
 	string author;
 	string version; 
 	string icon;
+	string installed_files;
 	// constructor
 	public Package.from_input() {
 		this.name = get_input("Name: ");
@@ -23,6 +24,8 @@ public struct Package {
 		unowned string @value;
 		unowned string start;
 		while ((line = fs.read_line()) != null) {
+			if (line == "[FILES]")
+				break;
 			start = line; 
 			value = line.offset(line.index_of_char(':') + 2);
 			value.data[-2] = '\0';
@@ -36,6 +39,26 @@ public struct Package {
 			if (start == "icon")
 				this.icon = value;
 		}
+		if (line != "[FILES]")
+			return;
+
+		// read all installed files
+		uint8 buffer[8192];
+		size_t len = 0;
+		this.installed_files = "";
+		while ((len = fs.read(buffer)) > 0) {
+			buffer[len] = '\0';
+			installed_files += (string)buffer;
+		}
+	}
+
+	public string []get_installed_files() {
+		var sp = this.installed_files.split("\n");
+		if (sp[sp.length - 1] == "") {
+			sp[sp.length -1] = null;
+			sp.resize(sp.length - 1);
+		}
+		return (sp);
 	}
 	
 	// public func 

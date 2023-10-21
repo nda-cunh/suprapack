@@ -27,7 +27,8 @@ void post_install(List<string> list, int len, ref Package pkg) {
 	fs.printf("[FILES]\n");
 	foreach(var i in list) {
 		unowned string basename = i.offset(len);
-		fs.printf("%s%s\n", PREFIX, basename);
+		if (basename != "/info")
+			fs.printf("%s%s\n", PREFIX, basename);
 	}
 
 }
@@ -70,20 +71,27 @@ public void install_package(string suprapack) {
 
 
 
-public void install(string pkg_name) {
+public void install(string name_search) {
+	Repository repo = Repository.default();
 	string pkgdir = @"$(LOCAL)/pkg";
+	string pkgname;
+	string output;
 	
-	var list = SupraList.get_only_name();
-	if (pkg_name in list) {
-		DirUtils.create_with_parents(pkgdir, 0755);
-		string output = @"$pkgdir/cppcheck-2.11.suprapack";
-		// print("https://gitlab.com/supraproject/suprastore_repository/-/raw/master/cppcheck-2.11.suprapack\n");
-		// print("%s", REPO_LIST + "cppcheck-2.11.suprapack\n");
-		download(REPO_LIST + "cppcheck-2.11.suprapack", output);
-		install_package(output);
+	var list = repo.get_list_package();
+	foreach (var pkg in list) {
+		if (pkg.name == name_search) {
+			DirUtils.create_with_parents(pkgdir, 0755);
+			print_info(@"$(pkg.name):$(pkg.version) found in repo $(pkg.repo_name)");
+			pkgname = @"$(pkg.name)-$(pkg.version).suprapack";
+			output = @"$pkgdir/$(pkg.name)-$(pkg.version).suprapack";
+			
+			string url = repo.get_url_from_name(pkg.repo_name) + pkgname;
+			download(url, output);
+			install_package(output);
+			return ;
+		}
 	}
-	else
-		print_info(@"$pkg_name doesn't exist");
+	print_error(@"$name_search doesn't exist");
 }
 
 public void download(string url, string output) {
