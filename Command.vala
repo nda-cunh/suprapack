@@ -1,14 +1,13 @@
-[NoReturn]
-void cmd_install(string []av) {
+bool cmd_install(string []av) {
 	if (av.length == 2)
 		print_error("`suprastore install [...]`");	
 
 	if (FileUtils.test(av[2], FileTest.EXISTS)) {
 		install_package(av[2]);
-		Process.exit(0);
+		return true;
 	}
 	install(av[2]);
-	Process.exit(0);
+	return true;
 }
 
 void build_package(string usr_dir) {
@@ -28,16 +27,14 @@ void build_package(string usr_dir) {
 	print_info(@"$(name_pkg).suprapack is created\n");
 }
 
-[NoReturn]
-void cmd_build(string []av) {
+bool cmd_build(string []av) {
 	if (av.length == 2)
 		print_error("`suprastore build [...]`");	
 	build_package(av[2]);
-	Process.exit(0);
+	return true;
 }
 
-[NoReturn]
-void cmd_uninstall(string []av) {
+bool cmd_uninstall(string []av) {
 	unowned string pkg;
 	if (av.length == 2)
 		print_error("`suprastore uninstall [...]`");	
@@ -50,17 +47,16 @@ void cmd_uninstall(string []av) {
 		FileUtils.unlink(i);
 	}
 	Query.remove_pkg(pkg);
-	Process.exit(0);
+	return true;
 }
 
-[NoReturn]
-void cmd_list(string []av) {
+bool cmd_list(string []av) {
 	var installed = Query.get_all_package();
 	foreach (var i in installed) {
 		print(@"$(BOLD)$(WHITE)$(i.name) $(GREEN)$(i.version)$(NONE)");
 		print("\t%s<%s> %s%s\n", COM, i.author, i.description, NONE);
 	}
-	Process.exit(0);
+	return true;
 }
 
 
@@ -73,8 +69,7 @@ private void print_search(ref SupraList repo, bool installed) {
 	print("%s\n", NONE);
 }
 
-[NoReturn]
-void cmd_search(string []av) {
+bool cmd_search(string []av) {
 	var list = Repository.default().get_list_package();
 	var installed = Query.get_all_installed_pkg();
 	// search without input
@@ -96,11 +91,10 @@ void cmd_search(string []av) {
 			print_error(e.message);
 		}
 	}
-	Process.exit(0);
+	return true;
 }
 
-[NoReturn]
-void cmd_run(string []av) {
+bool cmd_run(string []av) {
 	if (av.length == 2)
 		print_error("`suprastore run [...]`");	
 	if (Query.is_exist(av[2]) == false)
@@ -114,7 +108,7 @@ void cmd_run(string []av) {
 			av_binary += i;	
 	}
 	run_cmd(av_binary);
-	Process.exit(0);
+	return true;
 }
 
 
@@ -145,8 +139,7 @@ bool update_package(string pkg_name, bool say_me = true) {
 	return false;
 }
 
-[NoReturn]
-void cmd_update(string []av) {
+bool cmd_update(string []av) {
 	unowned string pkg_name;
 
 	// All Update
@@ -155,7 +148,7 @@ void cmd_update(string []av) {
 		foreach (var pkg in Qpkg) {
 			update_package(pkg, false);
 		}
-		Process.exit(0);
+		return true;
 	}
 	// update pkg_name
 	else {
@@ -165,12 +158,11 @@ void cmd_update(string []av) {
 		}
 		if (update_package(pkg_name) == false)
 			print_error(@"target not found: $pkg_name");
-		Process.exit(0);
+		return true;
 	}
 }
 
-[NoReturn]
-void cmd_help(string []av) {
+bool cmd_help(string []av) {
 	print(@"$(BOLD)$(INV)                            Help                            $(NONE)\n");
 	print(@"$(BOLD)suprastore$(NONE) help\n");
 	print(@"$(BOLD)suprastore$(NONE) install package         Install package from repo\n");
@@ -186,5 +178,5 @@ void cmd_help(string []av) {
 	print(@"$(CYAN)'bin' 'share' 'lib'$(NONE)\n");
 	print(@"$(CYAN)Example: suprapatate/bin/suprapatate `suprastore build suprapatate`$(NONE)\n");
 	print(@"$(BOLD)$(INV)                                                            $(NONE)\n");
-	Process.exit(0);
+	return true;
 }
