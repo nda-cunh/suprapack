@@ -5,12 +5,14 @@ public string? USERNAME = null;
 public class Main {
 
 	public bool all_cmd(string []args) {
-		if (args.length < 2)
+		if (args.length < 2) {
 			cmd_help(args);
+			return true;
+		}
 		
 		// 1 argv (suprapack)
 		if (FileUtils.test(args[1], FileTest.EXISTS)) {
-			install_package(args[1]);
+			install_suprapackage(args[1]);
 			return true;
 		}
 
