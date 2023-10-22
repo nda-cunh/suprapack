@@ -39,7 +39,7 @@ void install_files(List<string> list, int len) {
 	foreach(var i in list) {
 		unowned string basename = i.offset(len);
 		run_cmd({"install", i, PREFIX + basename});
-		print("[Install] [%u / %u] %s %s\r", ++nb, list.length(), basename, BLANK);
+		print("[Install] [%u/%u] %s\n", ++nb, list.length(), basename);
 	}
 }
 

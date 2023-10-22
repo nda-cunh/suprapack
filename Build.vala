@@ -5,7 +5,7 @@ public void build_package(string usr_dir) {
 	pkg.create_info_file(@"$usr_dir/info");
 
 	var name_pkg = @"$(pkg.name)-$(pkg.version)";
-	string []av = {"tar", "-czf", @"$(name_pkg).suprapack", "-C", usr_dir, "."};
+	string []av = {"tar", "-cJf", @"$(name_pkg).suprapack", "-C", usr_dir, "."};
 	try {
 		var tar = new Subprocess.newv(av, SubprocessFlags.STDERR_SILENCE);
 		tar.wait();
