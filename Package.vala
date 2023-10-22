@@ -47,12 +47,12 @@ public struct Package {
 		}
 		if (line == "[FILES]") {
 			// read all installed files
-			uint8 buffer[8192];
+			uint8 buffer[8193];
 			size_t len = 0;
 			this.installed_files = "";
-			while ((len = fs.read(buffer)) > 0) {
+			while ((len = fs.read(buffer[0:8192])) > 0) {
 				buffer[len] = '\0';
-				installed_files += (string)buffer;
+				installed_files += ((string)buffer).dup();
 			}
 		}
 			this.name = this.name ?? "";
