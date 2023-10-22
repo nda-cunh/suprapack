@@ -117,11 +117,56 @@ void cmd_run(string []av) {
 	Process.exit(0);
 }
 
+
+bool update_package(string pkg_name, bool say_me = true) {
+	var list = Repository.default().get_list_package();
+	var pkg = Query.get_from_pkg(pkg_name);
+	double Qversion = double.parse(pkg.version);
+	double Sversion;
+
+	foreach (var i in list) {
+		if (i.name == pkg_name) {
+			Sversion = double.parse(i.version);
+			if (Sversion > Qversion) {
+				print_info(@"Update avaiable for $(pkg_name) $(CYAN)$(pkg.version) --> $(i.version)");
+				print_info(@"Do you want update it ? [yes/No]");
+				var input = stdin.read_line().strip().down();
+				if (say_me && input == "" || "yes" in input) {
+					install(pkg_name);
+				}else {
+					print_info("Cancel ...");
+				}
+			}else {
+				print_info(@"No update avaiable for $(pkg_name) $(i.version)");
+			}
+			return true;
+		}
+	}
+	return false;
+}
+
 [NoReturn]
 void cmd_update(string []av) {
-	// var list = Repository.default().get_list_package();
-	//TODO
-	Process.exit(0);
+	unowned string pkg_name;
+
+	// All Update
+	if (av.length == 2) {
+		var Qpkg = Query.get_all_installed_pkg();
+		foreach (var pkg in Qpkg) {
+			update_package(pkg, false);
+		}
+		Process.exit(0);
+	}
+	// update pkg_name
+	else {
+		pkg_name = av[2];
+		if (Query.is_exist(pkg_name) == false) {
+			print_error(@"$pkg_name is not installed");
+		}
+		if (update_package(pkg_name) == false)
+			print_error(@"target not found: $pkg_name");
+		Process.exit(0);
+	}
 }
 
 [NoReturn]
