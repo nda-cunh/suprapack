@@ -163,20 +163,35 @@ bool cmd_update(string []av) {
 }
 
 bool cmd_help(string []av) {
-	print(@"$(BOLD)$(INV)                            Help                            $(NONE)\n");
-	print(@"$(BOLD)suprastore$(NONE) help\n");
-	print(@"$(BOLD)suprastore$(NONE) install package         Install package from repo\n");
-	print(@"$(BOLD)suprastore$(NONE) update package          Update only the package\n");
-	print(@"$(BOLD)suprastore$(NONE) update                  Update All\n");
-	print(@"$(BOLD)suprastore$(NONE) list                    List all package in repo\n");
-	print(@"$(BOLD)suprastore$(NONE) list package            List all files of package\n");
+	string suprastore = @"$(BOLD)suprastore$(NONE)";
+	print(@"$(BOLD)$(YELLOW)[SupraStore] ----- Help -----\n\n");
+	print(@"	$(suprastore) install [package name]\n");
+	print(@"	  $(COM) install a package from a repository\n");
+	print(@"	$(suprastore) install [file.suprapack]\n");
+	print(@"	  $(COM) install a package from a file (suprapack)\n");
+	print(@"	$(suprastore) uninstall [package name]\n");
+	print(@"	  $(COM) remove a package\n");
+	print(@"	$(suprastore) your_file.suprapack\n");
+	print(@"	  $(COM) install a package from a file (suprapack)\n");
+	print(@"	$(suprastore) update\n");
+	print(@"	  $(COM) update all your package\n");
+	print(@"	$(suprastore) update [package name]\n");
+	print(@"	  $(COM) update a package\n");
+	print(@"	$(suprastore) search <pkg>\n");
+	print(@"	  $(COM) search a package in the repo you can use patern for search\n");
+	print(@"	  $(BOLD)$(GREY) Exemple:$(COM) suprastore search $(CYAN)'^supra.*' \n");
+	print(@"	$(suprastore) list <pkg>\n");
+	print(@"	  $(COM) list your installed package\n");
+	print(@"	$(suprastore) <help>\n");
+	print(@"	  $(COM) you have RTFM... so you are a real\n");
 	print(@"\n");
-	print(@"$(BOLD)$(COM)[Dev Only]$(NONE)\n");
-	print(@"$(BOLD)suprastore$(NONE) build PREFIX  Build a file.suprapack\n");
-	print(@"$(BOLD)suprastore$(NONE) your_package.suprapack  Install a file.suprapack\n");
-	print(@"$(CYAN)PREFIX is a folder with this directory like: $(NONE)\n");
-	print(@"$(CYAN)'bin' 'share' 'lib'$(NONE)\n");
-	print(@"$(CYAN)Example: suprapatate/bin/suprapatate `suprastore build suprapatate`$(NONE)\n");
-	print(@"$(BOLD)$(INV)                                                            $(NONE)\n");
+	print(@"$(BOLD)$(YELLOW)[Dev Only]$(NONE)\n");
+	print(@"	$(suprastore) build $(CYAN)[PREFIX]\n");
+	print(@"	  $(COM) build a suprapack you need a prefix look note part\n");
+	print(@"\n");
+	print(@"$(BOLD)$(YELLOW)[Note]$(NONE)\n");
+	print(@"	$(WHITE)PREFIX is a folder with this directory like: $(NONE)\n");
+	print(@"	$(CYAN)'bin' 'share' 'lib'$(NONE)\n");
+	print(@"	$(BOLD)$(WHITE)Example: $(CYAN)suprapatate/bin/suprapatate$(NONE) `suprastore build suprapatate`$(NONE)\n");
 	return true;
 }
