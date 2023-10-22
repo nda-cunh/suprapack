@@ -3,7 +3,7 @@ bool cmd_install(string []av) {
 		print_error("`suprastore install [...]`");	
 
 	if (FileUtils.test(av[2], FileTest.EXISTS)) {
-		install_package(av[2]);
+		install_suprapackage(av[2]);
 		return true;
 	}
 	install(av[2]);
@@ -13,7 +13,7 @@ bool cmd_install(string []av) {
 bool cmd_build(string []av) {
 	if (av.length == 2)
 		print_error("`suprastore build [...]`");	
-	build_package(av[2]);
+	Build.create_package(av[2]);
 	return true;
 }
 

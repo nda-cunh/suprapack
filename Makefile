@@ -7,7 +7,12 @@ all:
 prod:
 	valac $(SRC) -X -w --pkg=gio-2.0 -o $(NAME) 
 
+install: prod
+	mkdir -p prefix/bin
+	cp $(NAME) prefix/bin/$(NAME)
+
 run: all
-	@./$(NAME) help 
+	cp $(NAME) ~/.local/bin/$(NAME)
+	@#./$(NAME) uninstall nodejs 
 	@# ./$(NAME) update suprapatate 
 	@# ./$(NAME) list 

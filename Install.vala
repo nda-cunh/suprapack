@@ -33,18 +33,30 @@ void post_install(List<string> list, int len, ref Package pkg) {
 
 }
 
+void draw_install_file(uint min, uint max, string file) {
+	stdout.printf("[Install] [%u/%u] %s\n", min, max, file);
+}
+
 // copy files to PREFIX ~/.local 
 void install_files(List<string> list, int len) {
 	uint nb = 0;
-	foreach(var i in list) {
-		unowned string basename = i.offset(len);
-		run_cmd({"install", i, PREFIX + basename});
-		print("[Install] [%u/%u] %s\n", ++nb, list.length(), basename);
+	unowned string basename;
+	uint list_length = list.length();
+	try {
+		foreach (var e in list) {
+			basename = e.offset(len);
+			var fileSrc = File.new_for_path(e);
+			var fileDest = File.new_for_path(PREFIX + basename);
+			fileSrc.move(fileDest, FileCopyFlags.OVERWRITE);
+			draw_install_file(++nb, list_length, basename);
+		}
+	} catch (Error e) {
+		print_error(@"FATAL ERROR >>> $(e.message)");
 	}
 }
 
 // install package suprapack
-public void install_package(string suprapack) {
+public void install_suprapackage(string suprapack) {
 	if (FileUtils.test(suprapack, FileTest.EXISTS)) {
 		if (!(suprapack.has_suffix(".suprapack")))
 			print_error("ce fichier n'est pas un suprapack");
@@ -59,7 +71,7 @@ public void install_package(string suprapack) {
 		print_info(@"Installation de $(YELLOW)$(pkg.name) $(pkg.version)$(NONE) par $(pkg.author)");
 		var list = new List<string>();
 		list_file_dir(tmp_dir, ref list);	
-	
+
 		install_files(list, tmp_dir.length);
 		post_install(list, tmp_dir.length, ref pkg);
 		
@@ -68,7 +80,6 @@ public void install_package(string suprapack) {
 		print_error(e.message);
 	}
 }
-
 
 
 public void install(string name_search) {
@@ -87,7 +98,7 @@ public void install(string name_search) {
 			
 			string url = repo.get_url_from_name(pkg.repo_name) + pkgname;
 			download(url, output);
-			install_package(output);
+			install_suprapackage(output);
 			return ;
 		}
 	}
