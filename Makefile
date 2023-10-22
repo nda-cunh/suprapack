@@ -1,4 +1,4 @@
-SRC= main.vala Command.vala Query.vala Log.vala Repository.vala Install.vala Package.vala
+SRC= main.vala Build.vala Command.vala Query.vala Log.vala Repository.vala Install.vala Package.vala
 NAME=suprastore
 
 all:
@@ -8,6 +8,6 @@ prod:
 	valac $(SRC) -X -w --pkg=gio-2.0 -o $(NAME) 
 
 run: all
-	@./$(NAME) list 
+	@./$(NAME) help 
 	@# ./$(NAME) update suprapatate 
 	@# ./$(NAME) list 
