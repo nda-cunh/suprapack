@@ -83,28 +83,17 @@ public void install_suprapackage(string suprapack) {
 
 
 public void install(string name_search) {
-	Repository repo = Repository.default();
-	string pkgdir = @"$(LOCAL)/pkg";
-	string pkgname;
+	var sync = Sync.default();
 	string output;
 	
-	var list = repo.get_list_package();
+	var list = sync.get_list_package();
 	foreach (var pkg in list) {
 		if (pkg.name == name_search) {
-			DirUtils.create_with_parents(pkgdir, 0755);
-			print_info(@"$(pkg.name):$(pkg.version) found in repo $(pkg.repo_name)");
-			pkgname = @"$(pkg.name)-$(pkg.version).suprapack";
-			output = @"$pkgdir/$(pkg.name)-$(pkg.version).suprapack";
-			
-			string url = repo.get_url_from_name(pkg.repo_name) + pkgname;
-			download(url, output);
+			print_info(@"$(pkg.name):$(pkg.version) found in sync $(pkg.repo_name)");
+			output = sync.download(pkg);
 			install_suprapackage(output);
 			return ;
 		}
 	}
 	print_error(@"$name_search doesn't exist");
-}
-
-public void download(string url, string output) {
-	run_cmd({"curl", "-o", output, url});
 }

@@ -1,6 +1,6 @@
 bool cmd_install(string []av) {
 	if (av.length == 2)
-		print_error("`suprastore install [...]`");	
+		print_error("`suprapack install [...]`");	
 
 	if (FileUtils.test(av[2], FileTest.EXISTS)) {
 		install_suprapackage(av[2]);
@@ -12,14 +12,15 @@ bool cmd_install(string []av) {
 
 bool cmd_build(string []av) {
 	if (av.length == 2)
-		print_error("`suprastore build [...]`");	
+		print_error("`suprapack build [...]`");	
+	print_info(@"Build $(av[2])");
 	Build.create_package(av[2]);
 	return true;
 }
 
 bool cmd_info(string []av) {
 	if (av.length == 2)
-		print_error("`suprastore info [...]`");	
+		print_error("`suprapack info [...]`");	
 	var info = Query.get_from_pkg(av[2]);
 	print(@"$(BOLD)Nom                      : $(NONE)%s\n", info.name);
 	print(@"$(BOLD)Version                  : $(NONE)%s\n", info.version);
@@ -32,7 +33,7 @@ bool cmd_info(string []av) {
 bool cmd_uninstall(string []av) {
 	unowned string pkg;
 	if (av.length == 2)
-		print_error("`suprastore uninstall [...]`");	
+		print_error("`suprapack uninstall [...]`");	
 	pkg = av[2];
 	if (Query.is_exist(pkg) == false)
 		print_error(@"the package $pkg doesn't exist");
@@ -65,7 +66,7 @@ private void print_search(ref SupraList repo, bool installed) {
 }
 
 bool cmd_search(string []av) {
-	var list = Repository.default().get_list_package();
+	var list = Sync.default().get_list_package();
 	var installed = Query.get_all_installed_pkg();
 	// search without input
 	if (av.length == 2) {
@@ -91,7 +92,7 @@ bool cmd_search(string []av) {
 
 bool cmd_run(string []av) {
 	if (av.length == 2)
-		print_error("`suprastore run [...]`");	
+		print_error("`suprapack run [...]`");	
 	if (Query.is_exist(av[2]) == false)
 		print_error(@"$(av[2]) is not installed");
 	var pkg = Query.get_from_pkg(av[2]);
@@ -108,7 +109,7 @@ bool cmd_run(string []av) {
 
 
 bool update_package(string pkg_name, bool say_me = true) {
-	var list = Repository.default().get_list_package();
+	var list = Sync.default().get_list_package();
 	var pkg = Query.get_from_pkg(pkg_name);
 	double Qversion = double.parse(pkg.version);
 	double Sversion;
@@ -158,37 +159,37 @@ bool cmd_update(string []av) {
 }
 
 bool cmd_help(string []av) {
-	string suprastore = @"$(BOLD)suprastore$(NONE)";
+	string suprapack = @"$(BOLD)suprapack$(NONE)";
 	print(@"$(BOLD)$(YELLOW)[SupraStore] ----- Help -----\n\n");
-	print(@"	$(suprastore) install [package name]\n");
+	print(@"	$(suprapack) install [package name]\n");
 	print(@"	  $(COM) install a package from a repository\n");
-	print(@"	$(suprastore) install [file.suprapack]\n");
+	print(@"	$(suprapack) install [file.suprapack]\n");
 	print(@"	  $(COM) install a package from a file (suprapack)\n");
-	print(@"	$(suprastore) uninstall [package name]\n");
+	print(@"	$(suprapack) uninstall [package name]\n");
 	print(@"	  $(COM) remove a package\n");
-	print(@"	$(suprastore) your_file.suprapack\n");
+	print(@"	$(suprapack) your_file.suprapack\n");
 	print(@"	  $(COM) install a package from a file (suprapack)\n");
-	print(@"	$(suprastore) update\n");
+	print(@"	$(suprapack) update\n");
 	print(@"	  $(COM) update all your package\n");
-	print(@"	$(suprastore) update [package name]\n");
+	print(@"	$(suprapack) update [package name]\n");
 	print(@"	  $(COM) update a package\n");
-	print(@"	$(suprastore) search <pkg>\n");
+	print(@"	$(suprapack) search <pkg>\n");
 	print(@"	  $(COM) search a package in the repo you can use patern for search\n");
-	print(@"	  $(BOLD)$(GREY) Exemple:$(COM) suprastore search $(CYAN)'^supra.*' \n");
-	print(@"	$(suprastore) list <pkg>\n");
+	print(@"	  $(BOLD)$(GREY) Exemple:$(COM) suprapack search $(CYAN)'^supra.*' \n");
+	print(@"	$(suprapack) list <pkg>\n");
 	print(@"	  $(COM) list your installed package\n");
-	print(@"	$(suprastore) info [package name]\n");
+	print(@"	$(suprapack) info [package name]\n");
 	print(@"	  $(COM) print info of package name\n");
-	print(@"	$(suprastore) <help>\n");
+	print(@"	$(suprapack) <help>\n");
 	print(@"	  $(COM) you have RTFM... so you are a real\n");
 	print(@"\n");
 	print(@"$(BOLD)$(YELLOW)[Dev Only]$(NONE)\n");
-	print(@"	$(suprastore) build $(CYAN)[PREFIX]\n");
+	print(@"	$(suprapack) build $(CYAN)[PREFIX]\n");
 	print(@"	  $(COM) build a suprapack you need a prefix look note part\n");
 	print(@"\n");
 	print(@"$(BOLD)$(YELLOW)[Note]$(NONE)\n");
 	print(@"	$(WHITE)PREFIX is a folder with this directory like: $(NONE)\n");
 	print(@"	$(CYAN)'bin' 'share' 'lib'$(NONE)\n");
-	print(@"	$(BOLD)$(WHITE)Example: $(CYAN)suprapatate/bin/suprapatate$(NONE) `suprastore build suprapatate`$(NONE)\n");
+	print(@"	$(BOLD)$(WHITE)Example: $(CYAN)suprapatate/bin/suprapatate$(NONE) `suprapack build suprapatate`$(NONE)\n");
 	return true;
 }
