@@ -1,5 +1,5 @@
-SRC= main.vala Build.vala Command.vala Query.vala Log.vala Repository.vala Install.vala Package.vala
-NAME=suprastore
+SRC= main.vala Build.vala Repository.vala Command.vala Query.vala Log.vala Sync.vala Install.vala Package.vala
+NAME=suprapack
 
 all:
 	valac $(SRC) -X -w -X -fsanitize=address --pkg=gio-2.0 -o $(NAME) 
