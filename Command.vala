@@ -17,6 +17,18 @@ bool cmd_build(string []av) {
 	return true;
 }
 
+bool cmd_info(string []av) {
+	if (av.length == 2)
+		print_error("`suprastore info [...]`");	
+	var info = Query.get_from_pkg(av[2]);
+	print(@"$(BOLD)Nom                      : $(NONE)%s\n", info.name);
+	print(@"$(BOLD)Version                  : $(NONE)%s\n", info.version);
+	print(@"$(BOLD)Description              : $(NONE)%s\n", info.description);
+	print(@"$(BOLD)Author                   : $(NONE)%s\n", info.author);
+
+	return true;
+}
+
 bool cmd_uninstall(string []av) {
 	unowned string pkg;
 	if (av.length == 2)
@@ -165,6 +177,8 @@ bool cmd_help(string []av) {
 	print(@"	  $(BOLD)$(GREY) Exemple:$(COM) suprastore search $(CYAN)'^supra.*' \n");
 	print(@"	$(suprastore) list <pkg>\n");
 	print(@"	  $(COM) list your installed package\n");
+	print(@"	$(suprastore) info [package name]\n");
+	print(@"	  $(COM) print info of package name\n");
 	print(@"	$(suprastore) <help>\n");
 	print(@"	  $(COM) you have RTFM... so you are a real\n");
 	print(@"\n");
