@@ -6,7 +6,7 @@ public class Main {
 
 	public bool all_cmd(string []args) {
 		if (args.length < 2) {
-			cmd_help(args);
+			cmd_help();
 			return true;
 		}
 		
@@ -27,7 +27,7 @@ public class Main {
 		if (av1 == "build")
 			return cmd_build(args);
 		if (av1 == "help")
-			return cmd_help(args);
+			return cmd_help();
 		if (av1 == "install")
 			return cmd_install(args);
 		if (av1 == "uninstall")
@@ -36,6 +36,8 @@ public class Main {
 			return cmd_update(args);
 		if (av1 == "info")
 			return cmd_info(args);
+		if (av1 == "prepare")
+			return cmd_prepare();
 		print_error("La commande n'existe pas.");
 	}
 

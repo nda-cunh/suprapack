@@ -55,6 +55,11 @@ bool cmd_list(string []av) {
 	return true;
 }
 
+bool cmd_prepare() {
+	Repository.prepare();
+	return true;
+}
+
 
 private void print_search(ref SupraList repo, bool installed) {
 	print("%s%s", BOLD, PURPLE);
@@ -93,8 +98,13 @@ bool cmd_search(string []av) {
 bool cmd_run(string []av) {
 	if (av.length == 2)
 		print_error("`suprapack run [...]`");	
-	if (Query.is_exist(av[2]) == false)
+	if (Query.is_exist(av[2]) == false) {
+		print_info(@"$(av[2]) doesn't exist install it...");
+		cmd_install({"", "install", av[2]});
+	}
+	if (Query.is_exist(av[2]) == false) {
 		print_error(@"$(av[2]) is not installed");
+	}
 	var pkg = Query.get_from_pkg(av[2]);
 
 	string []av_binary = {@"$(PREFIX)/bin/$(pkg.binary)"};
@@ -103,7 +113,7 @@ bool cmd_run(string []av) {
 		foreach (var i in av[3: av.length])
 			av_binary += i;	
 	}
-	run_cmd(av_binary);
+	run_cmd_no_silence(av_binary);
 	return true;
 }
 
@@ -158,7 +168,7 @@ bool cmd_update(string []av) {
 	}
 }
 
-bool cmd_help(string []av) {
+bool cmd_help() {
 	string suprapack = @"$(BOLD)suprapack$(NONE)";
 	print(@"$(BOLD)$(YELLOW)[SupraStore] ----- Help -----\n\n");
 	print(@"	$(suprapack) install [package name]\n");
