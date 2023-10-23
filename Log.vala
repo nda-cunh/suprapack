@@ -26,7 +26,7 @@ public void print_error(string msg) {
 		
 int run_cmd(string []av) {
 	try {
-		var pid = new Subprocess.newv(av, SubprocessFlags.NONE);
+		var pid = new Subprocess.newv(av, SubprocessFlags.STDERR_SILENCE);
 		pid.wait();
 		return pid.get_status();
 	} catch (Error e) {
