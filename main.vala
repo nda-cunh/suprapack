@@ -10,29 +10,31 @@ public class Main {
 			return true;
 		}
 		
-		// 1 argv (suprapack)
-		if (FileUtils.test(args[1], FileTest.EXISTS)) {
+		string av1 = args[1].down();
+		
+		if (av1.has_suffix(".suprapack")) {
 			install_suprapackage(args[1]);
 			return true;
 		}
 
-		if (args[1].match_string("run", true))
+
+		if (av1 == "run")
 			return cmd_run(args);
-		if (args[1].match_string("list", true))
+		if (av1 == "list")
 			return cmd_list(args);
-		if (args[1].match_string("search", true))
+		if (av1 == "search")
 			return cmd_search(args);
-		if (args[1].match_string("build", true))
+		if (av1 == "build")
 			return cmd_build(args);
-		if (args[1].match_string("help", true))
+		if (av1 == "help")
 			return cmd_help(args);
-		if (args[1].match_string("install", true))
+		if (av1 == "install")
 			return cmd_install(args);
-		if (args[1].match_string("uninstall", true))
+		if (av1 == "uninstall")
 			return cmd_uninstall(args);
-		if (args[1].match_string("update", true))
+		if (av1 == "update")
 			return cmd_update(args);
-		if (args[1].match_string("info", true))
+		if (av1 == "info")
 			return cmd_info(args);
 		print_error("La commande n'existe pas.");
 	}
@@ -41,7 +43,8 @@ public class Main {
 	public Main(string []args) {
 		USERNAME = Environment.get_user_name();
 		PREFIX = Environment.get_home_dir() + "/.local";
-	 	LOCAL = Environment.get_home_dir() + "/suprastore";
+	 	LOCAL = Environment.get_home_dir() + "/suprapack";
+		DirUtils.create(LOCAL, 0755);
 		Intl.setlocale();
 		if (all_cmd(args) == true)
 			Process.exit(0);
