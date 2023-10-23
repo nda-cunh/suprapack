@@ -47,6 +47,9 @@ void install_files(List<string> list, int len) {
 			basename = e.offset(len);
 			var fileSrc = File.new_for_path(e);
 			var fileDest = File.new_for_path(PREFIX + basename);
+			string path = fileDest.get_path();
+			path = path[0: path.last_index_of_char('/')];
+			DirUtils.create_with_parents(path, 0755);
 			fileSrc.move(fileDest, FileCopyFlags.OVERWRITE);
 			draw_install_file(++nb, list_length, basename);
 		}
