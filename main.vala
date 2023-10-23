@@ -32,6 +32,8 @@ public class Main {
 			return cmd_uninstall(args);
 		if (args[1].match_string("update", true))
 			return cmd_update(args);
+		if (args[1].match_string("info", true))
+			return cmd_info(args);
 		print_error("La commande n'existe pas.");
 	}
 
