@@ -33,3 +33,13 @@ int run_cmd(string []av) {
 		print_error(e.message);
 	}
 }
+
+int run_cmd_no_silence(string []av) {
+	try {
+		var pid = new Subprocess.newv(av, SubprocessFlags.NONE);
+		pid.wait();
+		return pid.get_status();
+	} catch (Error e) {
+		print_error(e.message);
+	}
+}
