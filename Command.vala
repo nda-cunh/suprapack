@@ -49,7 +49,7 @@ bool cmd_list(string []av) {
 	var installed = Query.get_all_package();
 	foreach (var i in installed) {
 		print(@"$(BOLD)$(WHITE)$(i.name) $(GREEN)$(i.version)$(NONE)");
-		print("\t%s<%s> %s%s\n", COM, i.author, i.description, NONE);
+		print("\t%s%s%s\n", COM, i.description, NONE);
 	}
 	return true;
 }
