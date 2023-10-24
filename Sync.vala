@@ -10,8 +10,8 @@ public const string REPO_URL = "https://gitlab.com/supraproject/suprastore_repos
 public struct SupraList {
 	public SupraList (string repo_name, string line) {
 		this.repo_name = repo_name;
-		name = line[0:line.index_of_char ('-')];
-		version = line[line.index_of_char ('-') + 1 : line.last_index_of_char ('.')];
+		name = line[0:line.last_index_of_char ('-')];
+		version = line[line.last_index_of_char ('-') + 1 : line.last_index_of_char ('.')];
 	}
 	unowned string repo_name;
 	string name;
