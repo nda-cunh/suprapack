@@ -107,13 +107,17 @@ bool cmd_run(string []av) {
 	}
 	var pkg = Query.get_from_pkg(av[2]);
 
-	string []av_binary = {@"$(PREFIX)/bin/$(pkg.binary)"};
+	string []av_binary;
+	if (pkg.binary.index_of_char('/') == -1)
+		av_binary = {@"$(PREFIX)/bin/$(pkg.binary)"};
+	else
+		av_binary = {@"$(PREFIX)/$(pkg.binary)"};
 
 	if (av.length >= 3) {
 		foreach (var i in av[3: av.length])
 			av_binary += i;	
 	}
-	run_cmd_no_silence(av_binary);
+	Utils.run_cmd_no_silence(av_binary);
 	return true;
 }
 
