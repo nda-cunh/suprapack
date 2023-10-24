@@ -1,11 +1,14 @@
+const int SIZE_TMP_DIR = 22;
+
 void list_file_dir(string emp_dir, ref List<string> list) {
 	try {
 		var dir = Dir.open(emp_dir);
 		unowned string it;
 		while ((it = dir.read_name()) != null) {
-			print("[%s/%s]\n", emp_dir, it);
-			if (it == "/info" || it == "/pre_install.sh" || it == "/post_install.sh")
-				continue;
+			if (emp_dir.length == SIZE_TMP_DIR) {
+				if (it == "info" || it == "pre_install.sh" || it == "post_install.sh")
+					continue;
+			}
 			string name = @"$emp_dir/$it";
 			if (FileUtils.test(name, FileTest.IS_DIR))
 				list_file_dir(name, ref list);
@@ -37,7 +40,7 @@ void post_install(List<string> list, int len, ref Package pkg) {
 }
 
 void draw_install_file(uint min, uint max, string file) {
-	stdout.printf("[Install] [%u/%u] %s\n", min, max, file);
+	stdout.printf("%s%s[Install]%s [%u/%u] %s\n", BOLD, YELLOW, NONE, min, max, file);
 }
 
 // copy files to PREFIX ~/.local 
@@ -48,11 +51,6 @@ void install_files(List<string> list, int len) {
 	try {
 		foreach (var e in list) {
 			basename = e.offset(len);
-			if (basename == "/info" || basename == "/pre_install.sh" || basename == "/post_install.sh")
-				continue;
-			print("[%s]\n", e);
-			print("[%s]\n", basename);
-
 			var fileSrc = File.new_for_path(e);
 			var fileDest = File.new_for_path(PREFIX + basename);
 			string path = fileDest.get_path();
@@ -68,14 +66,14 @@ void install_files(List<string> list, int len) {
 
 private void script_pre_install(string dir) {
 	if (FileUtils.test(@"$dir/pre_install.sh", FileTest.EXISTS | FileTest.IS_EXECUTABLE)) {
-		print_info("Pre Installation");
+		print_info(null, "Preparation");
 		Utils.run_cmd_no_silence({@"$dir/pre_install.sh"});
 	}
 }
 
 private void script_post_install(string dir) {
 	if (FileUtils.test(@"$dir/post_install.sh", FileTest.EXISTS | FileTest.IS_EXECUTABLE)) {
-		print_info("Post Installation");
+		print_info(null, "Finition");
 		Utils.run_cmd_no_silence({@"$dir/post_install.sh"});
 	}
 }
@@ -96,13 +94,12 @@ public void install_suprapackage(string suprapack) {
 		var pkg = Package.from_file(@"$tmp_dir/info");
 
 		script_pre_install(tmp_dir);
-		print_info(@"Installation de $(YELLOW)$(pkg.name) $(pkg.version)$(NONE) par $(pkg.author)");
+		print_info(@"Installation de $(CYAN)$(pkg.name) $(pkg.version)$(NONE) par $(pkg.author)");
 		var list = new List<string>();
 		list_file_dir(tmp_dir, ref list);	
 		install_files(list, tmp_dir.length);
 		script_post_install(tmp_dir);
 		post_install(list, tmp_dir.length, ref pkg);
-		print_info("Finish\n");
 		Utils.run_cmd({"rm", "-rf", tmp_dir});
 	} catch (Error e) {
 		print_error(e.message);

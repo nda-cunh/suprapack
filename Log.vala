@@ -11,8 +11,11 @@ public const string CYAN = "\033[96m";
 public const string PURPLE = "\033[35m";
 public const string NONE = "\033[0m";
 
-public void print_info(string msg) {
-	print("\033[33;1m[SupraPack]\033[0m: %s\n", msg);
+public void print_info(string? msg, string prefix = "SupraPack") {
+	if (msg == null)
+		print("\033[33;1m[%s]\033[0m\n", prefix);
+	else
+		print("\033[33;1m[%s]\033[0m: %s\n", prefix, msg);
 }
 public void print_update(string msg) {
 	print("\033[93;1m[Update]\033[0m: %s\n", msg);
