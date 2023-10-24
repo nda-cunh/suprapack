@@ -35,7 +35,7 @@ public class RepoInfo {
 			if (_list == null) {
 				string list_file = @"/tmp/$(this.name)_$(USERNAME)_list";
 				// print_info(@"Download list from $(this.name) repo");
-				run_cmd({"curl", "-o", list_file, REPO_URL + "list"});
+				Utils.run_cmd({"curl", "-o", list_file, REPO_URL + "list"});
 				_list = list_file;
 			}
 			return _list;
@@ -99,7 +99,7 @@ class Sync {
 			DirUtils.create_with_parents(pkgdir, 0755);
 			
 			string url = this.get_url_from_name(pkg.repo_name) + pkgname;
-			run_cmd({"curl", "-o", output, url});
+			Utils.run_cmd({"curl", "-o", output, url});
 			return output;
 	}
 

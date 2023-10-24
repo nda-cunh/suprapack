@@ -23,23 +23,3 @@ public void print_error(string msg) {
 	print("\033[91;1m[Error]\033[0m: %s\n", msg);
 	Process.exit(1);
 }
-		
-int run_cmd(string []av) {
-	try {
-		var pid = new Subprocess.newv(av, SubprocessFlags.STDERR_SILENCE | SubprocessFlags.STDOUT_SILENCE);
-		pid.wait();
-		return pid.get_status();
-	} catch (Error e) {
-		print_error(e.message);
-	}
-}
-
-int run_cmd_no_silence(string []av) {
-	try {
-		var pid = new Subprocess.newv(av, SubprocessFlags.NONE);
-		pid.wait();
-		return pid.get_status();
-	} catch (Error e) {
-		print_error(e.message);
-	}
-}

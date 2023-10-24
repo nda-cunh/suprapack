@@ -60,6 +60,7 @@ void install_files(List<string> list, int len) {
 
 // install package suprapack
 public void install_suprapackage(string suprapack) {
+	Utils.create_pixmaps_link();
 	if (FileUtils.test(suprapack, FileTest.EXISTS)) {
 		if (!(suprapack.has_suffix(".suprapack")))
 			print_error("ce fichier n'est pas un suprapack");
@@ -69,7 +70,7 @@ public void install_suprapackage(string suprapack) {
 	try {
 		var tmp_dir = DirUtils.make_tmp("suprastore_XXXXXX");
 		print_info(@"Extraction de $(CYAN)$(suprapack)$(NONE)");
-		run_cmd({"tar", "-xf", suprapack, "-C", tmp_dir});
+		Utils.run_cmd({"tar", "-xf", suprapack, "-C", tmp_dir});
 		var pkg = Package.from_file(@"$tmp_dir/info");
 		print_info(@"Installation de $(YELLOW)$(pkg.name) $(pkg.version)$(NONE) par $(pkg.author)");
 		var list = new List<string>();
@@ -78,7 +79,7 @@ public void install_suprapackage(string suprapack) {
 		install_files(list, tmp_dir.length);
 		post_install(list, tmp_dir.length, ref pkg);
 		
-		run_cmd({"rm", "-rf", tmp_dir});
+		Utils.run_cmd({"rm", "-rf", tmp_dir});
 	} catch (Error e) {
 		print_error(e.message);
 	}
