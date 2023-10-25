@@ -125,13 +125,13 @@ bool cmd_run(string []av) {
 bool update_package(string pkg_name, bool say_me = true) {
 	var list = Sync.default().get_list_package();
 	var pkg = Query.get_from_pkg(pkg_name);
-	double Qversion = double.parse(pkg.version);
-	double Sversion;
+	string Qversion = pkg.version;
+	string Sversion;
 
 	foreach (var i in list) {
 		if (i.name == pkg_name) {
-			Sversion = double.parse(i.version);
-			if (Sversion > Qversion) {
+			Sversion = i.version;
+			if (Sversion != Qversion) {
 				print_info(@"Update avaiable for $(pkg_name) $(CYAN)$(pkg.version) --> $(i.version)");
 				print_info(@"Do you want update it ? [yes/No]");
 				var input = stdin.read_line().strip().down();
