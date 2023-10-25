@@ -8,6 +8,7 @@ public struct Package {
 	string version; 
 	string description;
 	string binary;
+	string dependency;
 	string installed_files;
 
 
@@ -17,6 +18,7 @@ public struct Package {
 		this.version = ""; 
 		this.description = "";
 		this.binary = "";
+		this.dependency = "";
 		this.installed_files = "";
 	}
 
@@ -26,6 +28,7 @@ public struct Package {
 		this.version = Utils.get_input("Version: ");
 		this.author = Utils.get_input("Author: ");
 		this.description = Utils.get_input("Description: ");
+		this.dependency = Utils.get_input("Dependency: ");
 		print("Can be empty if %s is the binary name\n", this.name);
 		this.binary = Utils.get_input("Binary: ");
 		this.installed_files = "";
@@ -55,6 +58,8 @@ public struct Package {
 					this.description = value.strip();
 				if (line.has_prefix("binary"))
 					this.binary = value.strip();
+				if (line.has_prefix("dependency"))
+					this.dependency = value.strip();
 			}
 			if ("[FILES]" in contents) {
 				value = contents.offset(contents.index_of("[FILES]") + 8);
@@ -86,5 +91,6 @@ public struct Package {
 		fs.printf("author: %s\n", this.author);
 		fs.printf("binary: %s\n", this.binary);
 		fs.printf("description: %s\n", this.description);
+		fs.printf("dependency: %s\n", this.dependency);
 	}
 }

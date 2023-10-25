@@ -2,7 +2,6 @@
 public const string REPO_URL = "https://gitlab.com/supraproject/suprastore_repository/-/raw/master/";
 
 
-
 // Contains Informations or package from the repo
 // repo_name (Cosmos)
 // name (suprabear)
@@ -65,6 +64,25 @@ class Sync {
 		_repo += new RepoInfo("Cosmos", REPO_URL);
 	}
 
+	public static SupraList? get_from_pkg(string name_pkg) {
+		var pkg_list = Sync.default().get_list_package();
+		foreach (var pkg in pkg_list) {
+			if (pkg.name == name_pkg) {
+				return pkg;
+			}
+		}
+		return null;
+	}
+
+	// return true if need update else return false
+	public static bool check_update(string package_name) {
+		var Qpkg = Query.get_from_pkg(package_name);
+		var Spkg = Sync.get_from_pkg(package_name);
+		if (Spkg == null)
+			return false;
+		
+		return (Spkg.version != Qpkg.version);
+	}
 
 	// return url from a repo_name (comsos)  -> gitlab
 	private unowned string? get_url_from_name(string repo_name) {

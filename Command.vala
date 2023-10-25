@@ -122,7 +122,7 @@ bool cmd_run(string []av) {
 }
 
 
-bool update_package(string pkg_name, bool say_me = true) {
+bool update_package(string pkg_name, bool force = true) {
 	var list = Sync.default().get_list_package();
 	var pkg = Query.get_from_pkg(pkg_name);
 	string Qversion = pkg.version;
@@ -133,12 +133,16 @@ bool update_package(string pkg_name, bool say_me = true) {
 			Sversion = i.version;
 			if (Sversion != Qversion) {
 				print_info(@"Update avaiable for $(pkg_name) $(CYAN)$(pkg.version) --> $(i.version)");
-				print_info(@"Do you want update it ? [yes/No]");
-				var input = stdin.read_line().strip().down();
-				if (say_me && input == "" || "yes" in input) {
+				if (force == false) {
+					print_info(@"Do you want update it ? [yes/No]");
+					var input = stdin.read_line().strip().down();
+					if (input == "" || "y" in input)
+						install(pkg_name);
+					else
+						print_info("Cancel ...");
+				}
+				else {
 					install(pkg_name);
-				}else {
-					print_info("Cancel ...");
 				}
 			}else {
 				print_info(@"No update avaiable for $(pkg_name) $(i.version)");

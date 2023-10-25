@@ -36,7 +36,6 @@ void post_install(List<string> list, int len, ref Package pkg) {
 		if (basename != "/info")
 			fs.printf("%s%s\n", PREFIX, basename);
 	}
-
 }
 
 void draw_install_file(uint min, uint max, string file) {
@@ -98,7 +97,14 @@ public void install_suprapackage(string suprapack) {
 		print_info(@"Extraction de $(CYAN)$(suprapack)$(NONE)");
 		Utils.run_cmd({"tar", "-xf", suprapack, "-C", tmp_dir});
 		var pkg = Package.from_file(@"$tmp_dir/info");
-
+		if (pkg.dependency != "") {
+			print_info("search dependency...", "Dependency");
+			var dep_list = pkg.dependency.split(" ");
+			foreach(var dep in dep_list) {
+				install(dep, false);
+			}
+			print_info("All dependencies have been installed !", "Dependency");
+		}
 		script_pre_install(tmp_dir);
 		print_info(@"Installation de $(CYAN)$(pkg.name) $(pkg.version)$(NONE) par $(pkg.author)");
 		var list = new List<string>();
@@ -113,14 +119,22 @@ public void install_suprapackage(string suprapack) {
 }
 
 
-public void install(string name_search) {
+public void install(string name_search, bool force = true) {
 	var sync = Sync.default();
 	string output;
 	
 	var list = sync.get_list_package();
 	foreach (var pkg in list) {
 		if (pkg.name == name_search) {
-			print_info(@"$(pkg.name):$(pkg.version) found in sync $(pkg.repo_name)");
+			if (force == false) {
+				if (Query.is_exist(pkg.name) == true) {
+					if (Sync.check_update(pkg.name)) {
+						update_package(pkg.name, true);
+					}
+					return;
+				}
+			}
+			print_info(@"$(pkg.name):$(pkg.version) found in $(pkg.repo_name)");
 			output = sync.download(pkg);
 			install_suprapackage(output);
 			return ;
