@@ -13,10 +13,17 @@ namespace Build {
 				Process.exit(0);
 			}
 		}
+		Package pkg;
+
+		if (FileUtils.test(@"$usr_dir/info", FileTest.EXISTS)) {
+			pkg = Package.from_file(@"$usr_dir/info");
+		}
+		else {
+			pkg = Package.from_input();
+			pkg.create_info_file(@"$usr_dir/info");
+		}
 		// Get a Package from input
-		var pkg = Package.from_input();
 		// generate info file in USR_DIR
-		pkg.create_info_file(@"$usr_dir/info");
 
 		// compress the package
 		Build.compress(pkg, usr_dir);
