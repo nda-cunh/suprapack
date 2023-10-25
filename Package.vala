@@ -11,57 +11,60 @@ public struct Package {
 	string installed_files;
 
 
-	// constructor
-	public Package.from_input() {
-		this.name = get_input("Name: ");
-		this.version = get_input("Version: ");
-		this.author = get_input("Author: ");
-		this.description = get_input("Description: ");
-		this.binary = get_input("Binary: ");
+	private void init() {
+		this.name = "";
+		this.author = "";
+		this.version = ""; 
+		this.description = "";
+		this.binary = "";
+		this.installed_files = "";
 	}
 
+	// constructor
+	public Package.from_input() {
+		this.name = Utils.get_input("Name: ");
+		this.version = Utils.get_input("Version: ");
+		this.author = Utils.get_input("Author: ");
+		this.description = Utils.get_input("Description: ");
+		print("Can be empty if %s is the binary name\n", this.name);
+		this.binary = Utils.get_input("Binary: ");
+		this.installed_files = "";
+	}
+	
 	public Package.from_file(string info_file) {
-		var fs = FileStream.open(info_file, "r");
-		if (fs == null)
-			print_error(@"$info_file ne peut pas etre ouvert.");
-		string line;
+		string contents;
+		size_t len;
 		unowned string @value;
-		unowned string start;
-		while ((line = fs.read_line()) != null) {
-			if (line == "[FILES]")
-				break;
-			start = line; 
-			value = line.offset(line.index_of_char(':') + 2);
-			value.data[-2] = '\0';
 
-			if (start == "name")
-				this.name = value;
-			if (start == "version")
-				this.version = value;
-			if (start == "author")
-				this.author = value;
-			if (start == "description")
-				this.description = value;
-			if (start == "binary")
-				this.binary = value;
-		}
-		if (line == "[FILES]") {
-			// read all installed files
-			uint8 buffer[8193];
-			size_t len = 0;
-			this.installed_files = "";
-			while ((len = fs.read(buffer[0:8192])) > 0) {
-				buffer[len] = '\0';
-				installed_files += ((string)buffer).dup();
+		init();
+		try {
+			FileUtils.get_contents(info_file, out contents, out len);
+			var lines = contents.split("\n");
+			
+			foreach (var line in lines) {
+				if (line == "[FILES]")
+					break;
+				value = line.offset(line.index_of_char(':') + 1);
+				if (line.has_prefix("name"))
+					this.name = value.strip();
+				if (line.has_prefix("version"))
+					this.version = value.strip();
+				if (line.has_prefix("author"))
+					this.author = value.strip();
+				if (line.has_prefix("description"))
+					this.description = value.strip();
+				if (line.has_prefix("binary"))
+					this.binary = value.strip();
 			}
-		}
-			this.name = this.name ?? "";
-			this.version = this.version ?? "";
-			this.author = this.author ?? "";
-			this.description = this.description ?? "";
-			this.binary = this.binary ?? this.name;
+			if ("[FILES]" in contents) {
+				value = contents.offset(contents.index_of("[FILES]") + 8);
+				installed_files = value;
+			}
 			if (this.binary == "")
 				this.binary = this.name;
+		} catch (Error e) {
+			print_error(e.message);
+		}
 	}
 
 	public string []get_installed_files() {
@@ -83,16 +86,5 @@ public struct Package {
 		fs.printf("author: %s\n", this.author);
 		fs.printf("binary: %s\n", this.binary);
 		fs.printf("description: %s\n", this.description);
-	}
-	
-	// private func
-	private string get_input(string msg) {
-		print(msg);
-		string? str = stdin.read_line();
-		if (str != null) {
-			str = str.down();
-			str = str.strip();
-		}
-		return str;
 	}
 }
