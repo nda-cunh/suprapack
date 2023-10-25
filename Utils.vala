@@ -42,4 +42,12 @@ namespace Utils {
 			print_error(e.message);
 		}
 	}
+
+	void run(string []av, string []envp){
+		try {
+			Process.spawn_sync("/", av, envp, SpawnFlags.SEARCH_PATH, null, null, null, null);
+		} catch (Error e) {
+			print_error(e.message);
+		}
+	}
 }
