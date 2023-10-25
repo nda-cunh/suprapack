@@ -67,14 +67,20 @@ void install_files(List<string> list, int len) {
 private void script_pre_install(string dir) {
 	if (FileUtils.test(@"$dir/pre_install.sh", FileTest.EXISTS | FileTest.IS_EXECUTABLE)) {
 		print_info(null, "Preparation");
-		Utils.run_cmd_no_silence({@"$dir/pre_install.sh"});
+		var envp = Environ.get();
+		envp = Environ.set_variable(envp, "SRCDIR", dir, true);
+		envp = Environ.set_variable(envp, "PKGDIR", PREFIX, true);
+		Utils.run({@"$dir/pre_install.sh"}, envp);
 	}
 }
 
 private void script_post_install(string dir) {
 	if (FileUtils.test(@"$dir/post_install.sh", FileTest.EXISTS | FileTest.IS_EXECUTABLE)) {
+		var envp = Environ.get();
+		envp = Environ.set_variable(envp, "SRCDIR", dir, true);
+		envp = Environ.set_variable(envp, "PKGDIR", PREFIX, true);
 		print_info(null, "Finition");
-		Utils.run_cmd_no_silence({@"$dir/post_install.sh"});
+		Utils.run({@"$dir/post_install.sh"}, envp);
 	}
 }
 
