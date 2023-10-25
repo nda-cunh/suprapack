@@ -50,4 +50,16 @@ namespace Utils {
 			print_error(e.message);
 		}
 	}
+
+	// return a stdin line with downcase and strip space
+	string get_input(string msg) {
+		print(msg);
+		string? str = stdin.read_line();
+		if (str != null) {
+			str = str.down();
+			str = str.strip();
+			return str;
+		}
+		return "";
+	}
 }
