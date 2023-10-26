@@ -97,6 +97,9 @@ public void install_suprapackage(string suprapack) {
 		print_info(@"Extraction de $(CYAN)$(suprapack)$(NONE)");
 		Utils.run_cmd({"tar", "-xf", suprapack, "-C", tmp_dir});
 		var pkg = Package.from_file(@"$tmp_dir/info");
+		if (Query.is_exist(pkg.name)) {
+			Query.uninstall(pkg.name);
+		}
 		if (pkg.dependency != "") {
 			print_info("search dependency...", "Dependency");
 			var dep_list = pkg.dependency.split(" ");

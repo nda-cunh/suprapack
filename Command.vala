@@ -31,18 +31,9 @@ bool cmd_info(string []av) {
 }
 
 bool cmd_uninstall(string []av) {
-	unowned string pkg;
 	if (av.length == 2)
 		print_error("`suprapack uninstall [...]`");	
-	pkg = av[2];
-	if (Query.is_exist(pkg) == false)
-		print_error(@"the package $pkg doesn't exist");
-	var lst = Query.get_from_pkg(pkg).get_installed_files();
-	foreach(unowned string i in lst) {
-		print_info(@"Suppresion de $(i)");
-		FileUtils.unlink(i);
-	}
-	Query.remove_pkg(pkg);
+	Query.uninstall(av[2]);
 	return true;
 }
 
