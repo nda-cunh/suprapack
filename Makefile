@@ -8,11 +8,13 @@ prod:
 	valac $(SRC) -X -w --pkg=gio-2.0 -o $(NAME) 
 
 install: prod
-	mkdir -p prefix/bin
-	cp $(NAME) prefix/bin/$(NAME)
+	mkdir -p usr/bin
+	cp ./$(NAME) usr/bin/suprapack
+	tar -cJf suprapack.suprapack -C usr .
+	./$(NAME) install suprapack.suprapack
 
 run: all
 	cp $(NAME) ~/.local/bin/$(NAME)
 	@#./$(NAME) uninstall nodejs 
 	@# ./$(NAME) update suprapatate 
-	@# ./$(NAME) list 
+	@# ./$(NAME) 
