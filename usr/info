@@ -1,0 +1,6 @@
+name: suprapack
+version: 1.2
+author: nda-cunh
+binary: suprapack 
+description: package-manager without root
+dependency: 
