@@ -17,6 +17,7 @@ public void print_info(string? msg, string prefix = "SupraPack") {
 	else
 		print("\033[33;1m[%s]\033[0m: %s\n", prefix, msg);
 }
+
 public void print_update(string msg) {
 	print("\033[93;1m[Update]\033[0m: %s\n", msg);
 }
