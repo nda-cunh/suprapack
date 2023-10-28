@@ -1,4 +1,4 @@
-SRC= main.vala Utils.vala Command.vala Query.vala Log.vala Sync.vala Package.vala
+SRC= main.vala Utils.vala Query.vala Log.vala Sync.vala Package.vala
 NAME=suprapack
 
 all:
