@@ -73,25 +73,8 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC (Main, main_unref)
 VALA_EXTERN gboolean main_all_cmd (Main* self,
                        gchar** args,
                        gint args_length1);
-VALA_EXTERN gboolean cmd_help (void);
-VALA_EXTERN void install_suprapackage (const gchar* suprapack);
 VALA_EXTERN gboolean cmd_run (gchar** av,
                   gint av_length1);
-VALA_EXTERN gboolean cmd_list (gchar** av,
-                   gint av_length1);
-VALA_EXTERN gboolean cmd_search (gchar** av,
-                     gint av_length1);
-VALA_EXTERN gboolean cmd_build (gchar** av,
-                    gint av_length1);
-VALA_EXTERN gboolean cmd_install (gchar** av,
-                      gint av_length1);
-VALA_EXTERN gboolean cmd_uninstall (gchar** av,
-                        gint av_length1);
-VALA_EXTERN gboolean cmd_update (gchar** av,
-                     gint av_length1);
-VALA_EXTERN gboolean cmd_info (gchar** av,
-                   gint av_length1);
-VALA_EXTERN gboolean cmd_prepare (void);
 VALA_EXTERN void print_error (const gchar* msg);
 VALA_EXTERN Main* main_new (gchar** args,
                 gint args_length1);
@@ -111,93 +94,13 @@ main_all_cmd (Main* self,
 	gchar* av1 = NULL;
 	const gchar* _tmp0_;
 	gchar* _tmp1_;
-	const gchar* _tmp2_;
-	const gchar* _tmp4_;
-	const gchar* _tmp5_;
-	const gchar* _tmp6_;
-	const gchar* _tmp7_;
-	const gchar* _tmp8_;
-	const gchar* _tmp9_;
-	const gchar* _tmp10_;
-	const gchar* _tmp11_;
-	const gchar* _tmp12_;
-	const gchar* _tmp13_;
 	gboolean result;
 	g_return_val_if_fail (self != NULL, FALSE);
-	if (args_length1 < 2) {
-		cmd_help ();
-		result = TRUE;
-		return result;
-	}
 	_tmp0_ = args[1];
 	_tmp1_ = g_utf8_strdown (_tmp0_, (gssize) -1);
 	av1 = _tmp1_;
-	_tmp2_ = av1;
-	if (g_str_has_suffix (_tmp2_, ".suprapack")) {
-		const gchar* _tmp3_;
-		_tmp3_ = args[1];
-		install_suprapackage (_tmp3_);
-		result = TRUE;
-		_g_free0 (av1);
-		return result;
-	}
-	_tmp4_ = av1;
-	if (g_strcmp0 (_tmp4_, "run") == 0) {
+	if (g_strcmp0 (av1, "run") == 0) {
 		result = cmd_run (args, (gint) args_length1);
-		_g_free0 (av1);
-		return result;
-	}
-	_tmp5_ = av1;
-	if (g_strcmp0 (_tmp5_, "list") == 0) {
-		result = cmd_list (args, (gint) args_length1);
-		_g_free0 (av1);
-		return result;
-	}
-	_tmp6_ = av1;
-	if (g_strcmp0 (_tmp6_, "search") == 0) {
-		result = cmd_search (args, (gint) args_length1);
-		_g_free0 (av1);
-		return result;
-	}
-	_tmp7_ = av1;
-	if (g_strcmp0 (_tmp7_, "build") == 0) {
-		result = cmd_build (args, (gint) args_length1);
-		_g_free0 (av1);
-		return result;
-	}
-	_tmp8_ = av1;
-	if (g_strcmp0 (_tmp8_, "help") == 0) {
-		result = cmd_help ();
-		_g_free0 (av1);
-		return result;
-	}
-	_tmp9_ = av1;
-	if (g_strcmp0 (_tmp9_, "install") == 0) {
-		result = cmd_install (args, (gint) args_length1);
-		_g_free0 (av1);
-		return result;
-	}
-	_tmp10_ = av1;
-	if (g_strcmp0 (_tmp10_, "uninstall") == 0) {
-		result = cmd_uninstall (args, (gint) args_length1);
-		_g_free0 (av1);
-		return result;
-	}
-	_tmp11_ = av1;
-	if (g_strcmp0 (_tmp11_, "update") == 0) {
-		result = cmd_update (args, (gint) args_length1);
-		_g_free0 (av1);
-		return result;
-	}
-	_tmp12_ = av1;
-	if (g_strcmp0 (_tmp12_, "info") == 0) {
-		result = cmd_info (args, (gint) args_length1);
-		_g_free0 (av1);
-		return result;
-	}
-	_tmp13_ = av1;
-	if (g_strcmp0 (_tmp13_, "prepare") == 0) {
-		result = cmd_prepare ();
 		_g_free0 (av1);
 		return result;
 	}

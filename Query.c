@@ -6,11 +6,7 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 #include <glib-object.h>
-#include <stdio.h>
 
-#define BOLD "\033[;1m"
-#define YELLOW "\033[33m"
-#define NONE "\033[0m"
 #if !defined(VALA_EXTERN)
 #if defined(_MSC_VER)
 #define VALA_EXTERN __declspec(dllexport) extern
@@ -25,8 +21,6 @@
 
 #define TYPE_PACKAGE (package_get_type ())
 typedef struct _Package Package;
-#define _g_dir_close0(var) ((var == NULL) ? NULL : (var = (g_dir_close (var), NULL)))
-#define _g_error_free0(var) ((var == NULL) ? NULL : (var = (g_error_free (var), NULL)))
 
 struct _Package {
 	gchar* name;
@@ -41,8 +35,6 @@ struct _Package {
 VALA_EXTERN gchar* LOCAL;
 
 VALA_EXTERN gboolean query_is_exist (const gchar* name_pkg);
-VALA_EXTERN void query_uninstall (const gchar* name_pkg);
-VALA_EXTERN void print_error (const gchar* msg);
 VALA_EXTERN GType package_get_type (void) G_GNUC_CONST ;
 VALA_EXTERN Package* package_dup (const Package* self);
 VALA_EXTERN void package_free (Package* self);
@@ -52,29 +44,8 @@ VALA_EXTERN void package_destroy (Package* self);
 G_DEFINE_AUTO_CLEANUP_CLEAR_FUNC (Package, package_destroy)
 VALA_EXTERN void query_get_from_pkg (const gchar* name_pkg,
                          Package* result);
-VALA_EXTERN gchar** package_get_installed_files (Package *self,
-                                     gint* result_length1);
-VALA_EXTERN void query_remove_pkg (const gchar* name_pkg);
 VALA_EXTERN void package_init_from_file (Package *self,
                              const gchar* info_file);
-VALA_EXTERN Package* query_get_all_package (gint* result_length1);
-static void _vala_Package_array_free (Package * array,
-                               gssize array_length);
-static void _vala_array_add3 (Package* * array,
-                       gint* length,
-                       gint* size,
-                       const Package* value);
-VALA_EXTERN gchar** query_get_all_installed_pkg (gint* result_length1);
-static void _vala_array_add4 (gchar** * array,
-                       gint* length,
-                       gint* size,
-                       gchar* value);
-static void _vala_array_destroy (gpointer array,
-                          gssize array_length,
-                          GDestroyNotify destroy_func);
-static void _vala_array_free (gpointer array,
-                       gssize array_length,
-                       GDestroyNotify destroy_func);
 
 static const gchar*
 string_to_string (const gchar* self)
@@ -108,81 +79,6 @@ query_is_exist (const gchar* name_pkg)
 }
 
 void
-query_uninstall (const gchar* name_pkg)
-{
-	gchar** lst = NULL;
-	Package _tmp3_ = {0};
-	Package _tmp4_;
-	gint _tmp5_ = 0;
-	gchar** _tmp6_;
-	gchar** _tmp7_;
-	gint _tmp7__length1;
-	gint lst_length1;
-	gint _lst_size_;
-	gchar** _tmp8_;
-	gint _tmp8__length1;
-	g_return_if_fail (name_pkg != NULL);
-	if (query_is_exist (name_pkg) == FALSE) {
-		const gchar* _tmp0_;
-		gchar* _tmp1_;
-		gchar* _tmp2_;
-		_tmp0_ = string_to_string (name_pkg);
-		_tmp1_ = g_strconcat ("the package ", _tmp0_, " doesn't exist", NULL);
-		_tmp2_ = _tmp1_;
-		print_error (_tmp2_);
-		_g_free0 (_tmp2_);
-	}
-	query_get_from_pkg (name_pkg, &_tmp3_);
-	_tmp4_ = _tmp3_;
-	_tmp6_ = package_get_installed_files (&_tmp4_, &_tmp5_);
-	_tmp7_ = _tmp6_;
-	_tmp7__length1 = _tmp5_;
-	package_destroy (&_tmp4_);
-	lst = _tmp7_;
-	lst_length1 = _tmp7__length1;
-	_lst_size_ = lst_length1;
-	_tmp8_ = lst;
-	_tmp8__length1 = lst_length1;
-	{
-		gchar** i_collection = NULL;
-		gint i_collection_length1 = 0;
-		gint _i_collection_size_ = 0;
-		gint i_it = 0;
-		i_collection = _tmp8_;
-		i_collection_length1 = _tmp8__length1;
-		for (i_it = 0; i_it < i_collection_length1; i_it = i_it + 1) {
-			const gchar* i = NULL;
-			i = i_collection[i_it];
-			{
-				FILE* _tmp9_;
-				const gchar* _tmp10_;
-				const gchar* _tmp11_;
-				const gchar* _tmp12_;
-				const gchar* _tmp13_;
-				const gchar* _tmp14_;
-				gchar* _tmp15_;
-				gchar* _tmp16_;
-				const gchar* _tmp17_;
-				_tmp9_ = stdout;
-				_tmp10_ = string_to_string (BOLD);
-				_tmp11_ = string_to_string (YELLOW);
-				_tmp12_ = string_to_string (NONE);
-				_tmp13_ = i;
-				_tmp14_ = string_to_string (_tmp13_);
-				_tmp15_ = g_strconcat (_tmp10_, _tmp11_, "[Uninstall]", _tmp12_, ": Suppresion de ", _tmp14_, "\n", NULL);
-				_tmp16_ = _tmp15_;
-				fprintf (_tmp9_, "%s", _tmp16_);
-				_g_free0 (_tmp16_);
-				_tmp17_ = i;
-				g_unlink (_tmp17_);
-			}
-		}
-	}
-	query_remove_pkg (name_pkg);
-	lst = (_vala_array_free (lst, lst_length1, (GDestroyNotify) g_free), NULL);
-}
-
-void
 query_get_from_pkg (const gchar* name_pkg,
                     Package* result)
 {
@@ -202,280 +98,5 @@ query_get_from_pkg (const gchar* name_pkg,
 	_g_free0 (_tmp4_);
 	*result = pkg;
 	return;
-}
-
-void
-query_remove_pkg (const gchar* name_pkg)
-{
-	gchar* pkg = NULL;
-	const gchar* _tmp0_;
-	const gchar* _tmp1_;
-	const gchar* _tmp2_;
-	gchar* _tmp3_;
-	gchar* _tmp4_;
-	gchar* _tmp5_;
-	g_return_if_fail (name_pkg != NULL);
-	_tmp0_ = LOCAL;
-	_tmp1_ = string_to_string (_tmp0_);
-	_tmp2_ = string_to_string (name_pkg);
-	_tmp3_ = g_strconcat (_tmp1_, "/", _tmp2_, "/", NULL);
-	pkg = _tmp3_;
-	_tmp4_ = g_strconcat (pkg, "info", NULL);
-	_tmp5_ = _tmp4_;
-	g_unlink (_tmp5_);
-	_g_free0 (_tmp5_);
-	g_rmdir (pkg);
-	_g_free0 (pkg);
-}
-
-static void
-_vala_Package_array_free (Package * array,
-                          gssize array_length)
-{
-	if (array != NULL) {
-		gssize i;
-		for (i = 0; i < array_length; i = i + 1) {
-			package_destroy (&array[i]);
-		}
-	}
-	g_free (array);
-}
-
-static gchar
-string_get (const gchar* self,
-            glong index)
-{
-	gchar _tmp0_;
-	gchar result;
-	g_return_val_if_fail (self != NULL, '\0');
-	_tmp0_ = ((gchar*) self)[index];
-	result = _tmp0_;
-	return result;
-}
-
-static void
-_vala_array_add3 (Package* * array,
-                  gint* length,
-                  gint* size,
-                  const Package* value)
-{
-	if ((*length) == (*size)) {
-		*size = (*size) ? (2 * (*size)) : 4;
-		*array = g_renew (Package, *array, *size);
-	}
-	(*array)[(*length)++] = *value;
-}
-
-Package*
-query_get_all_package (gint* result_length1)
-{
-	GError* _inner_error0_ = NULL;
-	Package* result;
-	{
-		Package* _result_ = NULL;
-		Package* _tmp0_;
-		gint _result__length1;
-		gint __result__size_;
-		GDir* dir = NULL;
-		const gchar* _tmp1_;
-		GDir* _tmp2_;
-		const gchar* tmp = NULL;
-		Package* _tmp16_;
-		gint _tmp16__length1;
-		_tmp0_ = g_new0 (Package, 0);
-		_result_ = _tmp0_;
-		_result__length1 = 0;
-		__result__size_ = _result__length1;
-		_tmp1_ = LOCAL;
-		_tmp2_ = g_dir_open (_tmp1_, (guint) 0, &_inner_error0_);
-		dir = _tmp2_;
-		if (G_UNLIKELY (_inner_error0_ != NULL)) {
-			_result_ = (_vala_Package_array_free (_result_, _result__length1), NULL);
-			goto __catch0_g_error;
-		}
-		while (TRUE) {
-			const gchar* _tmp3_;
-			const gchar* _tmp4_;
-			gboolean _tmp5_ = FALSE;
-			const gchar* _tmp6_;
-			_tmp3_ = g_dir_read_name (dir);
-			tmp = _tmp3_;
-			_tmp4_ = tmp;
-			if (!(_tmp4_ != NULL)) {
-				break;
-			}
-			_tmp6_ = tmp;
-			if (string_get (_tmp6_, (glong) 0) != '.') {
-				const gchar* _tmp7_;
-				_tmp7_ = tmp;
-				_tmp5_ = g_strcmp0 (_tmp7_, "pkg") != 0;
-			} else {
-				_tmp5_ = FALSE;
-			}
-			if (_tmp5_) {
-				const gchar* _tmp8_;
-				_tmp8_ = tmp;
-				if (query_is_exist (_tmp8_)) {
-					const gchar* _tmp9_;
-					const gchar* _tmp10_;
-					const gchar* _tmp11_;
-					const gchar* _tmp12_;
-					gchar* _tmp13_;
-					gchar* _tmp14_;
-					Package _tmp15_ = {0};
-					_tmp9_ = LOCAL;
-					_tmp10_ = string_to_string (_tmp9_);
-					_tmp11_ = tmp;
-					_tmp12_ = string_to_string (_tmp11_);
-					_tmp13_ = g_strconcat (_tmp10_, "/", _tmp12_, "/info", NULL);
-					_tmp14_ = _tmp13_;
-					package_init_from_file (&_tmp15_, _tmp14_);
-					_vala_array_add3 (&_result_, &_result__length1, &__result__size_, &_tmp15_);
-					_g_free0 (_tmp14_);
-				}
-			}
-		}
-		_tmp16_ = _result_;
-		_tmp16__length1 = _result__length1;
-		if (result_length1) {
-			*result_length1 = _tmp16__length1;
-		}
-		result = _tmp16_;
-		_g_dir_close0 (dir);
-		return result;
-	}
-	goto __finally0;
-	__catch0_g_error:
-	{
-		GError* e = NULL;
-		const gchar* _tmp17_;
-		e = _inner_error0_;
-		_inner_error0_ = NULL;
-		_tmp17_ = e->message;
-		print_error (_tmp17_);
-		_g_error_free0 (e);
-	}
-	__finally0:
-	g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error0_->message, g_quark_to_string (_inner_error0_->domain), _inner_error0_->code);
-	g_clear_error (&_inner_error0_);
-	return NULL;
-}
-
-static void
-_vala_array_add4 (gchar** * array,
-                  gint* length,
-                  gint* size,
-                  gchar* value)
-{
-	if ((*length) == (*size)) {
-		*size = (*size) ? (2 * (*size)) : 4;
-		*array = g_renew (gchar*, *array, (*size) + 1);
-	}
-	(*array)[(*length)++] = value;
-	(*array)[*length] = NULL;
-}
-
-gchar**
-query_get_all_installed_pkg (gint* result_length1)
-{
-	GError* _inner_error0_ = NULL;
-	gchar** result;
-	{
-		gchar** _result_ = NULL;
-		gchar** _tmp0_;
-		gint _result__length1;
-		gint __result__size_;
-		GDir* dir = NULL;
-		const gchar* _tmp1_;
-		GDir* _tmp2_;
-		const gchar* tmp = NULL;
-		gchar** _tmp10_;
-		gint _tmp10__length1;
-		_tmp0_ = g_new0 (gchar*, 0 + 1);
-		_result_ = _tmp0_;
-		_result__length1 = 0;
-		__result__size_ = _result__length1;
-		_tmp1_ = LOCAL;
-		_tmp2_ = g_dir_open (_tmp1_, (guint) 0, &_inner_error0_);
-		dir = _tmp2_;
-		if (G_UNLIKELY (_inner_error0_ != NULL)) {
-			_result_ = (_vala_array_free (_result_, _result__length1, (GDestroyNotify) g_free), NULL);
-			goto __catch0_g_error;
-		}
-		while (TRUE) {
-			const gchar* _tmp3_;
-			const gchar* _tmp4_;
-			gboolean _tmp5_ = FALSE;
-			const gchar* _tmp6_;
-			_tmp3_ = g_dir_read_name (dir);
-			tmp = _tmp3_;
-			_tmp4_ = tmp;
-			if (!(_tmp4_ != NULL)) {
-				break;
-			}
-			_tmp6_ = tmp;
-			if (string_get (_tmp6_, (glong) 0) != '.') {
-				const gchar* _tmp7_;
-				_tmp7_ = tmp;
-				_tmp5_ = g_strcmp0 (_tmp7_, "pkg") != 0;
-			} else {
-				_tmp5_ = FALSE;
-			}
-			if (_tmp5_) {
-				const gchar* _tmp8_;
-				gchar* _tmp9_;
-				_tmp8_ = tmp;
-				_tmp9_ = g_strdup (_tmp8_);
-				_vala_array_add4 (&_result_, &_result__length1, &__result__size_, _tmp9_);
-			}
-		}
-		_tmp10_ = _result_;
-		_tmp10__length1 = _result__length1;
-		if (result_length1) {
-			*result_length1 = _tmp10__length1;
-		}
-		result = _tmp10_;
-		_g_dir_close0 (dir);
-		return result;
-	}
-	goto __finally0;
-	__catch0_g_error:
-	{
-		GError* e = NULL;
-		const gchar* _tmp11_;
-		e = _inner_error0_;
-		_inner_error0_ = NULL;
-		_tmp11_ = e->message;
-		print_error (_tmp11_);
-		_g_error_free0 (e);
-	}
-	__finally0:
-	g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error0_->message, g_quark_to_string (_inner_error0_->domain), _inner_error0_->code);
-	g_clear_error (&_inner_error0_);
-	return NULL;
-}
-
-static void
-_vala_array_destroy (gpointer array,
-                     gssize array_length,
-                     GDestroyNotify destroy_func)
-{
-	if ((array != NULL) && (destroy_func != NULL)) {
-		gssize i;
-		for (i = 0; i < array_length; i = i + 1) {
-			if (((gpointer*) array)[i] != NULL) {
-				destroy_func (((gpointer*) array)[i]);
-			}
-		}
-	}
-}
-
-static void
-_vala_array_free (gpointer array,
-                  gssize array_length,
-                  GDestroyNotify destroy_func)
-{
-	_vala_array_destroy (array, array_length, destroy_func);
-	g_free (array);
 }
 

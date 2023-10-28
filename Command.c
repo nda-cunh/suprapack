@@ -4,19 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <glib.h>
-#include <glib/gstdio.h>
 #include <glib-object.h>
-#include <stdio.h>
 
-#define BOLD "\033[;1m"
-#define NONE "\033[0m"
-#define WHITE "\033[39m"
-#define GREEN "\033[32m"
-#define COM "\033[;2m"
-#define PURPLE "\033[35m"
-#define CYAN "\033[96m"
-#define YELLOW "\033[33m"
-#define GREY "\033[37m"
 #if !defined(VALA_EXTERN)
 #if defined(_MSC_VER)
 #define VALA_EXTERN __declspec(dllexport) extern
@@ -32,22 +21,6 @@
 #define TYPE_PACKAGE (package_get_type ())
 typedef struct _Package Package;
 
-#define TYPE_SUPRA_LIST (supra_list_get_type ())
-typedef struct _SupraList SupraList;
-
-#define TYPE_SYNC (sync_get_type ())
-#define SYNC(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_SYNC, Sync))
-#define SYNC_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_SYNC, SyncClass))
-#define IS_SYNC(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_SYNC))
-#define IS_SYNC_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_SYNC))
-#define SYNC_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_SYNC, SyncClass))
-
-typedef struct _Sync Sync;
-typedef struct _SyncClass SyncClass;
-#define _g_regex_unref0(var) ((var == NULL) ? NULL : (var = (g_regex_unref (var), NULL)))
-#define _g_error_free0(var) ((var == NULL) ? NULL : (var = (g_error_free (var), NULL)))
-#define _g_string_free0(var) ((var == NULL) ? NULL : (var = (g_string_free (var, TRUE), NULL)))
-
 struct _Package {
 	gchar* name;
 	gchar* author;
@@ -58,27 +31,14 @@ struct _Package {
 	gchar* installed_files;
 };
 
-struct _SupraList {
-	const gchar* repo_name;
-	gchar* name;
-	gchar* version;
-};
-
 VALA_EXTERN gchar* PREFIX;
 
-VALA_EXTERN gboolean cmd_install (gchar** av,
-                      gint av_length1);
+VALA_EXTERN gboolean cmd_run (gchar** av,
+                  gint av_length1);
 VALA_EXTERN void print_error (const gchar* msg);
-VALA_EXTERN void install_suprapackage (const gchar* suprapack);
-VALA_EXTERN void install (const gchar* name_search,
-              gboolean force);
-VALA_EXTERN gboolean cmd_build (gchar** av,
-                    gint av_length1);
+VALA_EXTERN gboolean query_is_exist (const gchar* name_pkg);
 VALA_EXTERN void print_info (const gchar* msg,
                  const gchar* prefix);
-VALA_EXTERN void build_create_package (const gchar* usr_dir);
-VALA_EXTERN gboolean cmd_info (gchar** av,
-                   gint av_length1);
 VALA_EXTERN GType package_get_type (void) G_GNUC_CONST ;
 VALA_EXTERN Package* package_dup (const Package* self);
 VALA_EXTERN void package_free (Package* self);
@@ -88,54 +48,7 @@ VALA_EXTERN void package_destroy (Package* self);
 G_DEFINE_AUTO_CLEANUP_CLEAR_FUNC (Package, package_destroy)
 VALA_EXTERN void query_get_from_pkg (const gchar* name_pkg,
                          Package* result);
-VALA_EXTERN gboolean cmd_uninstall (gchar** av,
-                        gint av_length1);
-VALA_EXTERN void query_uninstall (const gchar* name_pkg);
-VALA_EXTERN gboolean cmd_list (gchar** av,
-                   gint av_length1);
-VALA_EXTERN Package* query_get_all_package (gint* result_length1);
-static void _vala_Package_array_free (Package * array,
-                               gssize array_length);
-VALA_EXTERN gboolean cmd_prepare (void);
-VALA_EXTERN void repository_prepare (void);
-VALA_EXTERN GType supra_list_get_type (void) G_GNUC_CONST ;
-VALA_EXTERN SupraList* supra_list_dup (const SupraList* self);
-VALA_EXTERN void supra_list_free (SupraList* self);
-VALA_EXTERN void supra_list_copy (const SupraList* self,
-                      SupraList* dest);
-VALA_EXTERN void supra_list_destroy (SupraList* self);
-G_DEFINE_AUTO_CLEANUP_CLEAR_FUNC (SupraList, supra_list_destroy)
-VALA_EXTERN void print_search (SupraList* repo,
-                   gboolean installed);
-VALA_EXTERN gboolean cmd_search (gchar** av,
-                     gint av_length1);
-VALA_EXTERN gpointer sync_ref (gpointer instance);
-VALA_EXTERN void sync_unref (gpointer instance);
-VALA_EXTERN GParamSpec* param_spec_sync (const gchar* name,
-                             const gchar* nick,
-                             const gchar* blurb,
-                             GType object_type,
-                             GParamFlags flags);
-VALA_EXTERN void value_set_sync (GValue* value,
-                     gpointer v_object);
-VALA_EXTERN void value_take_sync (GValue* value,
-                      gpointer v_object);
-VALA_EXTERN gpointer value_get_sync (const GValue* value);
-VALA_EXTERN GType sync_get_type (void) G_GNUC_CONST ;
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (Sync, sync_unref)
-VALA_EXTERN Sync* sync_default (void);
-VALA_EXTERN SupraList* sync_get_list_package (Sync* self,
-                                  gint* result_length1);
-VALA_EXTERN gchar** query_get_all_installed_pkg (gint* result_length1);
-static gboolean _vala_string_array_contains (gchar* * stack,
-                                      gssize stack_length,
-                                      const gchar* needle);
-static void _vala_SupraList_array_free (SupraList * array,
-                                 gssize array_length);
-VALA_EXTERN gboolean cmd_run (gchar** av,
-                  gint av_length1);
-VALA_EXTERN gboolean query_is_exist (const gchar* name_pkg);
-static void _vala_array_add2 (gchar** * array,
+static void _vala_array_add1 (gchar** * array,
                        gint* length,
                        gint* size,
                        gchar* value);
@@ -144,11 +57,6 @@ VALA_EXTERN gint utils_run (gchar** av,
                 gboolean silence,
                 gchar** envp,
                 gint envp_length1);
-VALA_EXTERN gboolean update_package (const gchar* pkg_name,
-                         gboolean force);
-VALA_EXTERN gboolean cmd_update (gchar** av,
-                     gint av_length1);
-VALA_EXTERN gboolean cmd_help (void);
 static void _vala_array_destroy (gpointer array,
                           gssize array_length,
                           GDestroyNotify destroy_func);
@@ -156,30 +64,6 @@ static void _vala_array_free (gpointer array,
                        gssize array_length,
                        GDestroyNotify destroy_func);
 static gssize _vala_array_length (gpointer array);
-
-gboolean
-cmd_install (gchar** av,
-             gint av_length1)
-{
-	const gchar* _tmp0_;
-	const gchar* _tmp2_;
-	gboolean result;
-	if (av_length1 == 2) {
-		print_error ("`suprapack install [...]`");
-	}
-	_tmp0_ = av[2];
-	if (g_file_test (_tmp0_, G_FILE_TEST_EXISTS)) {
-		const gchar* _tmp1_;
-		_tmp1_ = av[2];
-		install_suprapackage (_tmp1_);
-		result = TRUE;
-		return result;
-	}
-	_tmp2_ = av[2];
-	install (_tmp2_, TRUE);
-	result = TRUE;
-	return result;
-}
 
 static const gchar*
 string_to_string (const gchar* self)
@@ -190,525 +74,8 @@ string_to_string (const gchar* self)
 	return result;
 }
 
-gboolean
-cmd_build (gchar** av,
-           gint av_length1)
-{
-	const gchar* _tmp0_;
-	const gchar* _tmp1_;
-	gchar* _tmp2_;
-	gchar* _tmp3_;
-	const gchar* _tmp4_;
-	gboolean result;
-	if (av_length1 == 2) {
-		print_error ("`suprapack build [...]`");
-	}
-	_tmp0_ = av[2];
-	_tmp1_ = string_to_string (_tmp0_);
-	_tmp2_ = g_strconcat ("Build ", _tmp1_, NULL);
-	_tmp3_ = _tmp2_;
-	print_info (_tmp3_, "SupraPack");
-	_g_free0 (_tmp3_);
-	_tmp4_ = av[2];
-	build_create_package (_tmp4_);
-	result = TRUE;
-	return result;
-}
-
-gboolean
-cmd_info (gchar** av,
-          gint av_length1)
-{
-	Package info = {0};
-	const gchar* _tmp0_;
-	Package _tmp1_ = {0};
-	const gchar* _tmp2_;
-	const gchar* _tmp3_;
-	gchar* _tmp4_;
-	gchar* _tmp5_;
-	Package _tmp6_;
-	const gchar* _tmp7_;
-	const gchar* _tmp8_;
-	const gchar* _tmp9_;
-	gchar* _tmp10_;
-	gchar* _tmp11_;
-	Package _tmp12_;
-	const gchar* _tmp13_;
-	const gchar* _tmp14_;
-	const gchar* _tmp15_;
-	gchar* _tmp16_;
-	gchar* _tmp17_;
-	Package _tmp18_;
-	const gchar* _tmp19_;
-	const gchar* _tmp20_;
-	const gchar* _tmp21_;
-	gchar* _tmp22_;
-	gchar* _tmp23_;
-	Package _tmp24_;
-	const gchar* _tmp25_;
-	gchar** dep_list = NULL;
-	Package _tmp26_;
-	const gchar* _tmp27_;
-	gchar** _tmp28_;
-	gchar** _tmp29_;
-	gint dep_list_length1;
-	gint _dep_list_size_;
-	gchar** _tmp30_;
-	gint _tmp30__length1;
-	Package _tmp38_;
-	const gchar* _tmp39_;
-	Package _tmp40_;
-	const gchar* _tmp41_;
-	gboolean result;
-	if (av_length1 == 2) {
-		print_error ("`suprapack info [...]`");
-	}
-	_tmp0_ = av[2];
-	query_get_from_pkg (_tmp0_, &_tmp1_);
-	info = _tmp1_;
-	_tmp2_ = string_to_string (BOLD);
-	_tmp3_ = string_to_string (NONE);
-	_tmp4_ = g_strconcat (_tmp2_, "Nom                      : ", _tmp3_, "%s\n", NULL);
-	_tmp5_ = _tmp4_;
-	_tmp6_ = info;
-	_tmp7_ = _tmp6_.name;
-	g_print (_tmp5_, _tmp7_);
-	_g_free0 (_tmp5_);
-	_tmp8_ = string_to_string (BOLD);
-	_tmp9_ = string_to_string (NONE);
-	_tmp10_ = g_strconcat (_tmp8_, "Version                  : ", _tmp9_, "%s\n", NULL);
-	_tmp11_ = _tmp10_;
-	_tmp12_ = info;
-	_tmp13_ = _tmp12_.version;
-	g_print (_tmp11_, _tmp13_);
-	_g_free0 (_tmp11_);
-	_tmp14_ = string_to_string (BOLD);
-	_tmp15_ = string_to_string (NONE);
-	_tmp16_ = g_strconcat (_tmp14_, "Description              : ", _tmp15_, "%s\n", NULL);
-	_tmp17_ = _tmp16_;
-	_tmp18_ = info;
-	_tmp19_ = _tmp18_.description;
-	g_print (_tmp17_, _tmp19_);
-	_g_free0 (_tmp17_);
-	_tmp20_ = string_to_string (BOLD);
-	_tmp21_ = string_to_string (NONE);
-	_tmp22_ = g_strconcat (_tmp20_, "Author                   : ", _tmp21_, "%s\n", NULL);
-	_tmp23_ = _tmp22_;
-	_tmp24_ = info;
-	_tmp25_ = _tmp24_.author;
-	g_print (_tmp23_, _tmp25_);
-	_g_free0 (_tmp23_);
-	_tmp26_ = info;
-	_tmp27_ = _tmp26_.dependency;
-	_tmp29_ = _tmp28_ = g_strsplit (_tmp27_, " ", 0);
-	dep_list = _tmp29_;
-	dep_list_length1 = _vala_array_length (_tmp28_);
-	_dep_list_size_ = dep_list_length1;
-	_tmp30_ = dep_list;
-	_tmp30__length1 = dep_list_length1;
-	if (_tmp30__length1 >= 1) {
-		const gchar* _tmp31_;
-		const gchar* _tmp32_;
-		gchar* _tmp33_;
-		gchar* _tmp34_;
-		gchar** _tmp35_;
-		gint _tmp35__length1;
-		_tmp31_ = string_to_string (BOLD);
-		_tmp32_ = string_to_string (NONE);
-		_tmp33_ = g_strconcat (_tmp31_, "Depends                  : ", _tmp32_, NULL);
-		_tmp34_ = _tmp33_;
-		g_print ("%s", _tmp34_);
-		_g_free0 (_tmp34_);
-		_tmp35_ = dep_list;
-		_tmp35__length1 = dep_list_length1;
-		{
-			gchar** dep_collection = NULL;
-			gint dep_collection_length1 = 0;
-			gint _dep_collection_size_ = 0;
-			gint dep_it = 0;
-			dep_collection = _tmp35_;
-			dep_collection_length1 = _tmp35__length1;
-			for (dep_it = 0; dep_it < dep_collection_length1; dep_it = dep_it + 1) {
-				gchar* _tmp36_;
-				gchar* dep = NULL;
-				_tmp36_ = g_strdup (dep_collection[dep_it]);
-				dep = _tmp36_;
-				{
-					const gchar* _tmp37_;
-					_tmp37_ = dep;
-					g_print ("%s ", _tmp37_);
-					_g_free0 (dep);
-				}
-			}
-		}
-		g_print ("\n");
-	}
-	_tmp38_ = info;
-	_tmp39_ = _tmp38_.binary;
-	_tmp40_ = info;
-	_tmp41_ = _tmp40_.name;
-	if (g_strcmp0 (_tmp39_, _tmp41_) != 0) {
-		const gchar* _tmp42_;
-		const gchar* _tmp43_;
-		gchar* _tmp44_;
-		gchar* _tmp45_;
-		Package _tmp46_;
-		const gchar* _tmp47_;
-		_tmp42_ = string_to_string (BOLD);
-		_tmp43_ = string_to_string (NONE);
-		_tmp44_ = g_strconcat (_tmp42_, "Binary                   : ", _tmp43_, "%s\n", NULL);
-		_tmp45_ = _tmp44_;
-		_tmp46_ = info;
-		_tmp47_ = _tmp46_.binary;
-		g_print (_tmp45_, _tmp47_);
-		_g_free0 (_tmp45_);
-	}
-	result = TRUE;
-	dep_list = (_vala_array_free (dep_list, dep_list_length1, (GDestroyNotify) g_free), NULL);
-	package_destroy (&info);
-	return result;
-}
-
-gboolean
-cmd_uninstall (gchar** av,
-               gint av_length1)
-{
-	const gchar* _tmp0_;
-	gboolean result;
-	if (av_length1 == 2) {
-		print_error ("`suprapack uninstall [...]`");
-	}
-	_tmp0_ = av[2];
-	query_uninstall (_tmp0_);
-	result = TRUE;
-	return result;
-}
-
 static void
-_vala_Package_array_free (Package * array,
-                          gssize array_length)
-{
-	if (array != NULL) {
-		gssize i;
-		for (i = 0; i < array_length; i = i + 1) {
-			package_destroy (&array[i]);
-		}
-	}
-	g_free (array);
-}
-
-gboolean
-cmd_list (gchar** av,
-          gint av_length1)
-{
-	Package* installed = NULL;
-	gint _tmp0_ = 0;
-	Package* _tmp1_;
-	gint installed_length1;
-	gint _installed_size_;
-	Package* _tmp2_;
-	gint _tmp2__length1;
-	gboolean result;
-	_tmp1_ = query_get_all_package (&_tmp0_);
-	installed = _tmp1_;
-	installed_length1 = _tmp0_;
-	_installed_size_ = installed_length1;
-	_tmp2_ = installed;
-	_tmp2__length1 = installed_length1;
-	{
-		Package* i_collection = NULL;
-		gint i_collection_length1 = 0;
-		gint _i_collection_size_ = 0;
-		gint i_it = 0;
-		i_collection = _tmp2_;
-		i_collection_length1 = _tmp2__length1;
-		for (i_it = 0; i_it < i_collection_length1; i_it = i_it + 1) {
-			Package _tmp3_;
-			Package _tmp4_ = {0};
-			Package i = {0};
-			_tmp3_ = i_collection[i_it];
-			package_copy (&_tmp3_, &_tmp4_);
-			i = _tmp4_;
-			{
-				const gchar* _tmp5_;
-				const gchar* _tmp6_;
-				Package _tmp7_;
-				const gchar* _tmp8_;
-				const gchar* _tmp9_;
-				const gchar* _tmp10_;
-				Package _tmp11_;
-				const gchar* _tmp12_;
-				const gchar* _tmp13_;
-				const gchar* _tmp14_;
-				gchar* _tmp15_;
-				gchar* _tmp16_;
-				Package _tmp17_;
-				const gchar* _tmp18_;
-				_tmp5_ = string_to_string (BOLD);
-				_tmp6_ = string_to_string (WHITE);
-				_tmp7_ = i;
-				_tmp8_ = _tmp7_.name;
-				_tmp9_ = string_to_string (_tmp8_);
-				_tmp10_ = string_to_string (GREEN);
-				_tmp11_ = i;
-				_tmp12_ = _tmp11_.version;
-				_tmp13_ = string_to_string (_tmp12_);
-				_tmp14_ = string_to_string (NONE);
-				_tmp15_ = g_strconcat (_tmp5_, _tmp6_, _tmp9_, " ", _tmp10_, _tmp13_, _tmp14_, NULL);
-				_tmp16_ = _tmp15_;
-				g_print ("%s", _tmp16_);
-				_g_free0 (_tmp16_);
-				_tmp17_ = i;
-				_tmp18_ = _tmp17_.description;
-				g_print ("\t%s%s%s\n", COM, _tmp18_, NONE);
-				package_destroy (&i);
-			}
-		}
-	}
-	result = TRUE;
-	installed = (_vala_Package_array_free (installed, installed_length1), NULL);
-	return result;
-}
-
-gboolean
-cmd_prepare (void)
-{
-	gboolean result;
-	repository_prepare ();
-	result = TRUE;
-	return result;
-}
-
-void
-print_search (SupraList* repo,
-              gboolean installed)
-{
-	SupraList _tmp0_;
-	const gchar* _tmp1_;
-	SupraList _tmp2_;
-	const gchar* _tmp3_;
-	SupraList _tmp4_;
-	const gchar* _tmp5_;
-	g_return_if_fail (repo != NULL);
-	g_print ("%s%s", BOLD, PURPLE);
-	_tmp0_ = *repo;
-	_tmp1_ = _tmp0_.repo_name;
-	g_print ("%s/%s", _tmp1_, WHITE);
-	_tmp2_ = *repo;
-	_tmp3_ = _tmp2_.name;
-	_tmp4_ = *repo;
-	_tmp5_ = _tmp4_.version;
-	g_print ("%s %s%s", _tmp3_, GREEN, _tmp5_);
-	if (installed) {
-		g_print (" %s[installed]", CYAN);
-	}
-	g_print ("%s\n", NONE);
-}
-
-static gboolean
-_vala_string_array_contains (gchar* * stack,
-                             gssize stack_length,
-                             const gchar* needle)
-{
-	gssize i;
-	for (i = 0; i < stack_length; i++) {
-		if (g_strcmp0 (stack[i], needle) == 0) {
-			return TRUE;
-		}
-	}
-	return FALSE;
-}
-
-static void
-_vala_SupraList_array_free (SupraList * array,
-                            gssize array_length)
-{
-	if (array != NULL) {
-		gssize i;
-		for (i = 0; i < array_length; i = i + 1) {
-			supra_list_destroy (&array[i]);
-		}
-	}
-	g_free (array);
-}
-
-gboolean
-cmd_search (gchar** av,
-            gint av_length1)
-{
-	SupraList* list = NULL;
-	Sync* _tmp0_;
-	gint _tmp1_ = 0;
-	SupraList* _tmp2_;
-	gint list_length1;
-	gint _list_size_;
-	gchar** installed = NULL;
-	gint _tmp3_ = 0;
-	gchar** _tmp4_;
-	gint installed_length1;
-	gint _installed_size_;
-	GError* _inner_error0_ = NULL;
-	gboolean result;
-	_tmp0_ = sync_default ();
-	_tmp2_ = sync_get_list_package (_tmp0_, &_tmp1_);
-	list = _tmp2_;
-	list_length1 = _tmp1_;
-	_list_size_ = list_length1;
-	_tmp4_ = query_get_all_installed_pkg (&_tmp3_);
-	installed = _tmp4_;
-	installed_length1 = _tmp3_;
-	_installed_size_ = installed_length1;
-	if (av_length1 == 2) {
-		SupraList* _tmp5_;
-		gint _tmp5__length1;
-		_tmp5_ = list;
-		_tmp5__length1 = list_length1;
-		{
-			SupraList* i_collection = NULL;
-			gint i_collection_length1 = 0;
-			gint _i_collection_size_ = 0;
-			gint i_it = 0;
-			i_collection = _tmp5_;
-			i_collection_length1 = _tmp5__length1;
-			for (i_it = 0; i_it < i_collection_length1; i_it = i_it + 1) {
-				SupraList _tmp6_;
-				SupraList _tmp7_ = {0};
-				SupraList i = {0};
-				_tmp6_ = i_collection[i_it];
-				supra_list_copy (&_tmp6_, &_tmp7_);
-				i = _tmp7_;
-				{
-					SupraList _tmp8_;
-					const gchar* _tmp9_;
-					gchar** _tmp10_;
-					gint _tmp10__length1;
-					_tmp8_ = i;
-					_tmp9_ = _tmp8_.name;
-					_tmp10_ = installed;
-					_tmp10__length1 = installed_length1;
-					print_search (&i, _vala_string_array_contains (_tmp10_, _tmp10__length1, _tmp9_));
-					supra_list_destroy (&i);
-				}
-			}
-		}
-	} else {
-		{
-			GRegex* regex = NULL;
-			const gchar* _tmp11_;
-			GRegex* _tmp12_;
-			SupraList* _tmp13_;
-			gint _tmp13__length1;
-			_tmp11_ = av[2];
-			_tmp12_ = g_regex_new (_tmp11_, G_REGEX_EXTENDED, 0, &_inner_error0_);
-			regex = _tmp12_;
-			if (G_UNLIKELY (_inner_error0_ != NULL)) {
-				goto __catch0_g_error;
-			}
-			_tmp13_ = list;
-			_tmp13__length1 = list_length1;
-			{
-				SupraList* i_collection = NULL;
-				gint i_collection_length1 = 0;
-				gint _i_collection_size_ = 0;
-				gint i_it = 0;
-				i_collection = _tmp13_;
-				i_collection_length1 = _tmp13__length1;
-				for (i_it = 0; i_it < i_collection_length1; i_it = i_it + 1) {
-					SupraList _tmp14_;
-					SupraList _tmp15_ = {0};
-					SupraList i = {0};
-					_tmp14_ = i_collection[i_it];
-					supra_list_copy (&_tmp14_, &_tmp15_);
-					i = _tmp15_;
-					{
-						gboolean _tmp16_ = FALSE;
-						GRegex* _tmp17_;
-						SupraList _tmp18_;
-						const gchar* _tmp19_;
-						_tmp17_ = regex;
-						_tmp18_ = i;
-						_tmp19_ = _tmp18_.name;
-						if (g_regex_match (_tmp17_, _tmp19_, 0, NULL)) {
-							_tmp16_ = TRUE;
-						} else {
-							GRegex* _tmp20_;
-							SupraList _tmp21_;
-							const gchar* _tmp22_;
-							_tmp20_ = regex;
-							_tmp21_ = i;
-							_tmp22_ = _tmp21_.version;
-							_tmp16_ = g_regex_match (_tmp20_, _tmp22_, 0, NULL);
-						}
-						if (_tmp16_) {
-							SupraList _tmp23_;
-							const gchar* _tmp24_;
-							gchar** _tmp25_;
-							gint _tmp25__length1;
-							_tmp23_ = i;
-							_tmp24_ = _tmp23_.name;
-							_tmp25_ = installed;
-							_tmp25__length1 = installed_length1;
-							print_search (&i, _vala_string_array_contains (_tmp25_, _tmp25__length1, _tmp24_));
-						}
-						supra_list_destroy (&i);
-					}
-				}
-			}
-			_g_regex_unref0 (regex);
-		}
-		goto __finally0;
-		__catch0_g_error:
-		{
-			GError* e = NULL;
-			const gchar* _tmp26_;
-			e = _inner_error0_;
-			_inner_error0_ = NULL;
-			_tmp26_ = e->message;
-			print_error (_tmp26_);
-			_g_error_free0 (e);
-		}
-		__finally0:
-		if (G_UNLIKELY (_inner_error0_ != NULL)) {
-			gboolean _tmp27_ = FALSE;
-			installed = (_vala_array_free (installed, installed_length1, (GDestroyNotify) g_free), NULL);
-			list = (_vala_SupraList_array_free (list, list_length1), NULL);
-			g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error0_->message, g_quark_to_string (_inner_error0_->domain), _inner_error0_->code);
-			g_clear_error (&_inner_error0_);
-			return _tmp27_;
-		}
-	}
-	result = TRUE;
-	installed = (_vala_array_free (installed, installed_length1, (GDestroyNotify) g_free), NULL);
-	list = (_vala_SupraList_array_free (list, list_length1), NULL);
-	return result;
-}
-
-static gint
-string_index_of_char (const gchar* self,
-                      gunichar c,
-                      gint start_index)
-{
-	gchar* _result_ = NULL;
-	gchar* _tmp0_;
-	gchar* _tmp1_;
-	gint result;
-	g_return_val_if_fail (self != NULL, 0);
-	_tmp0_ = g_utf8_strchr (((gchar*) self) + start_index, (gssize) -1, c);
-	_result_ = _tmp0_;
-	_tmp1_ = _result_;
-	if (_tmp1_ != NULL) {
-		gchar* _tmp2_;
-		_tmp2_ = _result_;
-		result = (gint) (_tmp2_ - ((gchar*) self));
-		return result;
-	} else {
-		result = -1;
-		return result;
-	}
-}
-
-static void
-_vala_array_add2 (gchar** * array,
+_vala_array_add1 (gchar** * array,
                   gint* length,
                   gint* size,
                   gchar* value)
@@ -726,21 +93,26 @@ cmd_run (gchar** av,
          gint av_length1)
 {
 	const gchar* _tmp0_;
-	const gchar* _tmp11_;
+	const gchar* _tmp5_;
 	Package pkg = {0};
-	const gchar* _tmp16_;
-	Package _tmp17_ = {0};
+	const gchar* _tmp10_;
+	Package _tmp11_ = {0};
 	gchar** av_binary = NULL;
 	gint av_binary_length1 = 0;
 	gint _av_binary_size_ = 0;
-	Package _tmp18_;
-	const gchar* _tmp19_;
-	gchar** _tmp37_;
-	gint _tmp37__length1;
-	gchar** _tmp38_;
-	gchar** _tmp39_;
-	gchar** _tmp40_;
-	gint _tmp40__length1;
+	const gchar* _tmp12_;
+	const gchar* _tmp13_;
+	Package _tmp14_;
+	const gchar* _tmp15_;
+	const gchar* _tmp16_;
+	gchar* _tmp17_;
+	gchar** _tmp18_;
+	gchar** _tmp22_;
+	gint _tmp22__length1;
+	gchar** _tmp23_;
+	gchar** _tmp24_;
+	gchar** _tmp25_;
+	gint _tmp25__length1;
 	gboolean result;
 	if (av_length1 == 2) {
 		print_error ("`suprapack run [...]`");
@@ -751,91 +123,41 @@ cmd_run (gchar** av,
 		const gchar* _tmp2_;
 		gchar* _tmp3_;
 		gchar* _tmp4_;
-		gchar* _tmp5_;
-		gchar* _tmp6_;
-		const gchar* _tmp7_;
-		gchar* _tmp8_;
-		gchar** _tmp9_;
-		gchar** _tmp10_;
-		gint _tmp10__length1;
 		_tmp1_ = av[2];
 		_tmp2_ = string_to_string (_tmp1_);
 		_tmp3_ = g_strconcat (_tmp2_, " doesn't exist install it...", NULL);
 		_tmp4_ = _tmp3_;
 		print_info (_tmp4_, "SupraPack");
 		_g_free0 (_tmp4_);
-		_tmp5_ = g_strdup ("");
-		_tmp6_ = g_strdup ("install");
-		_tmp7_ = av[2];
-		_tmp8_ = g_strdup (_tmp7_);
-		_tmp9_ = g_new0 (gchar*, 3 + 1);
-		_tmp9_[0] = _tmp5_;
-		_tmp9_[1] = _tmp6_;
-		_tmp9_[2] = _tmp8_;
-		_tmp10_ = _tmp9_;
-		_tmp10__length1 = 3;
-		cmd_install (_tmp10_, (gint) 3);
-		_tmp10_ = (_vala_array_free (_tmp10_, _tmp10__length1, (GDestroyNotify) g_free), NULL);
 	}
-	_tmp11_ = av[2];
-	if (query_is_exist (_tmp11_) == FALSE) {
-		const gchar* _tmp12_;
-		const gchar* _tmp13_;
-		gchar* _tmp14_;
-		gchar* _tmp15_;
-		_tmp12_ = av[2];
-		_tmp13_ = string_to_string (_tmp12_);
-		_tmp14_ = g_strconcat (_tmp13_, " is not installed", NULL);
-		_tmp15_ = _tmp14_;
-		print_error (_tmp15_);
-		_g_free0 (_tmp15_);
+	_tmp5_ = av[2];
+	if (query_is_exist (_tmp5_) == FALSE) {
+		const gchar* _tmp6_;
+		const gchar* _tmp7_;
+		gchar* _tmp8_;
+		gchar* _tmp9_;
+		_tmp6_ = av[2];
+		_tmp7_ = string_to_string (_tmp6_);
+		_tmp8_ = g_strconcat (_tmp7_, " is not installed", NULL);
+		_tmp9_ = _tmp8_;
+		print_error (_tmp9_);
+		_g_free0 (_tmp9_);
 	}
-	_tmp16_ = av[2];
-	query_get_from_pkg (_tmp16_, &_tmp17_);
-	pkg = _tmp17_;
-	_tmp18_ = pkg;
-	_tmp19_ = _tmp18_.binary;
-	if (string_index_of_char (_tmp19_, (gunichar) '/', 0) == -1) {
-		const gchar* _tmp20_;
-		const gchar* _tmp21_;
-		Package _tmp22_;
-		const gchar* _tmp23_;
-		const gchar* _tmp24_;
-		gchar* _tmp25_;
-		gchar** _tmp26_;
-		_tmp20_ = PREFIX;
-		_tmp21_ = string_to_string (_tmp20_);
-		_tmp22_ = pkg;
-		_tmp23_ = _tmp22_.binary;
-		_tmp24_ = string_to_string (_tmp23_);
-		_tmp25_ = g_strconcat (_tmp21_, "/bin/", _tmp24_, NULL);
-		_tmp26_ = g_new0 (gchar*, 1 + 1);
-		_tmp26_[0] = _tmp25_;
-		av_binary = (_vala_array_free (av_binary, av_binary_length1, (GDestroyNotify) g_free), NULL);
-		av_binary = _tmp26_;
-		av_binary_length1 = 1;
-		_av_binary_size_ = av_binary_length1;
-	} else {
-		const gchar* _tmp27_;
-		const gchar* _tmp28_;
-		Package _tmp29_;
-		const gchar* _tmp30_;
-		const gchar* _tmp31_;
-		gchar* _tmp32_;
-		gchar** _tmp33_;
-		_tmp27_ = PREFIX;
-		_tmp28_ = string_to_string (_tmp27_);
-		_tmp29_ = pkg;
-		_tmp30_ = _tmp29_.binary;
-		_tmp31_ = string_to_string (_tmp30_);
-		_tmp32_ = g_strconcat (_tmp28_, "/", _tmp31_, NULL);
-		_tmp33_ = g_new0 (gchar*, 1 + 1);
-		_tmp33_[0] = _tmp32_;
-		av_binary = (_vala_array_free (av_binary, av_binary_length1, (GDestroyNotify) g_free), NULL);
-		av_binary = _tmp33_;
-		av_binary_length1 = 1;
-		_av_binary_size_ = av_binary_length1;
-	}
+	_tmp10_ = av[2];
+	query_get_from_pkg (_tmp10_, &_tmp11_);
+	pkg = _tmp11_;
+	_tmp12_ = PREFIX;
+	_tmp13_ = string_to_string (_tmp12_);
+	_tmp14_ = pkg;
+	_tmp15_ = _tmp14_.binary;
+	_tmp16_ = string_to_string (_tmp15_);
+	_tmp17_ = g_strconcat (_tmp13_, "/", _tmp16_, NULL);
+	_tmp18_ = g_new0 (gchar*, 1 + 1);
+	_tmp18_[0] = _tmp17_;
+	av_binary = (_vala_array_free (av_binary, av_binary_length1, (GDestroyNotify) g_free), NULL);
+	av_binary = _tmp18_;
+	av_binary_length1 = 1;
+	_av_binary_size_ = av_binary_length1;
 	if (av_length1 >= 3) {
 		{
 			gchar** i_collection = NULL;
@@ -845,630 +167,31 @@ cmd_run (gchar** av,
 			i_collection = av + 3;
 			i_collection_length1 = av_length1 - 3;
 			for (i_it = 0; i_it < i_collection_length1; i_it = i_it + 1) {
-				gchar* _tmp34_;
+				gchar* _tmp19_;
 				gchar* i = NULL;
-				_tmp34_ = g_strdup (i_collection[i_it]);
-				i = _tmp34_;
+				_tmp19_ = g_strdup (i_collection[i_it]);
+				i = _tmp19_;
 				{
-					const gchar* _tmp35_;
-					gchar* _tmp36_;
-					_tmp35_ = i;
-					_tmp36_ = g_strdup (_tmp35_);
-					_vala_array_add2 (&av_binary, &av_binary_length1, &_av_binary_size_, _tmp36_);
+					const gchar* _tmp20_;
+					gchar* _tmp21_;
+					_tmp20_ = i;
+					_tmp21_ = g_strdup (_tmp20_);
+					_vala_array_add1 (&av_binary, &av_binary_length1, &_av_binary_size_, _tmp21_);
 					_g_free0 (i);
 				}
 			}
 		}
 	}
-	_tmp37_ = av_binary;
-	_tmp37__length1 = av_binary_length1;
-	_tmp39_ = _tmp38_ = g_get_environ ();
-	_tmp40_ = _tmp39_;
-	_tmp40__length1 = _vala_array_length (_tmp38_);
-	utils_run (_tmp37_, (gint) _tmp37__length1, FALSE, _tmp40_, (gint) _vala_array_length (_tmp38_));
-	_tmp40_ = (_vala_array_free (_tmp40_, _tmp40__length1, (GDestroyNotify) g_free), NULL);
+	_tmp22_ = av_binary;
+	_tmp22__length1 = av_binary_length1;
+	_tmp24_ = _tmp23_ = g_get_environ ();
+	_tmp25_ = _tmp24_;
+	_tmp25__length1 = _vala_array_length (_tmp23_);
+	utils_run (_tmp22_, (gint) _tmp22__length1, FALSE, _tmp25_, (gint) _vala_array_length (_tmp23_));
+	_tmp25_ = (_vala_array_free (_tmp25_, _tmp25__length1, (GDestroyNotify) g_free), NULL);
 	result = TRUE;
 	av_binary = (_vala_array_free (av_binary, av_binary_length1, (GDestroyNotify) g_free), NULL);
 	package_destroy (&pkg);
-	return result;
-}
-
-static gchar*
-g_file_stream_read_line (FILE* self)
-{
-	gint c = 0;
-	GString* ret = NULL;
-	GString* _tmp3_;
-	gchar* result;
-	g_return_val_if_fail (self != NULL, NULL);
-	ret = NULL;
-	while (TRUE) {
-		GString* _tmp0_;
-		GString* _tmp2_;
-		c = fgetc (self);
-		if (!(c != EOF)) {
-			break;
-		}
-		_tmp0_ = ret;
-		if (_tmp0_ == NULL) {
-			GString* _tmp1_;
-			_tmp1_ = g_string_new ("");
-			_g_string_free0 (ret);
-			ret = _tmp1_;
-		}
-		if (c == ((gint) '\n')) {
-			break;
-		}
-		_tmp2_ = ret;
-		g_string_append_c ((GString*) _tmp2_, (gchar) c);
-	}
-	_tmp3_ = ret;
-	if (_tmp3_ == NULL) {
-		result = NULL;
-		_g_string_free0 (ret);
-		return result;
-	} else {
-		GString* _tmp4_;
-		const gchar* _tmp5_;
-		gchar* _tmp6_;
-		_tmp4_ = ret;
-		_tmp5_ = ((GString*) _tmp4_)->str;
-		_tmp6_ = g_strdup (_tmp5_);
-		result = _tmp6_;
-		_g_string_free0 (ret);
-		return result;
-	}
-}
-
-static gchar*
-string_strip (const gchar* self)
-{
-	gchar* _result_ = NULL;
-	gchar* _tmp0_;
-	gchar* result;
-	g_return_val_if_fail (self != NULL, NULL);
-	_tmp0_ = g_strdup (self);
-	_result_ = _tmp0_;
-	g_strstrip (_result_);
-	result = _result_;
-	return result;
-}
-
-static gboolean
-string_contains (const gchar* self,
-                 const gchar* needle)
-{
-	gchar* _tmp0_;
-	gboolean result;
-	g_return_val_if_fail (self != NULL, FALSE);
-	g_return_val_if_fail (needle != NULL, FALSE);
-	_tmp0_ = strstr ((gchar*) self, (gchar*) needle);
-	result = _tmp0_ != NULL;
-	return result;
-}
-
-gboolean
-update_package (const gchar* pkg_name,
-                gboolean force)
-{
-	SupraList* list = NULL;
-	Sync* _tmp0_;
-	gint _tmp1_ = 0;
-	SupraList* _tmp2_;
-	gint list_length1;
-	gint _list_size_;
-	Package pkg = {0};
-	Package _tmp3_ = {0};
-	gchar* Qversion = NULL;
-	Package _tmp4_;
-	const gchar* _tmp5_;
-	gchar* _tmp6_;
-	gchar* Sversion = NULL;
-	SupraList* _tmp7_;
-	gint _tmp7__length1;
-	gboolean result;
-	g_return_val_if_fail (pkg_name != NULL, FALSE);
-	_tmp0_ = sync_default ();
-	_tmp2_ = sync_get_list_package (_tmp0_, &_tmp1_);
-	list = _tmp2_;
-	list_length1 = _tmp1_;
-	_list_size_ = list_length1;
-	query_get_from_pkg (pkg_name, &_tmp3_);
-	pkg = _tmp3_;
-	_tmp4_ = pkg;
-	_tmp5_ = _tmp4_.version;
-	_tmp6_ = g_strdup (_tmp5_);
-	Qversion = _tmp6_;
-	_tmp7_ = list;
-	_tmp7__length1 = list_length1;
-	{
-		SupraList* i_collection = NULL;
-		gint i_collection_length1 = 0;
-		gint _i_collection_size_ = 0;
-		gint i_it = 0;
-		i_collection = _tmp7_;
-		i_collection_length1 = _tmp7__length1;
-		for (i_it = 0; i_it < i_collection_length1; i_it = i_it + 1) {
-			SupraList _tmp8_;
-			SupraList _tmp9_ = {0};
-			SupraList i = {0};
-			_tmp8_ = i_collection[i_it];
-			supra_list_copy (&_tmp8_, &_tmp9_);
-			i = _tmp9_;
-			{
-				SupraList _tmp10_;
-				const gchar* _tmp11_;
-				_tmp10_ = i;
-				_tmp11_ = _tmp10_.name;
-				if (g_strcmp0 (_tmp11_, pkg_name) == 0) {
-					SupraList _tmp12_;
-					const gchar* _tmp13_;
-					gchar* _tmp14_;
-					const gchar* _tmp15_;
-					const gchar* _tmp16_;
-					_tmp12_ = i;
-					_tmp13_ = _tmp12_.version;
-					_tmp14_ = g_strdup (_tmp13_);
-					_g_free0 (Sversion);
-					Sversion = _tmp14_;
-					_tmp15_ = Sversion;
-					_tmp16_ = Qversion;
-					if (g_strcmp0 (_tmp15_, _tmp16_) != 0) {
-						const gchar* _tmp17_;
-						const gchar* _tmp18_;
-						Package _tmp19_;
-						const gchar* _tmp20_;
-						const gchar* _tmp21_;
-						SupraList _tmp22_;
-						const gchar* _tmp23_;
-						const gchar* _tmp24_;
-						gchar* _tmp25_;
-						gchar* _tmp26_;
-						_tmp17_ = string_to_string (pkg_name);
-						_tmp18_ = string_to_string (CYAN);
-						_tmp19_ = pkg;
-						_tmp20_ = _tmp19_.version;
-						_tmp21_ = string_to_string (_tmp20_);
-						_tmp22_ = i;
-						_tmp23_ = _tmp22_.version;
-						_tmp24_ = string_to_string (_tmp23_);
-						_tmp25_ = g_strconcat ("Update avaiable for ", _tmp17_, " ", _tmp18_, _tmp21_, " --> ", _tmp24_, NULL);
-						_tmp26_ = _tmp25_;
-						print_info (_tmp26_, "SupraPack");
-						_g_free0 (_tmp26_);
-						if (force == FALSE) {
-							gchar* input = NULL;
-							FILE* _tmp27_;
-							gchar* _tmp28_;
-							gchar* _tmp29_;
-							gchar* _tmp30_;
-							gchar* _tmp31_;
-							gchar* _tmp32_;
-							gchar* _tmp33_;
-							gboolean _tmp34_ = FALSE;
-							const gchar* _tmp35_;
-							print_info ("Do you want update it ? [yes/No]", "SupraPack");
-							_tmp27_ = stdin;
-							_tmp28_ = g_file_stream_read_line (_tmp27_);
-							_tmp29_ = _tmp28_;
-							_tmp30_ = string_strip (_tmp29_);
-							_tmp31_ = _tmp30_;
-							_tmp32_ = g_utf8_strdown (_tmp31_, (gssize) -1);
-							_tmp33_ = _tmp32_;
-							_g_free0 (_tmp31_);
-							_g_free0 (_tmp29_);
-							input = _tmp33_;
-							_tmp35_ = input;
-							if (g_strcmp0 (_tmp35_, "") == 0) {
-								_tmp34_ = TRUE;
-							} else {
-								const gchar* _tmp36_;
-								_tmp36_ = input;
-								_tmp34_ = string_contains (_tmp36_, "y");
-							}
-							if (_tmp34_) {
-								install (pkg_name, TRUE);
-							} else {
-								print_info ("Cancel ...", "SupraPack");
-							}
-							_g_free0 (input);
-						} else {
-							install (pkg_name, TRUE);
-						}
-					} else {
-						const gchar* _tmp37_;
-						SupraList _tmp38_;
-						const gchar* _tmp39_;
-						const gchar* _tmp40_;
-						gchar* _tmp41_;
-						gchar* _tmp42_;
-						_tmp37_ = string_to_string (pkg_name);
-						_tmp38_ = i;
-						_tmp39_ = _tmp38_.version;
-						_tmp40_ = string_to_string (_tmp39_);
-						_tmp41_ = g_strconcat ("No update avaiable for ", _tmp37_, " ", _tmp40_, NULL);
-						_tmp42_ = _tmp41_;
-						print_info (_tmp42_, "SupraPack");
-						_g_free0 (_tmp42_);
-					}
-					result = TRUE;
-					supra_list_destroy (&i);
-					_g_free0 (Sversion);
-					_g_free0 (Qversion);
-					package_destroy (&pkg);
-					list = (_vala_SupraList_array_free (list, list_length1), NULL);
-					return result;
-				}
-				supra_list_destroy (&i);
-			}
-		}
-	}
-	result = FALSE;
-	_g_free0 (Sversion);
-	_g_free0 (Qversion);
-	package_destroy (&pkg);
-	list = (_vala_SupraList_array_free (list, list_length1), NULL);
-	return result;
-}
-
-gboolean
-cmd_update (gchar** av,
-            gint av_length1)
-{
-	const gchar* pkg_name = NULL;
-	gboolean result;
-	if (av_length1 == 2) {
-		gchar** Qpkg = NULL;
-		gint _tmp0_ = 0;
-		gchar** _tmp1_;
-		gint Qpkg_length1;
-		gint _Qpkg_size_;
-		gchar** _tmp2_;
-		gint _tmp2__length1;
-		_tmp1_ = query_get_all_installed_pkg (&_tmp0_);
-		Qpkg = _tmp1_;
-		Qpkg_length1 = _tmp0_;
-		_Qpkg_size_ = Qpkg_length1;
-		_tmp2_ = Qpkg;
-		_tmp2__length1 = Qpkg_length1;
-		{
-			gchar** pkg_collection = NULL;
-			gint pkg_collection_length1 = 0;
-			gint _pkg_collection_size_ = 0;
-			gint pkg_it = 0;
-			pkg_collection = _tmp2_;
-			pkg_collection_length1 = _tmp2__length1;
-			for (pkg_it = 0; pkg_it < pkg_collection_length1; pkg_it = pkg_it + 1) {
-				gchar* _tmp3_;
-				gchar* pkg = NULL;
-				_tmp3_ = g_strdup (pkg_collection[pkg_it]);
-				pkg = _tmp3_;
-				{
-					const gchar* _tmp4_;
-					_tmp4_ = pkg;
-					update_package (_tmp4_, FALSE);
-					_g_free0 (pkg);
-				}
-			}
-		}
-		result = TRUE;
-		Qpkg = (_vala_array_free (Qpkg, Qpkg_length1, (GDestroyNotify) g_free), NULL);
-		return result;
-	} else {
-		const gchar* _tmp5_;
-		const gchar* _tmp6_;
-		const gchar* _tmp11_;
-		_tmp5_ = av[2];
-		pkg_name = _tmp5_;
-		_tmp6_ = pkg_name;
-		if (query_is_exist (_tmp6_) == FALSE) {
-			const gchar* _tmp7_;
-			const gchar* _tmp8_;
-			gchar* _tmp9_;
-			gchar* _tmp10_;
-			_tmp7_ = pkg_name;
-			_tmp8_ = string_to_string (_tmp7_);
-			_tmp9_ = g_strconcat (_tmp8_, " is not installed", NULL);
-			_tmp10_ = _tmp9_;
-			print_error (_tmp10_);
-			_g_free0 (_tmp10_);
-		}
-		_tmp11_ = pkg_name;
-		if (update_package (_tmp11_, TRUE) == FALSE) {
-			const gchar* _tmp12_;
-			const gchar* _tmp13_;
-			gchar* _tmp14_;
-			gchar* _tmp15_;
-			_tmp12_ = pkg_name;
-			_tmp13_ = string_to_string (_tmp12_);
-			_tmp14_ = g_strconcat ("target not found: ", _tmp13_, NULL);
-			_tmp15_ = _tmp14_;
-			print_error (_tmp15_);
-			_g_free0 (_tmp15_);
-		}
-		result = TRUE;
-		return result;
-	}
-}
-
-gboolean
-cmd_help (void)
-{
-	gchar* suprapack = NULL;
-	const gchar* _tmp0_;
-	const gchar* _tmp1_;
-	gchar* _tmp2_;
-	const gchar* _tmp3_;
-	const gchar* _tmp4_;
-	gchar* _tmp5_;
-	gchar* _tmp6_;
-	const gchar* _tmp7_;
-	gchar* _tmp8_;
-	gchar* _tmp9_;
-	const gchar* _tmp10_;
-	gchar* _tmp11_;
-	gchar* _tmp12_;
-	const gchar* _tmp13_;
-	gchar* _tmp14_;
-	gchar* _tmp15_;
-	const gchar* _tmp16_;
-	gchar* _tmp17_;
-	gchar* _tmp18_;
-	const gchar* _tmp19_;
-	gchar* _tmp20_;
-	gchar* _tmp21_;
-	const gchar* _tmp22_;
-	gchar* _tmp23_;
-	gchar* _tmp24_;
-	const gchar* _tmp25_;
-	gchar* _tmp26_;
-	gchar* _tmp27_;
-	const gchar* _tmp28_;
-	gchar* _tmp29_;
-	gchar* _tmp30_;
-	const gchar* _tmp31_;
-	gchar* _tmp32_;
-	gchar* _tmp33_;
-	const gchar* _tmp34_;
-	gchar* _tmp35_;
-	gchar* _tmp36_;
-	const gchar* _tmp37_;
-	gchar* _tmp38_;
-	gchar* _tmp39_;
-	const gchar* _tmp40_;
-	gchar* _tmp41_;
-	gchar* _tmp42_;
-	const gchar* _tmp43_;
-	gchar* _tmp44_;
-	gchar* _tmp45_;
-	const gchar* _tmp46_;
-	gchar* _tmp47_;
-	gchar* _tmp48_;
-	const gchar* _tmp49_;
-	const gchar* _tmp50_;
-	const gchar* _tmp51_;
-	const gchar* _tmp52_;
-	gchar* _tmp53_;
-	gchar* _tmp54_;
-	const gchar* _tmp55_;
-	gchar* _tmp56_;
-	gchar* _tmp57_;
-	const gchar* _tmp58_;
-	gchar* _tmp59_;
-	gchar* _tmp60_;
-	const gchar* _tmp61_;
-	gchar* _tmp62_;
-	gchar* _tmp63_;
-	const gchar* _tmp64_;
-	gchar* _tmp65_;
-	gchar* _tmp66_;
-	const gchar* _tmp67_;
-	gchar* _tmp68_;
-	gchar* _tmp69_;
-	const gchar* _tmp70_;
-	gchar* _tmp71_;
-	gchar* _tmp72_;
-	const gchar* _tmp73_;
-	const gchar* _tmp74_;
-	const gchar* _tmp75_;
-	gchar* _tmp76_;
-	gchar* _tmp77_;
-	const gchar* _tmp78_;
-	const gchar* _tmp79_;
-	gchar* _tmp80_;
-	gchar* _tmp81_;
-	const gchar* _tmp82_;
-	gchar* _tmp83_;
-	gchar* _tmp84_;
-	const gchar* _tmp85_;
-	const gchar* _tmp86_;
-	const gchar* _tmp87_;
-	gchar* _tmp88_;
-	gchar* _tmp89_;
-	const gchar* _tmp90_;
-	const gchar* _tmp91_;
-	gchar* _tmp92_;
-	gchar* _tmp93_;
-	const gchar* _tmp94_;
-	const gchar* _tmp95_;
-	gchar* _tmp96_;
-	gchar* _tmp97_;
-	const gchar* _tmp98_;
-	const gchar* _tmp99_;
-	const gchar* _tmp100_;
-	const gchar* _tmp101_;
-	const gchar* _tmp102_;
-	gchar* _tmp103_;
-	gchar* _tmp104_;
-	gboolean result;
-	_tmp0_ = string_to_string (BOLD);
-	_tmp1_ = string_to_string (NONE);
-	_tmp2_ = g_strconcat (_tmp0_, "suprapack", _tmp1_, NULL);
-	suprapack = _tmp2_;
-	_tmp3_ = string_to_string (BOLD);
-	_tmp4_ = string_to_string (YELLOW);
-	_tmp5_ = g_strconcat (_tmp3_, _tmp4_, "[SupraStore] ----- Help -----\n\n", NULL);
-	_tmp6_ = _tmp5_;
-	g_print ("%s", _tmp6_);
-	_g_free0 (_tmp6_);
-	_tmp7_ = string_to_string (suprapack);
-	_tmp8_ = g_strconcat ("	", _tmp7_, " install [package name]\n", NULL);
-	_tmp9_ = _tmp8_;
-	g_print ("%s", _tmp9_);
-	_g_free0 (_tmp9_);
-	_tmp10_ = string_to_string (COM);
-	_tmp11_ = g_strconcat ("	  ", _tmp10_, " install a package from a repository\n", NULL);
-	_tmp12_ = _tmp11_;
-	g_print ("%s", _tmp12_);
-	_g_free0 (_tmp12_);
-	_tmp13_ = string_to_string (suprapack);
-	_tmp14_ = g_strconcat ("	", _tmp13_, " install [file.suprapack]\n", NULL);
-	_tmp15_ = _tmp14_;
-	g_print ("%s", _tmp15_);
-	_g_free0 (_tmp15_);
-	_tmp16_ = string_to_string (COM);
-	_tmp17_ = g_strconcat ("	  ", _tmp16_, " install a package from a file (suprapack)\n", NULL);
-	_tmp18_ = _tmp17_;
-	g_print ("%s", _tmp18_);
-	_g_free0 (_tmp18_);
-	_tmp19_ = string_to_string (suprapack);
-	_tmp20_ = g_strconcat ("	", _tmp19_, " uninstall [package name]\n", NULL);
-	_tmp21_ = _tmp20_;
-	g_print ("%s", _tmp21_);
-	_g_free0 (_tmp21_);
-	_tmp22_ = string_to_string (COM);
-	_tmp23_ = g_strconcat ("	  ", _tmp22_, " remove a package\n", NULL);
-	_tmp24_ = _tmp23_;
-	g_print ("%s", _tmp24_);
-	_g_free0 (_tmp24_);
-	_tmp25_ = string_to_string (suprapack);
-	_tmp26_ = g_strconcat ("	", _tmp25_, " your_file.suprapack\n", NULL);
-	_tmp27_ = _tmp26_;
-	g_print ("%s", _tmp27_);
-	_g_free0 (_tmp27_);
-	_tmp28_ = string_to_string (COM);
-	_tmp29_ = g_strconcat ("	  ", _tmp28_, " install a package from a file (suprapack)\n", NULL);
-	_tmp30_ = _tmp29_;
-	g_print ("%s", _tmp30_);
-	_g_free0 (_tmp30_);
-	_tmp31_ = string_to_string (suprapack);
-	_tmp32_ = g_strconcat ("	", _tmp31_, " update\n", NULL);
-	_tmp33_ = _tmp32_;
-	g_print ("%s", _tmp33_);
-	_g_free0 (_tmp33_);
-	_tmp34_ = string_to_string (COM);
-	_tmp35_ = g_strconcat ("	  ", _tmp34_, " update all your package\n", NULL);
-	_tmp36_ = _tmp35_;
-	g_print ("%s", _tmp36_);
-	_g_free0 (_tmp36_);
-	_tmp37_ = string_to_string (suprapack);
-	_tmp38_ = g_strconcat ("	", _tmp37_, " update [package name]\n", NULL);
-	_tmp39_ = _tmp38_;
-	g_print ("%s", _tmp39_);
-	_g_free0 (_tmp39_);
-	_tmp40_ = string_to_string (COM);
-	_tmp41_ = g_strconcat ("	  ", _tmp40_, " update a package\n", NULL);
-	_tmp42_ = _tmp41_;
-	g_print ("%s", _tmp42_);
-	_g_free0 (_tmp42_);
-	_tmp43_ = string_to_string (suprapack);
-	_tmp44_ = g_strconcat ("	", _tmp43_, " search <pkg>\n", NULL);
-	_tmp45_ = _tmp44_;
-	g_print ("%s", _tmp45_);
-	_g_free0 (_tmp45_);
-	_tmp46_ = string_to_string (COM);
-	_tmp47_ = g_strconcat ("	  ", _tmp46_, " search a package in the repo you can use patern for search\n", NULL);
-	_tmp48_ = _tmp47_;
-	g_print ("%s", _tmp48_);
-	_g_free0 (_tmp48_);
-	_tmp49_ = string_to_string (BOLD);
-	_tmp50_ = string_to_string (GREY);
-	_tmp51_ = string_to_string (COM);
-	_tmp52_ = string_to_string (CYAN);
-	_tmp53_ = g_strconcat ("	  ", _tmp49_, _tmp50_, " Exemple:", _tmp51_, " suprapack search ", _tmp52_, "'^supra.*' \n", NULL);
-	_tmp54_ = _tmp53_;
-	g_print ("%s", _tmp54_);
-	_g_free0 (_tmp54_);
-	_tmp55_ = string_to_string (suprapack);
-	_tmp56_ = g_strconcat ("	", _tmp55_, " list <pkg>\n", NULL);
-	_tmp57_ = _tmp56_;
-	g_print ("%s", _tmp57_);
-	_g_free0 (_tmp57_);
-	_tmp58_ = string_to_string (COM);
-	_tmp59_ = g_strconcat ("	  ", _tmp58_, " list your installed package\n", NULL);
-	_tmp60_ = _tmp59_;
-	g_print ("%s", _tmp60_);
-	_g_free0 (_tmp60_);
-	_tmp61_ = string_to_string (suprapack);
-	_tmp62_ = g_strconcat ("	", _tmp61_, " info [package name]\n", NULL);
-	_tmp63_ = _tmp62_;
-	g_print ("%s", _tmp63_);
-	_g_free0 (_tmp63_);
-	_tmp64_ = string_to_string (COM);
-	_tmp65_ = g_strconcat ("	  ", _tmp64_, " print info of package name\n", NULL);
-	_tmp66_ = _tmp65_;
-	g_print ("%s", _tmp66_);
-	_g_free0 (_tmp66_);
-	_tmp67_ = string_to_string (suprapack);
-	_tmp68_ = g_strconcat ("	", _tmp67_, " <help>\n", NULL);
-	_tmp69_ = _tmp68_;
-	g_print ("%s", _tmp69_);
-	_g_free0 (_tmp69_);
-	_tmp70_ = string_to_string (COM);
-	_tmp71_ = g_strconcat ("	  ", _tmp70_, " you have RTFM... so you are a real\n", NULL);
-	_tmp72_ = _tmp71_;
-	g_print ("%s", _tmp72_);
-	_g_free0 (_tmp72_);
-	g_print ("%s", "\n");
-	_tmp73_ = string_to_string (BOLD);
-	_tmp74_ = string_to_string (YELLOW);
-	_tmp75_ = string_to_string (NONE);
-	_tmp76_ = g_strconcat (_tmp73_, _tmp74_, "[Dev Only]", _tmp75_, "\n", NULL);
-	_tmp77_ = _tmp76_;
-	g_print ("%s", _tmp77_);
-	_g_free0 (_tmp77_);
-	_tmp78_ = string_to_string (suprapack);
-	_tmp79_ = string_to_string (CYAN);
-	_tmp80_ = g_strconcat ("	", _tmp78_, " build ", _tmp79_, "[PREFIX]\n", NULL);
-	_tmp81_ = _tmp80_;
-	g_print ("%s", _tmp81_);
-	_g_free0 (_tmp81_);
-	_tmp82_ = string_to_string (COM);
-	_tmp83_ = g_strconcat ("	  ", _tmp82_, " build a suprapack you need a prefix look note part\n", NULL);
-	_tmp84_ = _tmp83_;
-	g_print ("%s", _tmp84_);
-	_g_free0 (_tmp84_);
-	g_print ("%s", "\n");
-	_tmp85_ = string_to_string (BOLD);
-	_tmp86_ = string_to_string (YELLOW);
-	_tmp87_ = string_to_string (NONE);
-	_tmp88_ = g_strconcat (_tmp85_, _tmp86_, "[Note]", _tmp87_, "\n", NULL);
-	_tmp89_ = _tmp88_;
-	g_print ("%s", _tmp89_);
-	_g_free0 (_tmp89_);
-	_tmp90_ = string_to_string (WHITE);
-	_tmp91_ = string_to_string (NONE);
-	_tmp92_ = g_strconcat ("	", _tmp90_, "PREFIX is a folder with this directory like: ", _tmp91_, "\n", NULL);
-	_tmp93_ = _tmp92_;
-	g_print ("%s", _tmp93_);
-	_g_free0 (_tmp93_);
-	_tmp94_ = string_to_string (CYAN);
-	_tmp95_ = string_to_string (NONE);
-	_tmp96_ = g_strconcat ("	", _tmp94_, "'bin' 'share' 'lib'", _tmp95_, "\n", NULL);
-	_tmp97_ = _tmp96_;
-	g_print ("%s", _tmp97_);
-	_g_free0 (_tmp97_);
-	_tmp98_ = string_to_string (BOLD);
-	_tmp99_ = string_to_string (WHITE);
-	_tmp100_ = string_to_string (CYAN);
-	_tmp101_ = string_to_string (NONE);
-	_tmp102_ = string_to_string (NONE);
-	_tmp103_ = g_strconcat ("	", _tmp98_, _tmp99_, "Example: ", _tmp100_, "suprapatate/bin/suprapatate", _tmp101_, " `suprapack build suprapatate`", _tmp102_, "\n", NULL);
-	_tmp104_ = _tmp103_;
-	g_print ("%s", _tmp104_);
-	_g_free0 (_tmp104_);
-	result = TRUE;
-	_g_free0 (suprapack);
 	return result;
 }
 

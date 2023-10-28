@@ -5,39 +5,9 @@ public string? USERNAME = null;
 public class Main {
 
 	public bool all_cmd(string []args) {
-		if (args.length < 2) {
-			cmd_help();
-			return true;
-		}
-		
 		string av1 = args[1].down();
-		
-		if (av1.has_suffix(".suprapack")) {
-			install_suprapackage(args[1]);
-			return true;
-		}
-
-
 		if (av1 == "run")
 			return cmd_run(args);
-		if (av1 == "list")
-			return cmd_list(args);
-		if (av1 == "search")
-			return cmd_search(args);
-		if (av1 == "build")
-			return cmd_build(args);
-		if (av1 == "help")
-			return cmd_help();
-		if (av1 == "install")
-			return cmd_install(args);
-		if (av1 == "uninstall")
-			return cmd_uninstall(args);
-		if (av1 == "update")
-			return cmd_update(args);
-		if (av1 == "info")
-			return cmd_info(args);
-		if (av1 == "prepare")
-			return cmd_prepare();
 		print_error("La commande n'existe pas.");
 	}
 
