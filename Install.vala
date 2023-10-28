@@ -69,7 +69,7 @@ private void script_pre_install(string dir) {
 		var envp = Environ.get();
 		envp = Environ.set_variable(envp, "SRCDIR", dir, true);
 		envp = Environ.set_variable(envp, "PKGDIR", PREFIX, true);
-		Utils.run({@"$dir/pre_install.sh"}, envp);
+		Utils.run({@"$dir/pre_install.sh"}, false, envp);
 	}
 }
 
@@ -79,7 +79,7 @@ private void script_post_install(string dir) {
 		envp = Environ.set_variable(envp, "SRCDIR", dir, true);
 		envp = Environ.set_variable(envp, "PKGDIR", PREFIX, true);
 		print_info(null, "Finition");
-		Utils.run({@"$dir/post_install.sh"}, envp);
+		Utils.run({@"$dir/post_install.sh"}, false, envp);
 	}
 }
 
@@ -95,7 +95,7 @@ public void install_suprapackage(string suprapack) {
 	try {
 		var tmp_dir = DirUtils.make_tmp("suprastore_XXXXXX");
 		print_info(@"Extraction de $(CYAN)$(suprapack)$(NONE)");
-		Utils.run_cmd({"tar", "-xf", suprapack, "-C", tmp_dir});
+		Utils.run({"tar", "-xf", suprapack, "-C", tmp_dir}, true);
 		var pkg = Package.from_file(@"$tmp_dir/info");
 		if (Query.is_exist(pkg.name)) {
 			Query.uninstall(pkg.name);
@@ -115,7 +115,7 @@ public void install_suprapackage(string suprapack) {
 		install_files(list, tmp_dir.length);
 		script_post_install(tmp_dir);
 		post_install(list, tmp_dir.length, ref pkg);
-		Utils.run_cmd({"rm", "-rf", tmp_dir});
+		Utils.run({"rm", "-rf", tmp_dir}, true);
 	} catch (Error e) {
 		print_error(e.message);
 	}
@@ -143,5 +143,9 @@ public void install(string name_search, bool force = true) {
 			return ;
 		}
 	}
-	print_error(@"$name_search doesn't exist");
+	if (Query.is_exist(name_search) == true) {
+		print_info(@"Can't install $name_search but exist in local");
+	}
+	else
+		print_error(@"$name_search doesn't exist");
 }

@@ -34,7 +34,8 @@ public class RepoInfo {
 			if (_list == null) {
 				string list_file = @"/tmp/$(this.name)_$(USERNAME)_list";
 				// print_info(@"Download list from $(this.name) repo");
-				Utils.run_cmd({"curl", "-o", list_file, REPO_URL + "list"});
+				string []av = {"curl", "-o", list_file, @"$(this.url)/list"};
+				Utils.run(av, false);
 				_list = list_file;
 			}
 			return _list;

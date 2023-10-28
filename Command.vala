@@ -26,6 +26,15 @@ bool cmd_info(string []av) {
 	print(@"$(BOLD)Version                  : $(NONE)%s\n", info.version);
 	print(@"$(BOLD)Description              : $(NONE)%s\n", info.description);
 	print(@"$(BOLD)Author                   : $(NONE)%s\n", info.author);
+	var dep_list = info.dependency.split(" ");
+	if (dep_list.length >= 1) {
+		print(@"$(BOLD)Depends                  : $(NONE)");
+		foreach (var dep in dep_list)
+			print("%s ", dep);
+		print("\n");
+	}
+	if (info.binary != info.name)
+		print(@"$(BOLD)Binary                   : $(NONE)%s\n", info.binary);
 
 	return true;
 }
@@ -108,7 +117,7 @@ bool cmd_run(string []av) {
 		foreach (var i in av[3: av.length])
 			av_binary += i;	
 	}
-	Utils.run_cmd_no_silence(av_binary);
+	Utils.run(av_binary);
 	return true;
 }
 
