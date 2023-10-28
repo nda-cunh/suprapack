@@ -20,7 +20,7 @@ public class RepoInfo {
 	public string list {
 		get {
 			if (_list == null) {
-				string list_file = @"/tmp/$(this.name)_$(USERNAME)_list";
+				string list_file = @"/tmp/$(this.name)_USERNAME_list";
 				string []av = {"curl", "-o", list_file, @"$(this.url)/list"};
 				Utils.run(av, false);
 				_list = list_file;

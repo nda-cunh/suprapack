@@ -1,5 +1,4 @@
 namespace Utils {
-
 	int run(string []av, bool silence = false, string []envp = Environ.get()){
 		int status;
 		SpawnFlags flags;

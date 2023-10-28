@@ -1,29 +1,24 @@
-public string? PREFIX = null;
-public string? LOCAL = null;
-public string? USERNAME = null;
-
-public class Main {
-
-	public bool all_cmd(string []args) {
-		string av1 = args[1].down();
-		if (av1 == "run")
-			return cmd_run(args);
-		print_error("La commande n'existe pas.");
+bool cmd_run(string []av) {
+	if (av.length == 2)
+		print_error("`suprapack run [...]`");	
+	if (Query.is_exist(av[2]) == false) {
+		print_info(@"$(av[2]) doesn't exist install it...");
 	}
-
-	// INIT
-	public Main(string []args) {
-		USERNAME = Environment.get_user_name();
-		PREFIX = Environment.get_home_dir() + "/.local";
-	 	LOCAL = Environment.get_home_dir() + "/suprapack";
-		DirUtils.create(LOCAL, 0755);
-		Intl.setlocale();
-		if (all_cmd(args) == true)
-			Process.exit(0);
-		Process.exit(1);
+	if (Query.is_exist(av[2]) == false) {
+		print_error(@"$(av[2]) is not installed");
 	}
+	var pkg = Query.get_from_pkg(av[2]);
 
-	public static void main(string []args) {
-		new Main(args);
+	string []av_binary;
+	av_binary = {@"~/.local/$(pkg.binary)"};
+	if (av.length >= 3) {
+		foreach (var i in av[3: av.length])
+			av_binary += i;	
 	}
+	Utils.run(av_binary);
+	return true;
+}
+
+public void main(string []args) {
+	cmd_run(args);
 }
