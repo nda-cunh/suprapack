@@ -143,5 +143,9 @@ public void install(string name_search, bool force = true) {
 			return ;
 		}
 	}
-	print_error(@"$name_search doesn't exist");
+	if (Query.is_exist(name_search) == true) {
+		print_info(@"Can't install $name_search but exist in local");
+	}
+	else
+		print_error(@"$name_search doesn't exist");
 }
