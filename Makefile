@@ -12,6 +12,9 @@ install: prod
 	cp ./$(NAME) usr/bin/suprapack
 	tar -cJf suprapack.suprapack -C usr .
 	./$(NAME) install suprapack.suprapack
+	
+install_vim: install
+	./$(NAME) install supravim
 
 run: all
 	cp $(NAME) ~/.local/bin/$(NAME)
