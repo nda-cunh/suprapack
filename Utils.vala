@@ -23,33 +23,40 @@ namespace Utils {
 		}
 	}
 
-	int run_cmd(string []av) {
+	int run_silent(string []av) {
+		SpawnFlags flags = 0;
+		string PWD = Environment.get_current_dir();
+
+		flags = STDOUT_TO_DEV_NULL | STDERR_TO_DEV_NULL | SEARCH_PATH | CHILD_INHERITS_STDIN;
 		try {
-			var pid = new Subprocess.newv(av, SubprocessFlags.STDERR_SILENCE | SubprocessFlags.STDOUT_SILENCE);
-			pid.wait();
-			return pid.get_status();
+			int status;
+			Process.spawn_sync(PWD, av, Environ.get(), flags, null, null, null, out status);
+			return status;
 		} catch (Error e) {
 			print_error(e.message);
 		}
 	}
 
-	int run_cmd_no_silence(string []av) {
+	int run(string[] av, string[] envp = {}){
+		string PWD = Environment.get_current_dir();
+		string []_envp;
+
+		if (envp.length == 0)
+			_envp = Environ.get();
+		else
+			_envp = envp;
 		try {
-			var pid = new Subprocess.newv(av, SubprocessFlags.STDIN_INHERIT);
-			pid.wait();
-			return pid.get_status();
+			int status;
+			Process.spawn_sync(PWD, av, _envp, SpawnFlags.SEARCH_PATH | SpawnFlags.CHILD_INHERITS_STDIN, null, null, null, out status);
+			return status;
 		} catch (Error e) {
 			print_error(e.message);
 		}
 	}
 
-	void run(string []av, string []envp){
-		try {
-			Process.spawn_sync("/", av, envp, SpawnFlags.SEARCH_PATH, null, null, null, null);
-		} catch (Error e) {
-			print_error(e.message);
-		}
-	}
+	
+
+
 
 	// return a stdin line with downcase and strip space
 	string get_input(string msg) {

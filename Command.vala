@@ -17,6 +17,7 @@ bool cmd_build(string []av) {
 	Build.create_package(av[2]);
 	return true;
 }
+
 bool cmd_info(string []av) {
 	if (av.length == 2)
 		print_error("`suprapack info [...]`");	
@@ -116,7 +117,7 @@ bool cmd_run(string []av) {
 		foreach (var i in av[3: av.length])
 			av_binary += i;	
 	}
-	Utils.run_cmd_no_silence(av_binary);
+	Utils.run(av_binary);
 	return true;
 }
 
