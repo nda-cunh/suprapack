@@ -17,7 +17,6 @@ bool cmd_build(string []av) {
 	Build.create_package(av[2]);
 	return true;
 }
-
 bool cmd_info(string []av) {
 	if (av.length == 2)
 		print_error("`suprapack info [...]`");	
@@ -26,6 +25,15 @@ bool cmd_info(string []av) {
 	print(@"$(BOLD)Version                  : $(NONE)%s\n", info.version);
 	print(@"$(BOLD)Description              : $(NONE)%s\n", info.description);
 	print(@"$(BOLD)Author                   : $(NONE)%s\n", info.author);
+	var dep_list = info.dependency.split(" ");
+	if (dep_list.length >= 1) {
+		print(@"$(BOLD)Depends                  : $(NONE)");
+		foreach (var dep in dep_list)
+			print("%s ", dep);
+		print("\n");
+	}
+	if (info.binary != info.name)
+		print(@"$(BOLD)Binary                   : $(NONE)%s\n", info.binary);
 
 	return true;
 }
