@@ -32,6 +32,8 @@ public class Main {
 			return cmd_install(args);
 		if (av1 == "uninstall")
 			return cmd_uninstall(args);
+		if (av1 == "have_update")
+			return cmd_have_update(args);
 		if (av1 == "update")
 			return cmd_update(args);
 		if (av1 == "info")

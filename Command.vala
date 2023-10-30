@@ -39,6 +39,17 @@ bool cmd_info(string []av) {
 	return true;
 }
 
+bool cmd_have_update(string []av) {
+	if (av.length == 2)
+		print_error("`suprapack have_update [...]`");	
+	var Qpkg = Query.get_from_pkg(av[2]);
+	var Spkg = Sync.get_from_pkg(av[2]);
+	if (Spkg.version != Qpkg.version) {
+		print("Update %s --> %s", Qpkg.version, Spkg.version);
+	}
+	return true;
+}
+
 bool cmd_uninstall(string []av) {
 	if (av.length == 2)
 		print_error("`suprapack uninstall [...]`");	
