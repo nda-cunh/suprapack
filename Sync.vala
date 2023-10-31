@@ -34,7 +34,7 @@ public class RepoInfo {
 			if (_list == null) {
 				string list_file = @"/tmp/$(this.name)_$(USERNAME)_list";
 				// print_info(@"Download list from $(this.name) repo");
-				Utils.run_silent({"curl", "-o", list_file, REPO_URL + "list"});
+				Utils.run_silent({"curl", "-o", list_file, this.url + "list"});
 				_list = list_file;
 			}
 			return _list;
@@ -100,7 +100,7 @@ class Sync {
 			foreach (var repo in _repo) {
 				var fs = FileStream.open(repo.list, "r");
 				if (fs == null)
-					print_error("list introuvable ???");
+					print_error(@"Can't acces to $(repo.list)");
 				string tmp;
 				while ((tmp = fs.read_line()) != null)
 					_list += SupraList(repo.name, tmp);
