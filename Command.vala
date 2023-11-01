@@ -219,6 +219,8 @@ bool cmd_help() {
 	print(@"	  $(COM) list your installed package\n");
 	print(@"	$(suprapack) info [package name]\n");
 	print(@"	  $(COM) print info of package name\n");
+	print(@"	$(suprapack) config [config name] [config value]\n");
+	print(@"	  $(COM) update a config in your user.conf\n");
 	print(@"	$(suprapack) <help>\n");
 	print(@"	  $(COM) you have RTFM... so you are a real\n");
 	print(@"\n");
