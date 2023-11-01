@@ -128,7 +128,9 @@ bool cmd_run(string []av) {
 		foreach (var i in av[3: av.length])
 			av_binary += i;	
 	}
-	Utils.run(av_binary);
+	var status = Utils.run(av_binary);
+	if(status != 0)
+		print_error(@"non zero exit code of package binary\npackage => $(pkg.name)");
 	return true;
 }
 
