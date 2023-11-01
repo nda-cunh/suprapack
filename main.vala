@@ -41,7 +41,7 @@ public class Main {
 			return cmd_info(args);
 		if (av1 == "prepare")
 			return cmd_prepare();
-		print_error(@"La commande $(av1) n'existe pas.");
+		print_error(@"La commande \"$(av1)\" n'existe pas.");
 	}
 
 	// INIT
