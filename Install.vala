@@ -69,7 +69,9 @@ private void script_pre_install(string dir) {
 		var envp = Environ.get();
 		envp = Environ.set_variable(envp, "SRCDIR", dir, true);
 		envp = Environ.set_variable(envp, "PKGDIR", PREFIX, true);
-		Utils.run({@"$dir/pre_install.sh"}, envp);
+		var status = Utils.run({@"$dir/pre_install.sh"}, envp);
+		if(status != 0)
+			print_error("non zero exit code of pre installation script");
 	}
 }
 
@@ -79,7 +81,9 @@ private void script_post_install(string dir) {
 		envp = Environ.set_variable(envp, "SRCDIR", dir, true);
 		envp = Environ.set_variable(envp, "PKGDIR", PREFIX, true);
 		print_info(null, "Finition");
-		Utils.run({@"$dir/post_install.sh"}, envp);
+		var status = Utils.run({@"$dir/post_install.sh"}, envp);
+		if(status != 0)
+			print_error("non zero exit code of pre installation script");
 	}
 }
 
@@ -95,7 +99,9 @@ public void install_suprapackage(string suprapack) {
 	try {
 		var tmp_dir = DirUtils.make_tmp("suprastore_XXXXXX");
 		print_info(@"Extraction de $(CYAN)$(suprapack)$(NONE)");
-		Utils.run_silent({"tar", "-xf", suprapack, "-C", tmp_dir});
+		var status = Utils.run_silent({"tar", "-xf", suprapack, "-C", tmp_dir});
+		if(status != 0) 
+			print_error(@"unable to decompress package\npackage => $(suprapack)");
 		var pkg = Package.from_file(@"$tmp_dir/info");
 		if (Query.is_exist(pkg.name)) {
 			Query.uninstall(pkg.name);
@@ -115,7 +121,9 @@ public void install_suprapackage(string suprapack) {
 		install_files(list, tmp_dir.length);
 		script_post_install(tmp_dir);
 		post_install(list, tmp_dir.length, ref pkg);
-		Utils.run_silent({"rm", "-rf", tmp_dir});
+		var status = Utils.run_silent({"rm", "-rf", tmp_dir});
+		if(status != 0)
+			print_error(@"unable to remove directory\ndirectory => $(tmp_dir)")
 	} catch (Error e) {
 		print_error(e.message);
 	}
