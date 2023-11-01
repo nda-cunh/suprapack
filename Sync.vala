@@ -1,7 +1,3 @@
-//TODO read a file 
-public const string REPO_URL = "https://gitlab.com/supraproject/suprastore_repository/-/raw/master/";
-
-
 // Contains Informations or package from the repo
 // repo_name (Cosmos)
 // name (suprabear)
@@ -34,7 +30,8 @@ public class RepoInfo {
 			if (_list == null) {
 				string list_file = @"/tmp/$(this.name)_$(USERNAME)_list";
 				// print_info(@"Download list from $(this.name) repo");
-				Utils.run_silent({"curl", "-o", list_file, this.url + "list"});
+				if(Utils.run_silent({"curl", "-o", list_file, this.url + "list"}) != 0) 
+					print_error(@"unable to download file\nfile => {$(list_file) located at $(this.url)}");
 				_list = list_file;
 			}
 			return _list;
@@ -61,7 +58,20 @@ class Sync {
 	// Default private Constructor
 	private Sync () {
 		_list = {};
-		_repo += new RepoInfo("Cosmos", REPO_URL);
+        var fs = FileStream.open(REPO_LIST, "r");
+		if (fs == null)
+			print_error(@"unable to retreive repository list\nfile => $(REPO_LIST)");
+		var line = 1;
+        string tmp;
+		while((tmp = fs.read_line()) != null) {
+			if (tmp != "") {
+				var repoSplit = tmp.split(" ");
+				if(repoSplit.length != 2)
+					print_error(@"unable to parse repository\nline $(line) => $(tmp)");
+				_repo += new RepoInfo(repoSplit[0], repoSplit[1]);
+			}
+			line++;
+		}
 	}
 
 	public static SupraList? get_from_pkg(string name_pkg) {
@@ -100,7 +110,7 @@ class Sync {
 			foreach (var repo in _repo) {
 				var fs = FileStream.open(repo.list, "r");
 				if (fs == null)
-					print_error(@"Can't acces to $(repo.list)");
+					print_error(@"unable to retreive repository $(repo.name)\nfile =>$(repo.list)");
 				string tmp;
 				while ((tmp = fs.read_line()) != null)
 					_list += SupraList(repo.name, tmp);
@@ -117,7 +127,8 @@ class Sync {
 			DirUtils.create_with_parents(pkgdir, 0755);
 			
 			string url = this.get_url_from_name(pkg.repo_name) + pkgname;
-			Utils.run_silent({"curl", "-o", output, url});
+			if(Utils.run_silent({"curl", "-o", output, url}) != 0) 
+				print_error(@"unable to download package\npackage => $(pkgname)");
 			return output;
 	}
 

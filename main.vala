@@ -1,6 +1,7 @@
 public string? PREFIX = null;
 public string? LOCAL = null;
 public string? USERNAME = null;
+public string? REPO_LIST = null;
 
 public class Main {
 
@@ -48,6 +49,7 @@ public class Main {
 		USERNAME = Environment.get_user_name();
 		PREFIX = Environment.get_home_dir() + "/.local";
 	 	LOCAL = Environment.get_home_dir() + "/suprapack";
+		REPO_LIST = LOCAL + "/repo.list";
 		DirUtils.create(LOCAL, 0755);
 		Intl.setlocale();
 		if (all_cmd(args) == true)

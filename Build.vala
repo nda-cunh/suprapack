@@ -26,7 +26,10 @@ namespace Build {
 		// generate info file in USR_DIR
 
 		// compress the package
-		Build.compress(pkg, usr_dir);
+		var name_pkg = @"$(pkg.name)-$(pkg.version)";
+		if(Utils.run_silent({"tar", "-cJf", @"$(name_pkg).suprapack", "-C", usr_dir, "."}) != 0)
+			print_error(@"unable to create package\npackage => $(name_pkg)");
+		print_info(@"$(name_pkg).suprapack is created\n");
 	}
 	
 	private bool check(string usr_dir) {
@@ -38,19 +41,5 @@ namespace Build {
 		if (FileUtils.test(@"$usr_dir/share", FileTest.EXISTS))
 			n++;
 		return (n != 0);
-	}
-
-
-	private void compress(Package pkg, string usr_dir) {
-		var name_pkg = @"$(pkg.name)-$(pkg.version)";
-		string []av = {"tar", "-cJf", @"$(name_pkg).suprapack", "-C", usr_dir, "."};
-
-		try {
-			new Subprocess.newv(av, SubprocessFlags.STDERR_SILENCE).wait();
-		} 
-		catch(Error e) {
-			print_error(e.message);
-		}
-		print_info(@"$(name_pkg).suprapack is created\n");
 	}
 }
