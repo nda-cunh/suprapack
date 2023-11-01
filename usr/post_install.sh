@@ -1,14 +1,20 @@
 #!/bin/sh
 
 REPO_LIST=$HOME/suprapack/repo.list
-#generate REPO_LIST if not exist
-
 if [ -f "$REPO_LIST" ]; then
 	echo "already existing repo.list skipping..."
 else
 	touch $REPO_LIST
 	echo "Cosmos https://gitlab.com/supraproject/suprastore_repository/-/raw/master/" | cat >> $REPO_LIST
-	# echo "Elixir https://raw.githubusercontent.com/Strong214356/suprapack-list/master/" | cat >> $REPO_LIST
+	echo "Elixir https://raw.githubusercontent.com/Strong214356/suprapack-list/master/" | cat >> $REPO_LIST
+fi
+
+CONFIG=$HOME/suprapack/user.conf
+if [ -f "$CONFIG" ]; then
+	echo "already existing user.conf skipping..."
+else
+	touch $CONFIG
+	echo "is_cached:false" | cat > $CONFIG
 fi
 
 # generate PATH in .profile

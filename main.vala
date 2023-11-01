@@ -2,6 +2,7 @@ public string? PREFIX = null;
 public string? LOCAL = null;
 public string? USERNAME = null;
 public string? REPO_LIST = null;
+public string? CONFIG = null;
 
 public class Main {
 
@@ -41,7 +42,9 @@ public class Main {
 			return cmd_info(args);
 		if (av1 == "prepare")
 			return cmd_prepare();
-		print_error("La commande n'existe pas.");
+		if (av1 == "config")
+			return cmd_config(args);
+		print_error(@"La commande \"$(av1)\" n'existe pas.");
 	}
 
 	// INIT
@@ -50,6 +53,7 @@ public class Main {
 		PREFIX = Environment.get_home_dir() + "/.local";
 	 	LOCAL = Environment.get_home_dir() + "/suprapack";
 		REPO_LIST = LOCAL + "/repo.list";
+		CONFIG = LOCAL + "/user.conf";
 		DirUtils.create(LOCAL, 0755);
 		Intl.setlocale();
 		if (all_cmd(args) == true)

@@ -128,6 +128,7 @@ public void install_suprapackage(string suprapack) {
 
 public void install(string name_search, bool force = true) {
 	var sync = Sync.default();
+	var conf = Config.default();
 	string output;
 	
 	var list = sync.get_list_package();
@@ -144,6 +145,10 @@ public void install(string name_search, bool force = true) {
 			print_info(@"$(pkg.name):$(pkg.version) found in $(pkg.repo_name)");
 			output = sync.download(pkg);
 			install_suprapackage(output);
+			var is_cached = conf.get_from_name("is_cached");
+			if(is_cached == null || is_cached != "true") {
+				FileUtils.unlink(output);
+			}
 			return ;
 		}
 	}

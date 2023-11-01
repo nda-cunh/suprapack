@@ -38,7 +38,7 @@ namespace Query{
 			unowned string? tmp;
 
 			while ((tmp = dir.read_name()) != null) {
-				if (tmp[0] != '.' && tmp != "pkg")
+				if (tmp[0] != '.' && tmp != "pkg" && FileUtils.test(@"$LOCAL/$tmp", FileTest.IS_DIR))
 					if (Query.is_exist(tmp))
 						result += Package.from_file(@"$(LOCAL)/$tmp/info");
 			}
@@ -56,7 +56,7 @@ namespace Query{
 			unowned string? tmp;
 
 			while ((tmp = dir.read_name()) != null) {
-				if (tmp[0] != '.' && tmp != "pkg")
+				if (tmp[0] != '.' && tmp != "pkg" && FileUtils.test(@"$LOCAL/$tmp", FileTest.IS_DIR))
 					result += tmp.dup();
 			}
 			return result;
