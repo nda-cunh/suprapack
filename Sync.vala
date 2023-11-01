@@ -30,10 +30,9 @@ public class RepoInfo {
 			if (_list == null) {
 				string list_file = @"/tmp/$(this.name)_$(USERNAME)_list";
 				// print_info(@"Download list from $(this.name) repo");
-				var status = Utils.run_silent({"curl", "-o", list_file, this.url + "list"});
-				if(status != 0) 
+				if(Utils.run_silent({"curl", "-o", list_file, this.url + "list"}) != 0) 
 					print_error(@"unable to download file\nfile => {$(list_file) located at $(this.url)}");
-				_lisr = list_file;
+				_list = list_file;
 			}
 			return _list;
 		}
@@ -128,8 +127,7 @@ class Sync {
 			DirUtils.create_with_parents(pkgdir, 0755);
 			
 			string url = this.get_url_from_name(pkg.repo_name) + pkgname;
-			var status = Utils.run_silent({"curl", "-o", output, url});
-			if(status != 0) 
+			if(Utils.run_silent({"curl", "-o", output, url}) != 0) 
 				print_error(@"unable to download package\npackage => $(pkgname)");
 			return output;
 	}

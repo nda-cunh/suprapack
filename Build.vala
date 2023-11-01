@@ -27,8 +27,7 @@ namespace Build {
 
 		// compress the package
 		var name_pkg = @"$(pkg.name)-$(pkg.version)";
-		var status = Utils.run_silent({"tar", "-cJf", @"$(name_pkg).suprapack", "-C", usr_dir, "."});
-		if(status != 0)
+		if(Utils.run_silent({"tar", "-cJf", @"$(name_pkg).suprapack", "-C", usr_dir, "."}) != 0)
 			print_error(@"unable to create package\npackage => $(name_pkg)");
 		print_info(@"$(name_pkg).suprapack is created\n");
 	}
