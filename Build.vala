@@ -6,7 +6,7 @@ namespace Build {
 			print_error(@"$usr_dir is not a dir or doesn't exist");
 
 		if (check(usr_dir) == false) {
-			print_info("Your usr_dir is not good are you sure ? [y/N]\n");
+			print_info("Your usr_dir is not good are you sure ? [Y/n]\n");
 			var s = stdin.read_line().down();
 			if ("n" in s) {
 				print_info("Cancel...");
