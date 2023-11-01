@@ -39,6 +39,15 @@ bool cmd_info(string []av) {
 	return true;
 }
 
+bool cmd_config(string []av) {
+	if(av.length <= 3)
+		print_error("`suprapack config [...]`");
+	var conf = Config.default();
+	var cfg = ConfigInfo(av[2], av[3]);
+	conf.update_config(cfg);
+	return true;
+}
+
 bool cmd_have_update(string []av) {
 	if (av.length == 2)
 		print_error("`suprapack have_update [...]`");	
