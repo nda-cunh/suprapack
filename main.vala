@@ -51,7 +51,7 @@ public class Main {
 	public Main(string []args) {
 		USERNAME = Environment.get_user_name();
 		PREFIX = Environment.get_home_dir() + "/.local";
-	 	LOCAL = Environment.get_home_dir() + "/suprapack";
+	 	LOCAL = Environment.get_home_dir() + "/.suprapack";
 		REPO_LIST = LOCAL + "/repo.list";
 		CONFIG = LOCAL + "/user.conf";
 		DirUtils.create(LOCAL, 0755);
