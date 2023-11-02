@@ -1,5 +1,5 @@
 name: suprapack
-version: 1.3
+version: 1.5
 author: nda-cunh & PalsFreniers
 binary: suprapack 
 description: package-manager without root
