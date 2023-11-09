@@ -1,6 +1,6 @@
 name: suprapack
 version: 1.4
-author: nda-cunh & PalsFreniers
+author: nda-cunh
 binary: suprapack 
 description: package-manager without root
 dependency: 
