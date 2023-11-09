@@ -68,9 +68,16 @@ bool cmd_uninstall(string []av) {
 
 bool cmd_list(string []av) {
 	var installed = Query.get_all_package();
+	try {
+	var regex = new Regex(av[2] ?? "", RegexCompileFlags.EXTENDED);
 	foreach (var i in installed) {
-		print(@"$(BOLD)$(WHITE)$(i.name) $(GREEN)$(i.version)$(NONE)");
-		print("\t%s%s%s\n", COM, i.description, NONE);
+		if (regex.match(i.name) || regex.match(i.version) || regex.match(i.description) || regex.match(i.author)) {
+			print(@"$(BOLD)$(WHITE)$(i.name) $(GREEN)$(i.version)$(NONE)");
+			print("\t%s%s%s\n", COM, i.description, NONE);
+		}
+	}
+	} catch (Error e) {
+		print_error(e.message);
 	}
 	return true;
 }
