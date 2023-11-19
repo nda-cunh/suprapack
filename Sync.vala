@@ -65,7 +65,7 @@ class Sync {
         string tmp;
 		while((tmp = fs.read_line()) != null) {
 			if (tmp != "") {
-				var repoSplit = tmp.split(" ");
+				var repoSplit = / +/.split(tmp);
 				if(repoSplit.length != 2)
 					print_error(@"unable to parse repository\nline $(line) => $(tmp)");
 				_repo += new RepoInfo(repoSplit[0], repoSplit[1]);
