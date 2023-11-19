@@ -18,12 +18,12 @@ else
 fi
 
 # generate PATH in .profile
-if ! grep -q 'export PATH=$PATH:$HOME/.local/bin' $HOME/.profile; then
+if ! grep -q 'export PATH=$PATH:$HOME/.local/bin' $HOME/.profile 2>/dev/null; then
 	echo 'export PATH=$PATH:$HOME/.local/bin' >> $HOME/.profile
 fi
-if ! grep -q 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/.local/lib' $HOME/.profile; then
+if ! grep -q 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/.local/lib' $HOME/.profile 2>/dev/null; then
 	echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/.local/lib' >> $HOME/.profile
 fi
-if ! grep -q 'export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$HOME/.local/share/pkgconfig' $HOME/.profile; then
-	echo 'export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$HOME/.local/share/pkgconfig' >> $HOME/.profile
+if ! grep -q 'export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$HOME/.local/share/pkgconfig' $HOME/.profile 2>/dev/null; then
+	echo 'export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$HOME/.local/share/pkgconfig' >> $HOME/.profile 2>/dev/null   
 fi

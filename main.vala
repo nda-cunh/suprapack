@@ -20,30 +20,32 @@ public class Main {
 		}
 
 
-		if (av1 == "run")
-			return cmd_run(args);
-		if (av1 == "list")
-			return cmd_list(args);
-		if (av1 == "search")
-			return cmd_search(args);
-		if (av1 == "build")
-			return cmd_build(args);
-		if (av1 == "help")
-			return cmd_help();
-		if (av1 == "install")
-			return cmd_install(args);
-		if (av1 == "uninstall")
-			return cmd_uninstall(args);
-		if (av1 == "have_update")
-			return cmd_have_update(args);
-		if (av1 == "update")
-			return cmd_update(args);
-		if (av1 == "info")
-			return cmd_info(args);
-		if (av1 == "prepare")
-			return cmd_prepare();
-		if (av1 == "config")
-			return cmd_config(args);
+		switch (av1) {
+			case "run":
+				return cmd_run(args);
+			case "list":
+				return cmd_list(args);
+			case "search":
+				return cmd_search(args);
+			case "build":
+				return cmd_build(args);
+			case "help":
+				return cmd_help();
+			case "install":
+				return cmd_install(args);
+			case "uninstall":
+				return cmd_uninstall(args);
+			case "have_update":
+				return cmd_have_update(args);
+			case "update":
+				return cmd_update(args);
+			case "info":
+				return cmd_info(args);
+			case "prepare":
+				return cmd_prepare();
+			case "config":
+				return cmd_config(args);
+		}
 		print_error(@"La commande \"$(av1)\" n'existe pas.");
 	}
 

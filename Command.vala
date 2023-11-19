@@ -68,9 +68,16 @@ bool cmd_uninstall(string []av) {
 
 bool cmd_list(string []av) {
 	var installed = Query.get_all_package();
+	try {
+	var regex = new Regex(av[2] ?? "", RegexCompileFlags.EXTENDED);
 	foreach (var i in installed) {
-		print(@"$(BOLD)$(WHITE)$(i.name) $(GREEN)$(i.version)$(NONE)");
-		print("\t%s%s%s\n", COM, i.description, NONE);
+		if (regex.match(i.name) || regex.match(i.version) || regex.match(i.description) || regex.match(i.author)) {
+			print(@"$(BOLD)$(WHITE)$(i.name) $(GREEN)$(i.version)$(NONE)");
+			print("\t%s%s%s\n", COM, i.description, NONE);
+		}
+	}
+	} catch (Error e) {
+		print_error(e.message);
 	}
 	return true;
 }
@@ -137,9 +144,7 @@ bool cmd_run(string []av) {
 		foreach (var i in av[3: av.length])
 			av_binary += i;	
 	}
-	if(Utils.run(av_binary) != 0)
-		print_error(@"non zero exit code of package binary\npackage => $(pkg.name)");
-	return true;
+	Process.exit(Process.exit_status(Utils.run(av_binary)));
 }
 
 
