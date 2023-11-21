@@ -68,14 +68,26 @@ bool cmd_uninstall(string []av) {
 
 bool cmd_list(string []av) {
 	var installed = Query.get_all_package();
+	int width = 0;
+	int width_version = 0;
 	try {
-	var regex = new Regex(av[2] ?? "", RegexCompileFlags.EXTENDED);
-	foreach (var i in installed) {
-		if (regex.match(i.name) || regex.match(i.version) || regex.match(i.description) || regex.match(i.author)) {
-			print(@"$(BOLD)$(WHITE)$(i.name) $(GREEN)$(i.version)$(NONE)");
-			print("\t%s%s%s\n", COM, i.description, NONE);
+		var regex = new Regex(av[2] ?? "", RegexCompileFlags.EXTENDED);
+		foreach (var i in installed) {
+			if (regex.match(i.name) || regex.match(i.version) || regex.match(i.description) || regex.match(i.author)) {
+				if (i.name.length > width)
+					width = i.name.length;
+				if (i.version.length > width_version)
+					width_version = i.version.length;
+			}
 		}
-	}
+		++width_version;
+		++width;
+		foreach (var i in installed) {
+			if (regex.match(i.name) || regex.match(i.version) || regex.match(i.description) || regex.match(i.author)) {
+				print(@"%s%s%-*s %s%-*s%s", BOLD, WHITE, width, i.name, GREEN, width_version, i.version, NONE);
+				print("%s%s%s\n", COM, i.description, NONE);
+			}
+		}
 	} catch (Error e) {
 		print_error(e.message);
 	}
