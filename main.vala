@@ -24,22 +24,30 @@ public class Main {
 			case "run":
 				return cmd_run(args);
 			case "list":
+			case "-ql":
 				return cmd_list(args);
 			case "search":
+			case "-ss":
 				return cmd_search(args);
 			case "build":
 				return cmd_build(args);
 			case "help":
 				return cmd_help();
 			case "install":
+			case "add":
+			case "-s":
 				return cmd_install(args);
 			case "uninstall":
+			case "remove":
+			case "-r":
 				return cmd_uninstall(args);
 			case "have_update":
 				return cmd_have_update(args);
 			case "update":
+			case "-syu":
 				return cmd_update(args);
 			case "info":
+			case "-qi":
 				return cmd_info(args);
 			case "prepare":
 				return cmd_prepare();

@@ -6,7 +6,10 @@ bool cmd_install(string []av) {
 		install_suprapackage(av[2]);
 		return true;
 	}
-	install(av[2]);
+	foreach (var i in av[2:av.length]) {
+		print_info(i, "Installing");
+		install(i);
+	}
 	return true;
 }
 
@@ -62,7 +65,10 @@ bool cmd_have_update(string []av) {
 bool cmd_uninstall(string []av) {
 	if (av.length == 2)
 		print_error("`suprapack uninstall [...]`");	
-	Query.uninstall(av[2]);
+	foreach (var i in av[2:av.length]) {
+		print_info(i, "Removing");
+		Query.uninstall(i);
+	}
 	return true;
 }
 
