@@ -72,6 +72,19 @@ bool cmd_uninstall(string []av) {
 	return true;
 }
 
+bool cmd_list_files(string []av) {
+	foreach (var i in av[2:av.length]) {
+		var pkg = Query.get_from_pkg(i);
+		print_info(@"$(pkg.name) $(pkg.version)", "List");
+		var lst = pkg.get_installed_files();
+		foreach (var file in lst) {
+			print("%s\n", file);
+		}
+	}
+	
+	return true;
+}
+
 bool cmd_list(string []av) {
 	var installed = Query.get_all_package();
 	int width = 0;
@@ -223,10 +236,12 @@ bool cmd_update(string []av) {
 bool cmd_help() {
 	string suprapack = @"$(BOLD)suprapack$(NONE)";
 	print(@"$(BOLD)$(YELLOW)[SupraStore] ----- Help -----\n\n");
+	print(@"	$(suprapack) add [package name]\n");
 	print(@"	$(suprapack) install [package name]\n");
 	print(@"	  $(COM) install a package from a repository\n");
 	print(@"	$(suprapack) install [file.suprapack]\n");
 	print(@"	  $(COM) install a package from a file (suprapack)\n");
+	print(@"	$(suprapack) remove [package name]\n");
 	print(@"	$(suprapack) uninstall [package name]\n");
 	print(@"	  $(COM) remove a package\n");
 	print(@"	$(suprapack) your_file.suprapack\n");
@@ -238,6 +253,8 @@ bool cmd_help() {
 	print(@"	$(suprapack) search <pkg>\n");
 	print(@"	  $(COM) search a package in the repo you can use patern for search\n");
 	print(@"	  $(BOLD)$(GREY) Exemple:$(COM) suprapack search $(CYAN)'^supra.*' \n");
+	print(@"	$(suprapack) list_files <pkg>\n");
+	print(@"	  $(COM) list all file instaled by pkg\n");
 	print(@"	$(suprapack) list <pkg>\n");
 	print(@"	  $(COM) list your installed package\n");
 	print(@"	$(suprapack) info [package name]\n");
