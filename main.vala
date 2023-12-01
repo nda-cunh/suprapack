@@ -21,10 +21,12 @@ public class Main {
 
 
 		switch (av1) {
+			case "list_files":
+			case "-ql":
+				return cmd_list_files(args);
 			case "run":
 				return cmd_run(args);
 			case "list":
-			case "-ql":
 				return cmd_list(args);
 			case "search":
 			case "-ss":
