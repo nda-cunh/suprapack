@@ -29,6 +29,14 @@ namespace Build {
 
 		string stderr;
 		try {
+
+			// modify /etc 
+			if (FileUtils.test(@"$usr_dir/../etc", FileTest.EXISTS)) {
+				Process.spawn_command_line_sync(@"mv $usr_dir/../etc $usr_dir/etc");
+				Process.spawn_command_line_sync(@"ls $usr_dir/");
+			}
+
+			// modify x86_64-linux
 			string path = @"$usr_dir/lib/x86_64-linux-gnu";
 			if (FileUtils.test(@"$path/", FileTest.EXISTS)) {
 				print_info("Change lib/x86_64-linux-gnu");
