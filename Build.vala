@@ -25,6 +25,26 @@ namespace Build {
 		// Get a Package from input
 		// generate info file in USR_DIR
 
+		// Modify the package
+
+		string stderr;
+		try {
+			string path = @"$usr_dir/lib/x86_64-linux-gnu";
+			if (FileUtils.test(@"$path/", FileTest.EXISTS)) {
+				print_info("Change lib/x86_64-linux-gnu");
+				Process.spawn_command_line_sync(@"find $path/ -mindepth 1 -exec mv {} $usr_dir/lib/ \\;", null, out stderr);
+				DirUtils.remove(@"$path");
+			}
+			path = @"$usr_dir/include/x86_64-linux-gnu";
+			if (FileUtils.test(@"$path/", FileTest.EXISTS)) {
+				print_info("Change include/x86_64-linux-gnu");
+				Process.spawn_command_line_sync(@"find $path/ -mindepth 1 -exec mv {} $usr_dir/include/ \\;", null, out stderr);
+				DirUtils.remove(@"$path");
+			}
+		}catch(Error e) {
+			print_error(e.message);
+		}
+
 		// compress the package
 		var name_pkg = @"$(pkg.name)-$(pkg.version)";
 		if(Utils.run_silent({"tar", "-cJf", @"$(name_pkg).suprapack", "-C", usr_dir, "."}) != 0)
