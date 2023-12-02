@@ -21,6 +21,10 @@ public class Main {
 
 
 		switch (av1) {
+			case "query_get_comp":
+				return cmd_query_get_comp(args);
+			case "sync_get_comp":
+				return cmd_sync_get_comp(args);
 			case "list_files":
 			case "-ql":
 				return cmd_list_files(args);

@@ -1,3 +1,26 @@
+
+bool cmd_query_get_comp(string []av) {
+	var pkgs = Query.get_all_package();
+	for (var i = 0; i != pkgs.length; ++i) {
+		if (i == pkgs.length - 1)
+			print("%s", pkgs[i].name);
+		else
+			print("%s ", pkgs[i].name);
+	}
+	return true;
+}
+
+bool cmd_sync_get_comp(string []av) {
+	var pkgs = Sync.default().get_list_package();
+	for (var i = 0; i != pkgs.length; ++i) {
+		if (i == pkgs.length - 1)
+			print("%s", pkgs[i].name);
+		else
+			print("%s ", pkgs[i].name);
+	}
+	return true;
+}
+
 bool cmd_install(string []av) {
 	if (av.length == 2)
 		print_error("`suprapack install [...]`");	
