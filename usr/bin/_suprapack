@@ -5,11 +5,15 @@ _suprapack() {
 			_arguments "2:commands:($(suprapack sync_get_comp))"
 			;; *)
 	esac
+    case "$words[2]" in search)
+			_arguments "2:commands:($(suprapack sync_get_comp))"
+			;; *)
+	esac
     case "$words[2]" in add)
 			_arguments "2:commands:($(suprapack sync_get_comp))"
 			;; *)
 	esac
-    case "$words[2]" in list_files)
+    case "$words[2]" in list_file)
 			_arguments "2:commands:($(suprapack query_get_comp))"
 			;; *)
 	esac
