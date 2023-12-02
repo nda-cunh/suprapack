@@ -36,3 +36,10 @@ fi
 if ! grep -q 'export XDG_CONFIG_DIRS=$XDG_CONFIG_DIRS:$HOME/.local/etc' $HOME/.profile 2>/dev/null; then
 	echo 'export XDG_CONFIG_DIRS=$XDG_CONFIG_DIRS:$HOME/.local/etc' >> $HOME/.profile
 fi
+
+
+
+if ! grep -q "export fpath=($HOME/.local/bin \$fpath)" $HOME/.profile 2>/dev/null; then
+	echo "export fpath=($HOME/.local/bin \$fpath)" >> $HOME/.profile
+fi
+
