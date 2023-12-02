@@ -17,6 +17,8 @@ else
 	echo "is_cached:false" | cat > $CONFIG
 fi
 
+mkdir -p $HOME/.etc
+
 # generate PATH in .profile
 echo generate PATH in .profile
 if ! grep -q 'export PATH=$PATH:$HOME/.local/bin' $HOME/.profile 2>/dev/null; then
@@ -30,4 +32,7 @@ if ! grep -q 'export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$HOME/.local/share/pkgconf
 fi
 if ! grep -q 'export XDG_DATA_DIRS=$XDG_DATA_DIRS:$HOME/.local/share' $HOME/.profile 2>/dev/null; then
 	echo 'export XDG_DATA_DIRS=$XDG_DATA_DIRS:$HOME/.local/share' >> $HOME/.profile
+fi
+if ! grep -q 'export XDG_CONFIG_DIRS=$XDG_CONFIG_DIRS:$HOME/.local/etc' $HOME/.profile 2>/dev/null; then
+	echo 'export XDG_CONFIG_DIRS=$XDG_CONFIG_DIRS:$HOME/.local/etc' >> $HOME/.profile
 fi
