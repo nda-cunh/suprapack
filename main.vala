@@ -26,6 +26,7 @@ public class Main {
 				return cmd_list_files(args);
 			case "run":
 				return cmd_run(args);
+			case "-q":
 			case "list":
 				return cmd_list(args);
 			case "search":
