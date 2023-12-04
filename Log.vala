@@ -27,3 +27,8 @@ public void print_error(string msg) {
 	print("\033[91;1m[Error]\033[0m: %s\n", msg);
 	Process.exit(1);
 }
+
+public void printerror(string msg)
+{
+	print("\033[91;1m[Error]\033[0m: %s\n", msg);
+}

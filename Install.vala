@@ -86,47 +86,43 @@ private void script_post_install(string dir) {
 }
 
 // install package suprapack
-public void install_suprapackage(string suprapack) {
+public void install_suprapackage(string suprapack) throws Error {
 	Utils.create_pixmaps_link();
 	if (FileUtils.test(suprapack, FileTest.EXISTS)) {
 		if (!(suprapack.has_suffix(".suprapack")))
-			print_error("ce fichier n'est pas un suprapack");
+			throw new OptionError.FAILED("ce fichier n'est pas un suprapack");
 	}
 	else 
-		print_error(@"$suprapack n'existe pas.");
-	try {
-		var tmp_dir = DirUtils.make_tmp("suprastore_XXXXXX");
-		print_info(@"Extraction de $(CYAN)$(suprapack)$(NONE)");
-		if(Utils.run_silent({"tar", "-xf", suprapack, "-C", tmp_dir}) != 0) 
-			print_error(@"unable to decompress package\npackage => $(suprapack)");
-		var pkg = Package.from_file(@"$tmp_dir/info");
-		if (Query.is_exist(pkg.name)) {
-			Query.uninstall(pkg.name);
-		}
-		if (pkg.dependency != "") {
-			print_info("search dependency...", "Dependency");
-			var dep_list = pkg.dependency.split(" ");
-			foreach(var dep in dep_list) {
-				install(dep, false);
-			}
-			print_info("All dependencies have been installed !", "Dependency");
-		}
-		script_pre_install(tmp_dir);
-		print_info(@"Installation de $(CYAN)$(pkg.name) $(pkg.version)$(NONE) par $(pkg.author)");
-		var list = new List<string>();
-		list_file_dir(tmp_dir, ref list);	
-		install_files(list, tmp_dir.length);
-		script_post_install(tmp_dir);
-		post_install(list, tmp_dir.length, ref pkg);
-		if(Utils.run_silent({"rm", "-rf", tmp_dir}) != 0)
-			print_error(@"unable to remove directory\ndirectory => $(tmp_dir)");
-	} catch (Error e) {
-		print_error(e.message);
+		throw new OptionError.FAILED(@"$suprapack n'existe pas");
+	var tmp_dir = DirUtils.make_tmp("suprastore_XXXXXX");
+	print_info(@"Extraction de $(CYAN)$(suprapack)$(NONE)");
+	if(Utils.run_silent({"tar", "-xf", suprapack, "-C", tmp_dir}) != 0) 
+		print_error(@"unable to decompress package\npackage => $(suprapack)");
+	var pkg = Package.from_file(@"$tmp_dir/info");
+	if (Query.is_exist(pkg.name)) {
+		Query.uninstall(pkg.name);
 	}
+	if (pkg.dependency != "") {
+		print_info("search dependency...", "Dependency");
+		var dep_list = pkg.dependency.split(" ");
+		foreach(var dep in dep_list) {
+			install(dep, false);
+		}
+		print_info("All dependencies have been installed !", "Dependency");
+	}
+	script_pre_install(tmp_dir);
+	print_info(@"Installation de $(CYAN)$(pkg.name) $(pkg.version)$(NONE) par $(pkg.author)");
+	var list = new List<string>();
+	list_file_dir(tmp_dir, ref list);	
+	install_files(list, tmp_dir.length);
+	script_post_install(tmp_dir);
+	post_install(list, tmp_dir.length, ref pkg);
+	if(Utils.run_silent({"rm", "-rf", tmp_dir}) != 0)
+		new OptionError.FAILED(@"unable to remove directory\ndirectory => $(tmp_dir)");
 }
 
 
-public void install(string name_search, bool force = true) {
+public void install(string name_search, bool force = true) throws Error{
 	var sync = Sync.default();
 	var conf = Config.default();
 	string output;
@@ -156,5 +152,5 @@ public void install(string name_search, bool force = true) {
 		print_info(@"Can't install $name_search but exist in local");
 	}
 	else
-		print_error(@"$name_search doesn't exist");
+		throw new OptionError.FAILED(@"$name_search doesn't exist");
 }
