@@ -104,6 +104,10 @@ class Sync {
 		return null;
 	}
 
+	public static SupraList []get_all_package() {
+		var pkgs = Sync.default().get_list_package();
+		return pkgs;
+	}
 	// return all package in all repo
 	public SupraList []get_list_package () {
 		if (_list.length == 0) {
@@ -117,6 +121,16 @@ class Sync {
 			}
 		}
 		return _list;
+	}
+	
+	public static string download_package (string pkg_name, string repo_name = "Cosmos") {
+		var lst = Sync.default ().get_list_package ();
+		foreach (var l in lst) {
+			if (l.repo_name == repo_name)
+				if (l.name == pkg_name)
+					return Sync.default().download(l);
+		}
+		print_error("cant download the file");
 	}
 
 	// download a package and return this location
