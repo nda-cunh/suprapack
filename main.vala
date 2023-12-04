@@ -60,6 +60,7 @@ public class Main {
 				return cmd_prepare();
 			case "config":
 				return cmd_config(args);
+			case "-g":
 			case "download":
 				return cmd_download(args);
 		}
@@ -79,7 +80,7 @@ public class Main {
 		if (all_cmd(args) == true)
 			Process.exit(0);
 		} catch (Error e) {
-			printerr(e.message);
+			printerror(e.message);
 		}
 		Process.exit(1);
 	}
