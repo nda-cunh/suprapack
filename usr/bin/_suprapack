@@ -3,6 +3,11 @@
 _suprapack() {
     case "$words[2]" in install)
 			_arguments "2:commands:($(suprapack sync_get_comp))"
+			_files -/
+			;; *)
+	esac
+    case "$words[2]" in download)
+			_arguments "2:commands:($(suprapack sync_get_comp))"
 			;; *)
 	esac
     case "$words[2]" in search)
@@ -11,9 +16,10 @@ _suprapack() {
 	esac
     case "$words[2]" in add)
 			_arguments "2:commands:($(suprapack sync_get_comp))"
+			_files -/
 			;; *)
 	esac
-    case "$words[2]" in list_file)
+    case "$words[2]" in list_files)
 			_arguments "2:commands:($(suprapack query_get_comp))"
 			;; *)
 	esac
@@ -28,7 +34,8 @@ _suprapack() {
     case "$words[2]" in info)
 			_arguments "2:commands:($(suprapack query_get_comp))"
 			;; *)
-            _arguments '1:commands:(install uninstall update search list list_file info config prepare remove build)'
+            _arguments '1:commands:(install uninstall download update search list list_files info config prepare remove build)'
+			_files -/
             ;;
     esac
 }
