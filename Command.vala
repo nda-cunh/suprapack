@@ -1,4 +1,19 @@
 
+bool cmd_download(string []av) throws Error {
+	if (av.length == 2)
+		print_error("suprapack downloade <pkg>");
+	var path = Sync.download_package(av[2]);
+
+	if (path == null)
+		print_error("Cant download $(av[2])");
+
+	var file = File.new_for_path(path);
+	var filed = File.new_for_path(Environment.get_current_dir() + "/" + file.get_basename());
+	file.move(filed, FileCopyFlags.OVERWRITE);
+
+	return true;
+}
+
 bool cmd_query_get_comp(string []av) {
 	var pkgs = Query.get_all_package();
 	for (var i = 0; i != pkgs.length; ++i) {
@@ -11,7 +26,7 @@ bool cmd_query_get_comp(string []av) {
 }
 
 bool cmd_sync_get_comp(string []av) {
-	var pkgs = Sync.default().get_list_package();
+	var pkgs = Sync.get_all_package();
 	for (var i = 0; i != pkgs.length; ++i) {
 		if (i == pkgs.length - 1)
 			print("%s", pkgs[i].name);

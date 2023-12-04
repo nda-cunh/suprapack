@@ -6,7 +6,7 @@ public string? CONFIG = null;
 
 public class Main {
 
-	public bool all_cmd(string []args) {
+	public bool all_cmd(string []args) throws Error {
 		if (args.length < 2) {
 			cmd_help();
 			return true;
@@ -60,6 +60,8 @@ public class Main {
 				return cmd_prepare();
 			case "config":
 				return cmd_config(args);
+			case "download":
+				return cmd_download(args);
 		}
 		print_error(@"La commande \"$(av1)\" n'existe pas.");
 	}
@@ -73,8 +75,12 @@ public class Main {
 		CONFIG = LOCAL + "/user.conf";
 		DirUtils.create(LOCAL, 0755);
 		Intl.setlocale();
+		try {
 		if (all_cmd(args) == true)
 			Process.exit(0);
+		} catch (Error e) {
+			printerr(e.message);
+		}
 		Process.exit(1);
 	}
 
