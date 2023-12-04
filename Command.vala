@@ -36,7 +36,7 @@ bool cmd_sync_get_comp(string []av) {
 	return true;
 }
 
-bool cmd_install(string []av) {
+bool cmd_install(string []av) throws Error {
 	if (av.length == 2)
 		print_error("`suprapack install [...]`");	
 
@@ -45,8 +45,12 @@ bool cmd_install(string []av) {
 		return true;
 	}
 	foreach (var i in av[2:av.length]) {
-		print_info(i, "Installing");
-		install(i);
+		try {
+			print_info(i, "Installing");
+			install(i);
+		}catch (Error e) {
+			printerror(e.message);
+		}
 	}
 	return true;
 }
@@ -191,7 +195,7 @@ bool cmd_search(string []av) {
 	return true;
 }
 
-bool cmd_run(string []av) {
+bool cmd_run(string []av) throws Error {
 	if (av.length == 2)
 		print_error("`suprapack run [...]`");	
 	if (Query.is_exist(av[2]) == false) {
@@ -217,7 +221,7 @@ bool cmd_run(string []av) {
 }
 
 
-bool update_package(string pkg_name, bool force = true) {
+bool update_package(string pkg_name, bool force = true) throws Error{
 	var list = Sync.default().get_list_package();
 	var pkg = Query.get_from_pkg(pkg_name);
 	string Qversion = pkg.version;
@@ -248,7 +252,7 @@ bool update_package(string pkg_name, bool force = true) {
 	return false;
 }
 
-bool cmd_update(string []av) {
+bool cmd_update(string []av) throws Error {
 	unowned string pkg_name;
 
 	// All Update
