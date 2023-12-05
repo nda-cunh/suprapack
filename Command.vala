@@ -1,4 +1,52 @@
 
+async void loading() {
+	const string animation[] = {
+	"⠋ Loading .  ",
+	"⠙ Loading .. ",
+	"⠹ Loading ...",
+	"⠸ Loading .. ",
+	"⠼ Loading ...",
+	"⠴ Loading .. ",
+	"⠦ Loading .  ",
+	"⠧ Loading .. ",
+	"⠇ Loading .  ",
+	"⠏ Loading .. "
+	};
+	int i = 0;
+	while (true) {
+		yield Utils.sleep(300);
+		print("%s\r", animation[i]);
+		++i;
+		if (i == animation.length)
+			i = 0;
+	}
+}
+
+async int cmd_loading(string []av) {
+	try {
+		var loop = new MainLoop();
+		int status = 0;
+		Pid child_pid;
+		Process.spawn_async   (null, av[2:av.length], null, STDOUT_TO_DEV_NULL | STDERR_TO_DEV_NULL |CHILD_INHERITS_STDIN | SEARCH_PATH , null, out child_pid);
+		
+		Log.set_default_handler(()=> {});
+		ChildWatch.add (child_pid, (pid, _status) => {
+			status = _status;
+			print("\n");
+			loop.quit ();
+		});
+
+		Idle.add(()=> {
+			loading.begin();
+			return false;
+		});
+		loop.run();
+		return status;
+	} catch (Error e) {
+		print_error(e.message);
+	}
+}
+
 bool cmd_download(string []av) throws Error {
 	if (av.length == 2)
 		print_error("suprapack download <pkg>");

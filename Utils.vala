@@ -1,5 +1,10 @@
 namespace Utils {
 
+	async void sleep(uint ms) {
+		Timeout.add(ms, sleep.callback);
+		yield;
+	}
+
 	void create_pixmaps_link() {
 		string HOME = Environment.get_home_dir ();
 		try {
