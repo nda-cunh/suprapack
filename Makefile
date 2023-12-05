@@ -2,10 +2,10 @@ SRC= main.vala Build.vala Repository.vala Utils.vala Command.vala Query.vala Log
 NAME=suprapack
 
 all:
-	valac $(SRC) -X -w -X -fsanitize=address --pkg=gio-2.0 -o $(NAME) 
+	valac $(SRC) -X -O2 -X -w -X -fsanitize=address --pkg=gio-2.0 -o $(NAME) 
 
 prod:
-	valac $(SRC) -X -w --pkg=gio-2.0 -o $(NAME) 
+	valac $(SRC) -X -O2 -X -w --pkg=gio-2.0 -o $(NAME) 
 
 install: prod
 	mkdir -p usr/bin
@@ -18,6 +18,7 @@ install_vim: install
 
 run: all
 	cp $(NAME) ~/.local/bin/$(NAME)
+	suprapack list
 	@#./$(NAME) uninstall nodejs 
 	@# ./$(NAME) update suprapatate 
 	@# ./$(NAME) 
