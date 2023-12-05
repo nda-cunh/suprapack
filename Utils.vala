@@ -70,3 +70,8 @@ namespace Utils {
 		return "";
 	}
 }
+
+errordomain ErrorSP {
+	ACCESS,
+	FAILED
+}

@@ -1,15 +1,18 @@
 
 bool cmd_download(string []av) throws Error {
 	if (av.length == 2)
-		print_error("suprapack downloade <pkg>");
-	var path = Sync.download_package(av[2]);
+		print_error("suprapack download <pkg>");
+	foreach (var pkg in av[2:av.length]) {
+		var supralist = Sync.get_from_pkg(pkg);
+		print_info(@"$(supralist.name) $(supralist.version)", "Download");
+		var path = Sync.download_package(pkg);
+		if (path == null)
+			print_error("Cant download $(av[2])");
 
-	if (path == null)
-		print_error("Cant download $(av[2])");
-
-	var file = File.new_for_path(path);
-	var filed = File.new_for_path(Environment.get_current_dir() + "/" + file.get_basename());
-	file.move(filed, FileCopyFlags.OVERWRITE);
+		var file = File.new_for_path(path);
+		var filed = File.new_for_path(Environment.get_current_dir() + "/" + file.get_basename());
+		file.move(filed, FileCopyFlags.OVERWRITE);
+	}
 
 	return true;
 }
@@ -93,7 +96,7 @@ bool cmd_config(string []av) {
 	return true;
 }
 
-bool cmd_have_update(string []av) {
+bool cmd_have_update(string []av) throws Error{
 	if (av.length == 2)
 		print_error("`suprapack have_update [...]`");	
 	var Qpkg = Query.get_from_pkg(av[2]);
