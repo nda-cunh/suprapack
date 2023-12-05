@@ -74,24 +74,28 @@ class Sync {
 		}
 	}
 
-	public static SupraList? get_from_pkg(string name_pkg) {
+	public static SupraList get_from_pkg(string name_pkg) throws Error{
 		var pkg_list = Sync.default().get_list_package();
 		foreach (var pkg in pkg_list) {
 			if (pkg.name == name_pkg) {
 				return pkg;
 			}
 		}
-		return null;
+		throw new ErrorSP.FAILED(@"Cant found $name_pkg");
 	}
 
 	// return true if need update else return false
-	public static bool check_update(string package_name) {
-		var Qpkg = Query.get_from_pkg(package_name);
-		var Spkg = Sync.get_from_pkg(package_name);
-		if (Spkg == null)
-			return false;
-		
-		return (Spkg.version != Qpkg.version);
+	public static bool check_update(string package_name) throws Error{
+		try {
+			var Qpkg = Query.get_from_pkg(package_name);
+			var Spkg = Sync.get_from_pkg(package_name);
+			return (Spkg.version != Qpkg.version);
+		}
+		catch (Error e) {
+			if(e is ErrorSP.FAILED)
+				return false;
+			throw e;
+		}
 	}
 
 	// return url from a repo_name (comsos)  -> gitlab
