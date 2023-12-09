@@ -27,10 +27,11 @@ async int cmd_loading(string []av) {
 		var loop = new MainLoop();
 		int status = 0;
 		Pid child_pid;
-		Process.spawn_async   (null, av[2:av.length], null, STDOUT_TO_DEV_NULL | STDERR_TO_DEV_NULL |CHILD_INHERITS_STDIN | SEARCH_PATH , null, out child_pid);
+		Process.spawn_async   (null, av[2:], null, STDOUT_TO_DEV_NULL | STDERR_TO_DEV_NULL |CHILD_INHERITS_STDIN | SEARCH_PATH , null, out child_pid);
 		
-		Log.set_default_handler(()=> {});
+		// Log.set_default_handler(()=> {});
 		ChildWatch.add (child_pid, (pid, _status) => {
+			print("Sleep terminado\n");
 			status = _status;
 			print("\n");
 			loop.quit ();
@@ -92,8 +93,10 @@ bool cmd_install(string []av) throws Error {
 		print_error("`suprapack install [...]`");	
 
 	if (FileUtils.test(av[2], FileTest.EXISTS)) {
-		install_suprapackage(av[2]);
-		return true;
+		try {
+			install_suprapackage(av[2]);
+			return true;
+		} catch(Error e) { }
 	}
 	foreach (var i in av[2:av.length]) {
 		try {
@@ -213,7 +216,7 @@ bool cmd_prepare() {
 
 
 private void print_search(ref SupraList repo, bool installed) {
-	print("%s%s", BOLD, PURPLE);
+	print("%s%s ", BOLD, PURPLE);
 	print("%s/%s", repo.repo_name, WHITE);
 	print("%s %s%s", repo.name, GREEN, repo.version);
 	if (installed)
@@ -268,7 +271,14 @@ bool cmd_run(string []av) throws Error {
 		foreach (var i in av[3: av.length])
 			av_binary += i;	
 	}
-	Process.exit(Process.exit_status(Utils.run(av_binary)));
+	var env = Environ.get();
+	env = Environ.set_variable(env, "LD_LIBRARY_PATH",	 @"$(PREFIX)/lib:$(Environ.get_variable(env, "LD_LIBRARY_PATH"))", true);
+	env = Environ.set_variable(env, "LIBRARY_PATH",	 	 @"$(PREFIX)/lib:$(Environ.get_variable(env, "LIBRARY_PATH"))", true);
+	env = Environ.set_variable(env, "C_INCLUDE_PATH",	 @"$(PREFIX)/include:$(Environ.get_variable(env, "C_INCLUDE_PATH"))", true);
+	env = Environ.set_variable(env, "CPLUS_INCLUDE_PATH",@"$(PREFIX)/include:$(Environ.get_variable(env, "CPLUS_INCLUDE_PATH"))", true);
+	env = Environ.set_variable(env, "PATH",	 @"$(PREFIX)/bin:$(Environ.get_variable(env, "PATH"))", true);
+
+	Process.exit(Process.exit_status(Utils.run(av_binary, env)));
 }
 
 

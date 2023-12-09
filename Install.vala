@@ -125,32 +125,52 @@ public void install_suprapackage(string suprapack) throws Error {
 public void install(string name_search, bool force = true) throws Error{
 	var sync = Sync.default();
 	var conf = Config.default();
-	string output;
 	
+	SupraList[] queue = {};
 	var list = sync.get_list_package();
 	foreach (var pkg in list) {
 		if (pkg.name == name_search) {
-			if (force == false) {
-				if (Query.is_exist(pkg.name) == true) {
-					if (Sync.check_update(pkg.name)) {
-						update_package(pkg.name, true);
-					}
-					return;
-				}
-			}
-			print_info(@"$(pkg.name):$(pkg.version) found in $(pkg.repo_name)");
-			output = sync.download(pkg);
-			install_suprapackage(output);
-			var is_cached = conf.get_from_name("is_cached");
-			if(is_cached == null || is_cached != "true") {
-				FileUtils.unlink(output);
-			}
-			return ;
+			queue += pkg;
 		}
 	}
-	if (Query.is_exist(name_search) == true) {
-		print_info(@"Can't install $name_search but exist in local");
+
+	SupraList? pkg = null;
+	if (queue.length == 0) {
+		if (Query.is_exist(name_search) == true) {
+			throw new ErrorSP.ACCESS(@"Can't found $name_search but exist in local");
+		}
+		throw new ErrorSP.FAILED(@"$(name_search) not found");
 	}
-	else
-		throw new OptionError.FAILED(@"$name_search doesn't exist");
+	else if (queue.length == 1){
+		pkg = queue[0];
+		print_info(@"$(pkg.name):$(pkg.version) found in $(pkg.repo_name)");
+	}
+	else {
+		print_info("Similar package are found");
+		for (int i = 0; i < queue.length; i++) {
+		print("%s", BOLD);
+			print(@"%4d) $(PURPLE)%s/$(WHITE)%s [%s]$(NONE)\n", i, queue[i].repo_name, queue[i].name, queue[i].version);
+		}
+		print("please choose one: ");
+		var nb = int.parse(stdin.read_line());
+		if (nb < 0 || nb > queue.length - 1) {
+			print_info("Cancelling...");
+			return ;
+		}
+		pkg = queue[nb];
+	}
+	if (force == false) {
+		if (Query.is_exist(pkg.name) == true) {
+			if (Sync.check_update(pkg.name)) {
+				update_package(pkg.name, true);
+			}
+			return;
+		}
+	}
+	var output = sync.download(pkg);
+	install_suprapackage(output);
+	var is_cached = conf.get_from_name("is_cached");
+	if(is_cached == null || is_cached != "true") {
+		FileUtils.unlink(output);
+	}
 }
