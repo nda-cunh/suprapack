@@ -120,8 +120,13 @@ class Sync {
 				if (fs == null)
 					print_error(@"unable to retreive repository $(repo.name)\nfile =>$(repo.list)");
 				string tmp;
-				while ((tmp = fs.read_line()) != null)
-					_list += SupraList(repo.name, tmp);
+				var regex = /[a-zA-Z0-9]+[-][a-zA-Z0-9.]+[.]suprapack/;
+				while ((tmp = fs.read_line()) != null) {
+					if (regex.match(tmp))
+						_list += SupraList(repo.name, tmp);
+					else
+						warning(tmp);
+				}
 			}
 		}
 		return _list;
