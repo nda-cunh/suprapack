@@ -1,16 +1,16 @@
 
 async void loading() {
 	const string animation[] = {
-	"⠋ Loading .  ",
-	"⠙ Loading .. ",
-	"⠹ Loading ...",
-	"⠸ Loading .. ",
-	"⠼ Loading ...",
-	"⠴ Loading .. ",
-	"⠦ Loading .  ",
-	"⠧ Loading .. ",
-	"⠇ Loading .  ",
-	"⠏ Loading .. "
+		"⠋ Loading .  ",
+		"⠙ Loading .. ",
+		"⠹ Loading ...",
+		"⠸ Loading .. ",
+		"⠼ Loading ...",
+		"⠴ Loading .. ",
+		"⠦ Loading .  ",
+		"⠧ Loading .. ",
+		"⠇ Loading .  ",
+		"⠏ Loading .. "
 	};
 	int i = 0;
 	while (true) {
@@ -22,30 +22,29 @@ async void loading() {
 	}
 }
 
-async int cmd_loading(string []av) {
+async int run_proc(string []av) {
 	try {
-		var loop = new MainLoop();
-		int status = 0;
-		Pid child_pid;
-		Process.spawn_async   (null, av[2:], null, STDOUT_TO_DEV_NULL | STDERR_TO_DEV_NULL |CHILD_INHERITS_STDIN | SEARCH_PATH , null, out child_pid);
-		
-		// Log.set_default_handler(()=> {});
-		ChildWatch.add (child_pid, (pid, _status) => {
-			print("Sleep terminado\n");
-			status = _status;
-			print("\n");
-			loop.quit ();
-		});
-
-		Idle.add(()=> {
-			loading.begin();
-			return false;
-		});
-		loop.run();
-		return status;
+		var proc = new Subprocess.newv(av[2:], STDERR_SILENCE | STDOUT_SILENCE | INHERIT_FDS);
+		yield proc.wait_async();
+		return proc.get_status();
 	} catch (Error e) {
-		print_error(e.message);
+		printerr(e.message);
 	}
+	return -1;
+}
+
+[NoReturn]
+void cmd_loading(string []av) {
+	int status = 0;
+	var loop = new MainLoop();
+
+	loading.begin();
+	run_proc.begin(av, (obj, res)=> {
+		status = run_proc.end(res);
+		loop.quit();
+	});
+	loop.run();
+	Process.exit(status);
 }
 
 bool cmd_download(string []av) throws Error {
@@ -177,7 +176,7 @@ bool cmd_list_files(string []av) {
 			print("%s\n", file);
 		}
 	}
-	
+
 	return true;
 }
 
