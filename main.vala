@@ -29,11 +29,7 @@ public class Main {
 			case "-ql":
 				return cmd_list_files(args);
 			case "loading":
-				int _return = 0;
-				cmd_loading.begin(args, (obj, res) => {
-					_return = cmd_loading.end(res);
-				});
-				return (bool)_return;
+				cmd_loading(args);
 			case "run":
 				return cmd_run(args);
 			case "-q":
