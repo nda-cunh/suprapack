@@ -137,12 +137,10 @@ bool cmd_info(string []av) {
 	return true;
 }
 
-bool cmd_config(string []av) {
+bool cmd_config(string []av) throws Error{
 	if(av.length <= 3)
-		print_error("`suprapack config [...]`");
-	var conf = Config.default();
-	var cfg = ConfigInfo(av[2], av[3]);
-	conf.update_config(cfg);
+		print_error("`suprapack config [Config] [Value]`");
+	config.add(av[2], av[3]);
 	return true;
 }
 
@@ -262,20 +260,20 @@ bool cmd_run(string []av) throws Error {
 
 	string []av_binary;
 	if (pkg.binary.index_of_char('/') == -1)
-		av_binary = {@"$(PREFIX)/bin/$(pkg.binary)"};
+		av_binary = {@"$(config.prefix)/bin/$(pkg.binary)"};
 	else
-		av_binary = {@"$(PREFIX)/$(pkg.binary)"};
+		av_binary = {@"$(config.prefix)/$(pkg.binary)"};
 
 	if (av.length >= 3) {
 		foreach (var i in av[3: av.length])
 			av_binary += i;	
 	}
 	var env = Environ.get();
-	env = Environ.set_variable(env, "LD_LIBRARY_PATH",	 @"$(PREFIX)/lib:$(Environ.get_variable(env, "LD_LIBRARY_PATH"))", true);
-	env = Environ.set_variable(env, "LIBRARY_PATH",	 	 @"$(PREFIX)/lib:$(Environ.get_variable(env, "LIBRARY_PATH"))", true);
-	env = Environ.set_variable(env, "C_INCLUDE_PATH",	 @"$(PREFIX)/include:$(Environ.get_variable(env, "C_INCLUDE_PATH"))", true);
-	env = Environ.set_variable(env, "CPLUS_INCLUDE_PATH",@"$(PREFIX)/include:$(Environ.get_variable(env, "CPLUS_INCLUDE_PATH"))", true);
-	env = Environ.set_variable(env, "PATH",	 @"$(PREFIX)/bin:$(Environ.get_variable(env, "PATH"))", true);
+	env = Environ.set_variable(env, "LD_LIBRARY_PATH",	 @"$(config.prefix)/lib:$(Environ.get_variable(env, "LD_LIBRARY_PATH"))", true);
+	env = Environ.set_variable(env, "LIBRARY_PATH",	 	 @"$(config.prefix)/lib:$(Environ.get_variable(env, "LIBRARY_PATH"))", true);
+	env = Environ.set_variable(env, "C_INCLUDE_PATH",	 @"$(config.prefix)/include:$(Environ.get_variable(env, "C_INCLUDE_PATH"))", true);
+	env = Environ.set_variable(env, "CPLUS_INCLUDE_PATH",@"$(config.prefix)/include:$(Environ.get_variable(env, "CPLUS_INCLUDE_PATH"))", true);
+	env = Environ.set_variable(env, "PATH",	 @"$(config.prefix)/bin:$(Environ.get_variable(env, "PATH"))", true);
 
 	Process.exit(Process.exit_status(Utils.run(av_binary, env)));
 }

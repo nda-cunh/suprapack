@@ -1,24 +1,33 @@
-public string? PREFIX = null;
-public string? LOCAL = null;
-public string? USERNAME = null;
-public string? REPO_LIST = null;
+public string HOME;
+public string USERNAME;
 public string? CONFIG = null;
 
-public class Main {
+public Config config;
 
+public class Main {
 	public bool all_cmd(string []args) throws Error {
 		if (args.length < 2) {
 			cmd_help();
 			return true;
 		}
-		
+
+		// foreach (var av in args[1:]) {
+			// if (!av.has_prefix("-"))
+				// continue;
+			// switch (av) {
+				// default:
+					// print("%s is not know\n", av);
+					// break;
+// 
+			// }
+		// }
+
 		string av1 = args[1].down();
 		
 		if (av1.has_suffix(".suprapack")) {
 			install_suprapackage(args[1]);
 			return true;
 		}
-
 
 		switch (av1) {
 			case "query_get_comp":
@@ -71,16 +80,13 @@ public class Main {
 
 	// INIT
 	public Main(string []args) {
+		HOME = Environment.get_home_dir();
 		USERNAME = Environment.get_user_name();
-		PREFIX = Environment.get_home_dir() + "/.local";
-	 	LOCAL = Environment.get_home_dir() + "/.suprapack";
-		REPO_LIST = LOCAL + "/repo.list";
-		CONFIG = LOCAL + "/user.conf";
-		DirUtils.create(LOCAL, 0755);
 		Intl.setlocale();
 		try {
-		if (all_cmd(args) == true)
-			Process.exit(0);
+			config = new Config();
+			if (all_cmd(args) == true)
+				Process.exit(0);
 		} catch (Error e) {
 			printerror(e.message);
 		}

@@ -2,7 +2,7 @@ namespace Query{
 
 	/* verify if package is installed in ~/suprastore/name_pkg */
 	public bool is_exist(string name_pkg) {
-		return FileUtils.test(@"$(LOCAL)/$name_pkg/info", FileTest.EXISTS);
+		return FileUtils.test(@"$(config.cache)/$name_pkg/info", FileTest.EXISTS);
 	}
 
 	/* remove package with all files installed remove ~/suprastore/name_pkg */
@@ -19,14 +19,14 @@ namespace Query{
 
 	/* return the Package struct from a package-name */
 	public Package get_from_pkg(string name_pkg) {
-		var pkg = Package.from_file(@"$(LOCAL)/$name_pkg/info");
+		var pkg = Package.from_file(@"$(config.cache)/$name_pkg/info");
 		return pkg;
 	}
 	
 
 	/* remove only ~/suprastore/PKG */
 	private void remove_pkg(string name_pkg) {
-		var pkg = @"$(LOCAL)/$name_pkg/";
+		var pkg = @"$(config.cache)/$name_pkg/";
 		FileUtils.unlink(pkg + "info");	
 		DirUtils.remove(pkg);
 	}
@@ -35,13 +35,13 @@ namespace Query{
 	public Package []get_all_package(){
 		try {
 			Package []result = {};
-			var dir = Dir.open(LOCAL);
+			var dir = Dir.open(config.cache);
 			unowned string? tmp;
 
 			while ((tmp = dir.read_name()) != null) {
-				if (tmp[0] != '.' && tmp != "pkg" && FileUtils.test(@"$LOCAL/$tmp", FileTest.IS_DIR))
+				if (tmp[0] != '.' && tmp != "pkg" && FileUtils.test(@"$(config.cache)/$tmp", FileTest.IS_DIR))
 					if (Query.is_exist(tmp))
-						result += Package.from_file(@"$(LOCAL)/$tmp/info");
+						result += Package.from_file(@"$(config.cache)/$tmp/info");
 			}
 			return result;
 		}catch(Error e) {
@@ -53,11 +53,11 @@ namespace Query{
 	public string []get_all_installed_pkg() {
 		try {
 			string []result = {};	
-			var dir = Dir.open(LOCAL);
+			var dir = Dir.open(config.cache);
 			unowned string? tmp;
 
 			while ((tmp = dir.read_name()) != null) {
-				if (tmp[0] != '.' && tmp != "pkg" && FileUtils.test(@"$LOCAL/$tmp", FileTest.IS_DIR))
+				if (tmp[0] != '.' && tmp != "pkg" && FileUtils.test(@"$(config.cache)/$tmp", FileTest.IS_DIR))
 					result += tmp.dup();
 			}
 			return result;
