@@ -129,7 +129,6 @@ public void install_suprapackage(string suprapack) throws Error {
 
 public void install(string name_search, bool force = true) throws Error{
 	var sync = Sync.default();
-	// var conf = Config.default(); //TODO
 	
 	SupraList[] queue = {};
 	var list = sync.get_list_package();
@@ -174,8 +173,7 @@ public void install(string name_search, bool force = true) throws Error{
 	}
 	var output = sync.download(pkg);
 	install_suprapackage(output);
-	// var is_cached = conf.get_from_name("is_cached"); //TODO
-	// if(is_cached == null || is_cached != "true") {
-		// FileUtils.unlink(output);
-	// }
+	if(!config.is_cached) {
+		FileUtils.unlink(output);
+	}
 }
