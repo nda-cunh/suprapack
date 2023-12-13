@@ -25,12 +25,13 @@ public class Config{
 		FileUtils.get_contents (this.config, out contents);
 
 		var lines = contents.split("\n");
-		var reg = /^[a-zA-Z0-9]+:[a-zA-Z0-9]$/;
+		var reg = /^[a-zA-Z0-9_]+[:][a-zA-Z0-9_]+$/;
 		foreach (var line in lines) {
 			if (!reg.match(line))
 				continue;
-			if (line.has_prefix ("is_cached"))
+			if (line.has_prefix ("is_cached")) {
 				is_cached = bool.parse(line[line.index_of_char(':') + 1:]);
+			}
 		}
 		
 	}
