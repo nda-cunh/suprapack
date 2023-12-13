@@ -21,7 +21,7 @@ void list_file_dir(string emp_dir, ref List<string> list) {
 }
 
 void post_install(List<string> list, int len, ref Package pkg) {
-	string packinfo = @"$(LOCAL)/$(pkg.name)";
+	string packinfo = @"$(config.cache)/$(pkg.name)";
 	string info_file = @"$packinfo/info";
 	
 	DirUtils.create_with_parents(packinfo, 0755);
@@ -34,7 +34,7 @@ void post_install(List<string> list, int len, ref Package pkg) {
 	foreach(var i in list) {
 		unowned string basename = i.offset(len);
 		if (basename != "/info")
-			fs.printf("%s%s\n", PREFIX, basename);
+			fs.printf("%s%s\n", config.prefix, basename);
 	}
 }
 
@@ -51,7 +51,7 @@ void install_files(List<string> list, int len) {
 		foreach (var e in list) {
 			basename = e.offset(len);
 			var fileSrc = File.new_for_path(e);
-			var fileDest = File.new_for_path(PREFIX + basename);
+			var fileDest = File.new_for_path(config.prefix+ basename);
 			string path = fileDest.get_path();
 			path = path[0: path.last_index_of_char('/')];
 			DirUtils.create_with_parents(path, 0755);
@@ -63,14 +63,14 @@ void install_files(List<string> list, int len) {
 	}
 }
 
-private void script_pre_install(string dir) {
+private void script_pre_install(string dir) throws Error {
 	if (FileUtils.test(@"$dir/pre_install.sh", FileTest.EXISTS | FileTest.IS_EXECUTABLE)) {
 		print_info(null, "Preparation");
 		var envp = Environ.get();
 		envp = Environ.set_variable(envp, "SRCDIR", dir, true);
-		envp = Environ.set_variable(envp, "PKGDIR", PREFIX, true);
+		envp = Environ.set_variable(envp, "PKGDIR", config.prefix, true);
 		if(Utils.run({@"$dir/pre_install.sh"}, envp) != 0)
-			print_error("non zero exit code of pre installation script");
+			throw new ErrorSP.FAILED("non zero exit code of pre installation script");
 	}
 }
 
@@ -78,7 +78,7 @@ private void script_post_install(string dir) {
 	if (FileUtils.test(@"$dir/post_install.sh", FileTest.EXISTS | FileTest.IS_EXECUTABLE)) {
 		var envp = Environ.get();
 		envp = Environ.set_variable(envp, "SRCDIR", dir, true);
-		envp = Environ.set_variable(envp, "PKGDIR", PREFIX, true);
+		envp = Environ.set_variable(envp, "PKGDIR", config.prefix, true);
 		print_info(null, "Finition");
 		if(Utils.run({@"$dir/post_install.sh"}, envp) != 0)
 			print_error("non zero exit code of pre installation script");
@@ -90,14 +90,14 @@ public void install_suprapackage(string suprapack) throws Error {
 	Utils.create_pixmaps_link();
 	if (FileUtils.test(suprapack, FileTest.EXISTS)) {
 		if (!(suprapack.has_suffix(".suprapack")))
-			throw new OptionError.FAILED("ce fichier n'est pas un suprapack");
+			throw new ErrorSP.BADFILE("ce fichier n'est pas un suprapack");
 	}
 	else 
-		throw new OptionError.FAILED(@"$suprapack n'existe pas");
+		throw new ErrorSP.ACCESS(@"$suprapack n'existe pas");
 	var tmp_dir = DirUtils.make_tmp("suprastore_XXXXXX");
 	print_info(@"Extraction de $(CYAN)$(suprapack)$(NONE)");
 	if(Utils.run_silent({"tar", "-xf", suprapack, "-C", tmp_dir}) != 0) 
-		print_error(@"unable to decompress package\npackage => $(suprapack)");
+		throw new ErrorSP.FAILED(@"unable to decompress package\npackage => $(suprapack)");
 	var pkg = Package.from_file(@"$tmp_dir/info");
 	if (Query.is_exist(pkg.name)) {
 		Query.uninstall(pkg.name);
@@ -106,7 +106,12 @@ public void install_suprapackage(string suprapack) throws Error {
 		print_info("search dependency...", "Dependency");
 		var dep_list = pkg.dependency.split(" ");
 		foreach(var dep in dep_list) {
-			install(dep, false);
+			try {
+				install(dep, false);
+			} catch (Error err) {
+				if (err is ErrorSP.FAILED)
+					throw err;
+			}
 		}
 		print_info("All dependencies have been installed !", "Dependency");
 	}
@@ -124,7 +129,7 @@ public void install_suprapackage(string suprapack) throws Error {
 
 public void install(string name_search, bool force = true) throws Error{
 	var sync = Sync.default();
-	var conf = Config.default();
+	// var conf = Config.default(); //TODO
 	
 	SupraList[] queue = {};
 	var list = sync.get_list_package();
@@ -169,8 +174,8 @@ public void install(string name_search, bool force = true) throws Error{
 	}
 	var output = sync.download(pkg);
 	install_suprapackage(output);
-	var is_cached = conf.get_from_name("is_cached");
-	if(is_cached == null || is_cached != "true") {
-		FileUtils.unlink(output);
-	}
+	// var is_cached = conf.get_from_name("is_cached"); //TODO
+	// if(is_cached == null || is_cached != "true") {
+		// FileUtils.unlink(output);
+	// }
 }

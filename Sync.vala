@@ -58,9 +58,9 @@ class Sync {
 	// Default private Constructor
 	private Sync () {
 		_list = {};
-        var fs = FileStream.open(REPO_LIST, "r");
+        var fs = FileStream.open(config.repo_list, "r");
 		if (fs == null)
-			print_error(@"unable to retreive repository list\nfile => $(REPO_LIST)");
+			print_error(@"unable to retreive repository list\nfile => $(config.repo_list)");
 		var line = 1;
         string tmp;
 		while((tmp = fs.read_line()) != null) {
@@ -144,7 +144,7 @@ class Sync {
 
 	// download a package and return this location
 	public string download (SupraList pkg) {
-			string pkgdir = @"$(LOCAL)/pkg";
+			string pkgdir = @"$(config.cache)/pkg";
 			string pkgname = @"$(pkg.name)-$(pkg.version).suprapack";
 			string output = @"$pkgdir/$(pkg.name)-$(pkg.version).suprapack";
 			DirUtils.create_with_parents(pkgdir, 0755);

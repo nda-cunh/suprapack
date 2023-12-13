@@ -11,6 +11,13 @@ public const string CYAN = "\033[96m";
 public const string PURPLE = "\033[35m";
 public const string NONE = "\033[0m";
 
+errordomain ErrorSP {
+	ACCESS,
+	FAILED,
+	BADFILE
+	
+}
+
 public void print_info(string? msg, string prefix = "SupraPack") {
 	if (msg == null)
 		print("\033[33;1m[%s]\033[0m\n", prefix);
