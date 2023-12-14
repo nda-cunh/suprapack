@@ -4,11 +4,19 @@ public class Config{
 		this.load_config();
 	}
 	public void change_prefix (string prefix) throws Error {
+		int offset;
 		this.prefix = prefix;
-		this.cache = prefix[0:prefix.last_index_of_char('/')]+ "/.suprapack";
+		offset = prefix.last_index_of_char('/');
+		if (offset == -1) {
+			this.cache = "./.suprapack";
+		}
+		else
+			this.cache = prefix[0:offset]+ "/.suprapack";
 		this.config = this.cache + "/user.conf";
 		this.repo_list = this.cache + "/repo.list";
 
+		DirUtils.create_with_parents(this.prefix, 0755);
+		DirUtils.create_with_parents(this.cache, 0755);
 		if (FileUtils.test (this.cache, FileTest.EXISTS) == false) {
 			DirUtils.create(this.cache, 0755);
 		}

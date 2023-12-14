@@ -249,22 +249,29 @@ bool cmd_search(string []av) {
 bool cmd_run(string []av) throws Error {
 	if (av.length == 2)
 		print_error("`suprapack run [...]`");	
-	if (Query.is_exist(av[2]) == false) {
+	if (Query.is_exist(av[2]) == false && config.force == false) {
 		print_info(@"$(av[2]) doesn't exist install it...");
 		cmd_install({"", "install", av[2]});
 	}
-	if (Query.is_exist(av[2]) == false) {
+	if (Query.is_exist(av[2]) == false && config.force == false) {
 		print_error(@"$(av[2]) is not installed");
 	}
-	var pkg = Query.get_from_pkg(av[2]);
 
 	string []av_binary;
-	if (pkg.binary.index_of_char('/') == -1)
-		av_binary = {@"$(config.prefix)/bin/$(pkg.binary)"};
-	else
-		av_binary = {@"$(config.prefix)/$(pkg.binary)"};
+	if (config.force == false) {
+		var pkg = Query.get_from_pkg(av[2]);
+		if (pkg.binary.index_of_char('/') == -1)
+			av_binary = {@"$(config.prefix)/bin/$(pkg.binary)"};
+		else
+			av_binary = {@"$(config.prefix)/$(pkg.binary)"};
 
-	if (av.length >= 3) {
+		if (av.length >= 3) {
+			foreach (var i in av[3: av.length])
+				av_binary += i;	
+		}
+	}
+	else {
+		av_binary = {av[2]};
 		foreach (var i in av[3: av.length])
 			av_binary += i;	
 	}
@@ -275,6 +282,8 @@ bool cmd_run(string []av) throws Error {
 	env = Environ.set_variable(env, "CPLUS_INCLUDE_PATH",@"$(config.prefix)/include:$(Environ.get_variable(env, "CPLUS_INCLUDE_PATH"))", true);
 	env = Environ.set_variable(env, "PATH",	 @"$(config.prefix)/bin:$(Environ.get_variable(env, "PATH"))", true);
 
+env = Environ.set_variable(env, "XDG_DATA_DIRS", @"$(config.prefix)/share", true);
+env = Environ.set_variable(env, "PKG_CONFIG_PATH", @"$(config.prefix)/share/pkgconfig:$(config.prefix)/lib/pkgconfig", true);
 	Process.exit(Process.exit_status(Utils.run(av_binary, env)));
 }
 
