@@ -52,6 +52,8 @@ public class Main {
 				return cmd_query_get_comp(cmd);
 			case "sync_get_comp":
 				return cmd_sync_get_comp(cmd);
+			case "shell":
+				return cmd_shell(cmd);
 			case "list_files":
 			case "-ql":
 				return cmd_list_files(cmd);
