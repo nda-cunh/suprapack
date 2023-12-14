@@ -47,6 +47,14 @@ void cmd_loading(string []av) {
 	Process.exit(status);
 }
 
+bool cmd_shell(string []av) throws Error {
+	var env = Environ.get();
+	var shell = Environ.get_variable(env, "SHELL") ?? "/bin/bash";
+	config.force = true;
+	cmd_run({"suprapack", "run", shell, "-f"});
+	return true;
+}
+
 bool cmd_download(string []av) throws Error {
 	if (av.length == 2)
 		print_error("suprapack download <pkg>");
@@ -276,14 +284,15 @@ bool cmd_run(string []av) throws Error {
 			av_binary += i;	
 	}
 	var env = Environ.get();
-	env = Environ.set_variable(env, "LD_LIBRARY_PATH",	 @"$(config.prefix)/lib:$(Environ.get_variable(env, "LD_LIBRARY_PATH"))", true);
-	env = Environ.set_variable(env, "LIBRARY_PATH",	 	 @"$(config.prefix)/lib:$(Environ.get_variable(env, "LIBRARY_PATH"))", true);
-	env = Environ.set_variable(env, "C_INCLUDE_PATH",	 @"$(config.prefix)/include:$(Environ.get_variable(env, "C_INCLUDE_PATH"))", true);
-	env = Environ.set_variable(env, "CPLUS_INCLUDE_PATH",@"$(config.prefix)/include:$(Environ.get_variable(env, "CPLUS_INCLUDE_PATH"))", true);
-	env = Environ.set_variable(env, "PATH",	 @"$(config.prefix)/bin:$(Environ.get_variable(env, "PATH"))", true);
+	env = Environ.set_variable(env, "LD_LIBRARY_PATH",	 @"$(config.prefix)/lib:$(Environ.get_variable(env, "LD_LIBRARY_PATH") ?? "")", true);
+	env = Environ.set_variable(env, "LIBRARY_PATH",	 	 @"$(config.prefix)/lib:$(Environ.get_variable(env, "LIBRARY_PATH") ?? "")", true);
+	env = Environ.set_variable(env, "C_INCLUDE_PATH",	 @"$(config.prefix)/include:$(Environ.get_variable(env, "C_INCLUDE_PATH") ?? "")", true);
+	env = Environ.set_variable(env, "CPLUS_INCLUDE_PATH",@"$(config.prefix)/include:$(Environ.get_variable(env, "CPLUS_INCLUDE_PATH") ?? "")", true);
+	env = Environ.set_variable(env, "PATH",	 @"$(config.prefix)/bin:$(Environ.get_variable(env, "PATH") ?? "")", true);
 
-env = Environ.set_variable(env, "XDG_DATA_DIRS", @"$(config.prefix)/share", true);
-env = Environ.set_variable(env, "PKG_CONFIG_PATH", @"$(config.prefix)/share/pkgconfig:$(config.prefix)/lib/pkgconfig", true);
+	env = Environ.set_variable(env, "XDG_DATA_DIRS", @"$(config.prefix)/share", true);
+	env = Environ.set_variable(env, "PKG_CONFIG_PATH", @"$(config.prefix)/share/pkgconfig:$(config.prefix)/lib/pkgconfig", true);
+	env = Environ.set_variable(env, "PS1", "%B%F{blue}(Suprapack)%f%b%~ $ ", true);
 	Process.exit(Process.exit_status(Utils.run(av_binary, env)));
 }
 
