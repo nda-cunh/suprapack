@@ -1,5 +1,5 @@
 SRC= main.vala Build.vala Repository.vala Utils.vala Command.vala Query.vala Log.vala Sync.vala Install.vala Package.vala Config.vala
-NAME=suprapack
+NAME=suprapack_dev
 
 all: $(NAME)
 
@@ -20,13 +20,10 @@ install: prod
 	cp ./suprapack usr/bin/suprapack
 	tar -cJf suprapack.suprapack -C usr .
 	./suprapack install suprapack.suprapack
-	
-install_vim: install
-	./suprapack install supravim
 
 run: all
 	# cp suprapack ~/.local/bin/suprapacl
-	./suprapack add suprapack 
+	./suprapack add suprapack --force 
 	@#./$(NAME) uninstall nodejs 
 	@# ./$(NAME) update suprapatate 
 	@# ./$(NAME) 
