@@ -59,8 +59,46 @@ namespace Utils {
 		}
 	}
 
-	
 
+	SupraList[] sort_supralist_version(SupraList []lst) {
+		var list = lst.copy();
+
+		for (int j = 0; j < list.length; j++) {
+			for (int i = 0; i < list.length - 1; i++) {
+				var tmp = max_version_supralist(list[i], list[i + 1]);
+				if (tmp == list[i]) {
+					list[i] = list[i + 1];
+					list[i + 1] = tmp;
+				}
+			}
+		}
+		return list;
+	}
+
+	unowned SupraList max_version_supralist(SupraList s1, SupraList s2) {
+		var res = Utils.max_version(s1.version, s2.version);
+		if (res == s1.version)
+			return s1;
+		return s2;
+	}
+
+	// return max version
+	unowned string max_version(string v1, string v2) {
+		var reg = /[^0-9]+/;
+		var sp1 = reg.split(v1);
+		var sp2 = reg.split(v2);
+		for (var i = 0; i != sp1.length && i != sp2.length; ++i) {
+			int i1 = int.parse(sp1[i]);
+			int i2 = int.parse(sp2[i]);
+			if (i1 == i2)
+				continue;
+			if (i1 > i2)
+				return v1;
+			else
+				return v2;
+		}
+		return v1;
+	}
 
 
 	// return a stdin line with downcase and strip space
