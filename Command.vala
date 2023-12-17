@@ -320,7 +320,7 @@ bool update_package(string pkg_name, bool force = true) throws Error{
 					install(pkg_name);
 				}
 			}else {
-				print_info(@"No update avaiable for $(pkg_name) $(i.version)");
+				// print_info(@"No update avaiable for $(pkg_name) $(i.version)");
 			}
 			return true;
 		}
