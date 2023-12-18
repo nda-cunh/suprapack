@@ -297,7 +297,7 @@ bool cmd_run(string []av) throws Error {
 }
 
 
-bool update_package(string pkg_name, bool force = true) throws Error{
+bool update_package(string pkg_name) throws Error{
 	var list = Sync.default().get_list_package();
 	var pkg = Query.get_from_pkg(pkg_name);
 	string Qversion = pkg.version;
@@ -308,9 +308,10 @@ bool update_package(string pkg_name, bool force = true) throws Error{
 			Sversion = i.version;
 			if (Sversion != Qversion) {
 				print_info(@"Update avaiable for $(pkg_name) $(CYAN)$(pkg.version) --> $(i.version)");
-				if (force == false) {
+				if (config.force == false) {
 					print_info(@"Do you want update it ? [yes/No]");
 					var input = stdin.read_line().strip().down();
+					config.force = true;
 					if (input == "" || "y" in input)
 						install(pkg_name);
 					else
@@ -335,7 +336,7 @@ bool cmd_update(string []av) throws Error {
 	if (av.length == 2) {
 		var Qpkg = Query.get_all_installed_pkg();
 		foreach (var pkg in Qpkg) {
-			update_package(pkg, false);
+			update_package(pkg);
 		}
 		return true;
 	}
