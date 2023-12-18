@@ -173,8 +173,11 @@ public void install(string name_search) throws Error{
 	if (config.force == false) {
 		if (Query.is_exist(pkg.name) == true) {
 			if (Sync.check_update(pkg.name)) {
-				update_package(pkg.name, true);
+				config.force = true;
+				update_package(pkg.name);
+				return ;
 			}
+			print_info("The package is already installed, use --force if you want to replace it", "Info");
 			return;
 		}
 	}
