@@ -1,6 +1,6 @@
 #!/bin/sh
 
-REPO_LIST=$HOME/.suprapack/repo.list
+REPO_LIST=$HOME/.local/.suprapack/repo.list
 if [ -f "$REPO_LIST" ]; then
 	echo "already existing repo.list skipping..."
 else
@@ -9,7 +9,7 @@ else
 	# echo "Elixir https://raw.githubusercontent.com/Strong214356/suprapack-list/master/" | cat >> $REPO_LIST
 fi
 
-CONFIG=$HOME/.suprapack/user.conf
+CONFIG=$HOME/.local/.suprapack/user.conf
 if [ -f "$CONFIG" ]; then
 	echo "already existing user.conf skipping..."
 else
@@ -43,3 +43,4 @@ if ! grep -q "export fpath=($HOME/.local/bin \$fpath)" $HOME/.profile 2>/dev/nul
 	echo "export fpath=($HOME/.local/bin \$fpath)" >> $HOME/.profile
 fi
 
+[ -d $HOME/.suprapack ] && mv $HOME/.suprapack $HOME/.local/ 2> /dev/null; true

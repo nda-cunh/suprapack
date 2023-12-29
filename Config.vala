@@ -4,16 +4,11 @@ public class Config{
 		this.load_config();
 	}
 	public void change_prefix (string prefix) throws Error {
-		int offset;
 		this.prefix = prefix;
-		offset = prefix.last_index_of_char('/');
-		if (offset == -1) {
-			this.cache = "./.suprapack";
-		}
-		else
-			this.cache = prefix[0:offset]+ "/.suprapack";
+		this.cache = prefix + "/.suprapack";
 		this.config = this.cache + "/user.conf";
 		this.repo_list = this.cache + "/repo.list";
+		FileUtils.symlink(@"$HOME/.local/.suprapack", @"$HOME/.config/suprapack");
 
 		DirUtils.create_with_parents(this.prefix, 0755);
 		DirUtils.create_with_parents(this.cache, 0755);
