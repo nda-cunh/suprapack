@@ -26,6 +26,7 @@ public struct Package {
 	public Package.from_input() {
 		this.name = Utils.get_input("Name: ");
 		this.version = Utils.get_input("Version: ");
+		this.version = this.version.replace("-", ".");
 		this.author = Utils.get_input("Author: ");
 		this.description = Utils.get_input("Description: ");
 		this.dependency = Utils.get_input("Dependency: ");
