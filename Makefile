@@ -1,7 +1,7 @@
 SRC= main.vala Build.vala Repository.vala Utils.vala Command.vala Query.vala Log.vala Sync.vala Install.vala Package.vala Config.vala
 NAME=suprapack_dev
 
-all: $(NAME)
+all: install 
 
 suprapack:
 	valac $(SRC) -X -O2 -X -w -X -fsanitize=address --pkg=gio-2.0 -o suprapack 
@@ -13,7 +13,7 @@ suprapack_dev: build
 	ninja install -C build
 
 prod:
-	valac $(SRC) -X -O2 -X -w --pkg=gio-2.0 -o suprapack 
+	valac $(SRC) -X -flto -X -O2 -X -w --pkg=gio-2.0 -o suprapack 
 
 install: prod
 	mkdir -p usr/bin
@@ -21,9 +21,9 @@ install: prod
 	tar -cJf suprapack.suprapack -C usr .
 	./suprapack install suprapack.suprapack
 
-run: all
-	# cp suprapack ~/.local/bin/suprapacl
-	./suprapack add suprapack --force 
+run: $(NAME) 
+	cp suprapack ~/.local/bin/suprapack
+	# ./suprapack add suprapack --force 
 	@#./$(NAME) uninstall nodejs 
 	@# ./$(NAME) update suprapatate 
 	@# ./$(NAME) 
