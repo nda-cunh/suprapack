@@ -17,7 +17,7 @@ public struct SupraList {
 // RepoInfo contains information of a repo like Cosmos 
 // name  (Cosmos)
 // url (http://gitlab/../../)
-public class RepoInfo {
+public class RepoInfo : Object{
 	public RepoInfo(string name, string url) {
 		this.name = name;
 		this.url = url;
@@ -37,7 +37,7 @@ public class RepoInfo {
 			return _list;
 		}
 	}
-	
+
 	public string name;
 	public string url;
 }
@@ -47,7 +47,7 @@ public class RepoInfo {
 // he can download list
 // he can download package
 // have to the management of all repository online
-class Sync {
+class Sync : Object{
 	//   SINGLETON 
 	private static Sync? singleton = null;
 	public static unowned Sync default() {
@@ -58,11 +58,11 @@ class Sync {
 	// Default private Constructor
 	private Sync () {
 		_list = {};
-        var fs = FileStream.open(config.repo_list, "r");
+		var fs = FileStream.open(config.repo_list, "r");
 		if (fs == null)
 			print_error(@"unable to retreive repository list\nfile => $(config.repo_list)");
 		var line = 1;
-        string tmp;
+		string tmp;
 		while((tmp = fs.read_line()) != null) {
 			if (tmp != "") {
 				var repoSplit = / +/.split(tmp);
@@ -116,22 +116,26 @@ class Sync {
 	public SupraList []get_list_package () {
 		if (_list.length == 0) {
 			foreach (var repo in _repo) {
-				var fs = FileStream.open(repo.list, "r");
-				if (fs == null)
+				try {
+					string tmp;
+					FileUtils.get_contents(repo.list, out tmp);
+					var regex = /[a-zA-Z0-9]+[-][a-zA-Z0-9.]+[.]suprapack/;
+					foreach (var pkg in tmp.split("\n")) {
+						if (regex.match(pkg)) {
+							_list += SupraList(repo.name, pkg);
+						}
+						else if (pkg != "")
+							warning(pkg);
+					}
+				}
+				catch (Error e) {
 					print_error(@"unable to retreive repository $(repo.name)\nfile =>$(repo.list)");
-				string tmp;
-				var regex = /[a-zA-Z0-9]+[-][a-zA-Z0-9.]+[.]suprapack/;
-				while ((tmp = fs.read_line()) != null) {
-					if (regex.match(tmp))
-						_list += SupraList(repo.name, tmp);
-					else
-						warning(tmp);
 				}
 			}
 		}
 		return _list;
 	}
-	
+
 	public static string download_package (string pkg_name, string? repo_name = null) {
 		var lst = Sync.default ().get_list_package ();
 		foreach (var l in lst) {
@@ -144,15 +148,15 @@ class Sync {
 
 	// download a package and return this location
 	public string download (SupraList pkg) {
-			string pkgdir = @"$(config.cache)/pkg";
-			string pkgname = @"$(pkg.name)-$(pkg.version).suprapack";
-			string output = @"$pkgdir/$(pkg.name)-$(pkg.version).suprapack";
-			DirUtils.create_with_parents(pkgdir, 0755);
-			
-			string url = this.get_url_from_name(pkg.repo_name) + pkgname;
-			if(Utils.run_silent({"curl", "-o", output, url}) != 0) 
-				print_error(@"unable to download package\npackage => $(pkgname)");
-			return output;
+		string pkgdir = @"$(config.cache)/pkg";
+		string pkgname = @"$(pkg.name)-$(pkg.version).suprapack";
+		string output = @"$pkgdir/$(pkg.name)-$(pkg.version).suprapack";
+		DirUtils.create_with_parents(pkgdir, 0755);
+
+		string url = this.get_url_from_name(pkg.repo_name) + pkgname;
+		if(Utils.run_silent({"curl", "-o", output, url}) != 0) 
+			print_error(@"unable to download package\npackage => $(pkgname)");
+		return output;
 	}
 
 	private SupraList []_list;

@@ -229,7 +229,8 @@ private void print_search(ref SupraList repo, bool installed) {
 	print("%s\n", NONE);
 }
 
-bool cmd_search(string []av) {
+bool cmd_search(string []av) throws Error {
+	force_suprapack_update();
 	var list = Sync.default().get_list_package();
 	var installed = Query.get_all_installed_pkg();
 	// search without input
@@ -330,6 +331,7 @@ bool update_package(string pkg_name) throws Error{
 }
 
 bool cmd_update(string []av) throws Error {
+	force_suprapack_update();
 	unowned string pkg_name;
 
 	// All Update
