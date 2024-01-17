@@ -1,4 +1,4 @@
-public class Config{
+public class Config : Object{
 	public Config () throws Error {
 		this.change_prefix (@"$HOME/.local");
 		this.load_config();
@@ -54,7 +54,9 @@ public class Config{
 		FileUtils.set_contents(this.config, new_contents.str);
 	}
 
+	public unowned string[] cmd;
 	public bool force		{get; set; default=false;}
+	public bool supraforce	{get; set; default=false;}
 	public string prefix	{get; set; default=@"$HOME/.local";}
 	public string cache		{get; private set;}
 	public string config	{get; private set;}

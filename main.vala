@@ -12,7 +12,7 @@ void load_env() throws Error{
 }
 
 
-public class Main {
+public class Main : Object {
 	public bool all_cmd(string []args) throws Error {
 		string []cmd = {"suprapack"};
 
@@ -30,6 +30,9 @@ public class Main {
 			else if (av.has_prefix ("--force")) {
 				config.force = true;
 			}
+			else if (av.has_prefix ("--supraforce")) {
+				config.supraforce = true;
+			}
 			else
 				cmd += av;
 		}
@@ -41,6 +44,7 @@ public class Main {
 
 
 		string av1 = cmd[1].down();
+		config.cmd = cmd;
 		
 		if (av1.has_suffix(".suprapack")) {
 			install_suprapackage(cmd[1]);

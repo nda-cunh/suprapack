@@ -18,11 +18,11 @@ errordomain ErrorSP {
 	
 }
 
-public void print_info(string? msg, string prefix = "SupraPack") {
+public void print_info(string? msg, string prefix = "SupraPack", string color = "\033[33;1m") {
 	if (msg == null)
-		print("\033[33;1m[%s]\033[0m\n", prefix);
+		print("%s[%s]\033[0m\n", color, prefix);
 	else
-		print("\033[33;1m[%s]\033[0m: %s\n", prefix, msg);
+		print("%s[%s]\033[0m: %s\n", color, prefix, msg);
 }
 
 public void print_update(string msg) {

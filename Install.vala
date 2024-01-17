@@ -51,7 +51,9 @@ void install_files(List<string> list, int len) {
 		foreach (var e in list) {
 			basename = e.offset(len);
 			var fileSrc = File.new_for_path(e);
-			var fileDest = File.new_for_path(config.prefix+ basename);
+			var last_dest = config.prefix + basename;
+			FileUtils.unlink(last_dest);
+			var fileDest = File.new_for_path(last_dest);
 			string path = fileDest.get_path();
 			path = path[0: path.last_index_of_char('/')];
 			DirUtils.create_with_parents(path, 0755);
@@ -87,6 +89,18 @@ private void script_post_install(string dir) {
 
 // install package suprapack
 public void install_suprapackage(string suprapack) throws Error {
+	force_suprapack_update();
+	if (config.supraforce == false && Sync.check_update("suprapack")) {
+		print_info("Upgrade", "An update of suprapack");
+		Process.spawn_command_line_sync(@"$(config.prefix)/bin/suprapack --force --supraforce add suprapack");
+		var cmd_str = "";
+		foreach (var i in config.cmd) {
+			cmd_str += @"$i ";
+		}
+		Process.spawn_command_line_sync(@"$cmd_str");
+		Process.exit(0);
+	}
+
 	Utils.create_pixmaps_link();
 	if (FileUtils.test(suprapack, FileTest.EXISTS)) {
 		if (!(suprapack.has_suffix(".suprapack")))
@@ -128,7 +142,21 @@ public void install_suprapackage(string suprapack) throws Error {
 }
 
 
+private void force_suprapack_update () throws Error {
+	if (config.supraforce == false && Sync.check_update("suprapack")) {
+		print_info(null, "Canceling... An update of suprapack is here", "\033[35;1m");
+		Process.spawn_command_line_sync(@"$(config.prefix)/bin/suprapack --force --supraforce add suprapack");
+		var cmd_str = "";
+		foreach (var i in config.cmd) {
+			cmd_str += @"$i ";
+		}
+		Process.spawn_command_line_sync(@"$cmd_str");
+		Process.exit(0);
+	}
+}
+
 public void install(string name_search) throws Error{
+	force_suprapack_update();
 	var sync = Sync.default();
 	
 	SupraList[] queue = {};
