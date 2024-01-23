@@ -90,16 +90,6 @@ private void script_post_install(string dir) {
 // install package suprapack
 public void install_suprapackage(string suprapack) throws Error {
 	force_suprapack_update();
-	if (config.supraforce == false && Sync.check_update("suprapack")) {
-		print_info("Upgrade", "An update of suprapack");
-		Process.spawn_command_line_sync(@"$(config.prefix)/bin/suprapack --force --supraforce add suprapack");
-		var cmd_str = "";
-		foreach (var i in config.cmd) {
-			cmd_str += @"$i ";
-		}
-		Process.spawn_command_line_sync(@"$cmd_str");
-		Process.exit(0);
-	}
 
 	Utils.create_pixmaps_link();
 	if (FileUtils.test(suprapack, FileTest.EXISTS)) {
@@ -143,6 +133,8 @@ public void install_suprapackage(string suprapack) throws Error {
 
 
 private void force_suprapack_update () throws Error {
+	if (!Query.is_exist("suprapack"))
+		return ;
 	if (config.supraforce == false && Sync.check_update("suprapack")) {
 		print_info(null, "Canceling... An update of suprapack is here", "\033[35;1m");
 		Process.spawn_command_line_sync(@"$(config.prefix)/bin/suprapack --force --supraforce add suprapack");
