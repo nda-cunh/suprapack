@@ -26,17 +26,25 @@ public class RepoInfo : Object{
 
 	private string? _list;
 	public string list {
-		get {
-			if (_list == null) {
-				string list_file = @"/tmp/$(this.name)_$(USERNAME)_list";
-				// print_info(@"Download list from $(this.name) repo");
-				if(Utils.run_silent({"curl", "-o", list_file, this.url + "list"}) != 0) 
-					print_error(@"unable to download file\nfile => {$(list_file) located at $(this.url)}");
-				_list = list_file;
-			}
-			return _list;
-		}
-	}
+    get {
+        if (_list == null) {
+            string list_file = @"/tmp/$(this.name)_$(USERNAME)_list";
+            // print_info(@"Download list from $(this.name) repo");
+            bool should_download = true;
+            if (FileUtils.test(list_file, FileTest.EXISTS)) {
+				var stat = Stat.l(list_file);
+				var now = time_t();
+				if (stat.st_mtime + 700 > now)
+					should_download = false;
+            }
+            if (should_download && Utils.run_silent({"curl", "-o", list_file, this.url + "list"}) !=  0) {
+                print_error(@"unable to download file\nfile => {$(list_file) located at $(this.url)}");
+            }
+            _list = list_file;
+        }
+        return _list;
+    }
+}
 
 	public string name;
 	public string url;
