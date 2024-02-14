@@ -13,23 +13,10 @@ namespace Build {
 				Process.exit(0);
 			}
 		}
-		Package pkg;
-
-		if (FileUtils.test(@"$usr_dir/info", FileTest.EXISTS)) {
-			pkg = Package.from_file(@"$usr_dir/info");
-		}
-		else {
-			pkg = Package.from_input();
-			pkg.create_info_file(@"$usr_dir/info");
-		}
-		// Get a Package from input
-		// generate info file in USR_DIR
-
-		// Modify the package
+		// Modify the build_package
 
 		string stderr;
 		try {
-
 			// modify /etc 
 			if (FileUtils.test(@"$usr_dir/../etc", FileTest.EXISTS)) {
 				Process.spawn_command_line_sync(@"mv $usr_dir/../etc $usr_dir/etc");
@@ -52,6 +39,21 @@ namespace Build {
 		}catch(Error e) {
 			print_error(e.message);
 		}
+
+
+		// Create the info_file or use it
+		Package pkg;
+
+		if (FileUtils.test(@"$usr_dir/info", FileTest.EXISTS)) {
+			pkg = Package.from_file(@"$usr_dir/info");
+		}
+		else {
+			pkg = Package.from_input();
+			pkg.size_installed = Utils.size_folder(usr_dir).to_string();
+			pkg.create_info_file(@"$usr_dir/info");
+		}
+
+
 
 		// compress the package
 		var name_pkg = @"$(pkg.name)-$(pkg.version)";
