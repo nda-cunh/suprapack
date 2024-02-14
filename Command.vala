@@ -132,6 +132,8 @@ bool cmd_info(string []av) {
 	print(@"$(BOLD)Version                  : $(NONE)%s\n", info.version);
 	print(@"$(BOLD)Description              : $(NONE)%s\n", info.description);
 	print(@"$(BOLD)Author                   : $(NONE)%s\n", info.author);
+	if (info.size_installed != "")
+		print(@"$(BOLD)Installed Size           : $(NONE)%s\n", info.size_installed);
 	var dep_list = info.dependency.split(" ");
 	if (dep_list.length >= 1) {
 		print(@"$(BOLD)Depends                  : $(NONE)");
