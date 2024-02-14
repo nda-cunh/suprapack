@@ -9,6 +9,9 @@ public struct Package {
 	string description;
 	string binary;
 	string dependency;
+	string optional_dependency;
+	string size_tar;
+	string size_installed;
 	string installed_files;
 
 
@@ -20,6 +23,9 @@ public struct Package {
 		this.binary = "";
 		this.dependency = "";
 		this.installed_files = "";
+		this.optional_dependency = "";
+		this.size_tar = "";
+		this.size_installed = "";
 	}
 
 	// constructor
@@ -30,8 +36,11 @@ public struct Package {
 		this.author = Utils.get_input("Author: ");
 		this.description = Utils.get_input("Description: ");
 		this.dependency = Utils.get_input("Dependency: ");
+		this.optional_dependency = Utils.get_input("Optional Dependency: ");
 		print("Can be empty if %s is the binary name\n", this.name);
 		this.binary = Utils.get_input("Binary: ");
+		this.size_tar = "";
+		this.size_installed = "";
 		this.installed_files = "";
 	}
 	
@@ -61,6 +70,12 @@ public struct Package {
 					this.binary = value.strip();
 				if (line.has_prefix("dependency"))
 					this.dependency = value.strip();
+				if (line.has_prefix("optional_dependency"))
+					this.optional_dependency = value.strip();
+				if (line.has_prefix("size_tar"))
+					this.size_tar = value.strip();
+				if (line.has_prefix("size_installed"))
+					this.size_installed = value.strip();
 			}
 			if ("[FILES]" in contents) {
 				value = contents.offset(contents.index_of("[FILES]") + 8);
@@ -93,5 +108,8 @@ public struct Package {
 		fs.printf("binary: %s\n", this.binary);
 		fs.printf("description: %s\n", this.description);
 		fs.printf("dependency: %s\n", this.dependency);
+		fs.printf("optional_dependency: %s\n", this.optional_dependency);
+		fs.printf("size_tar: %s\n", this.size_tar);
+		fs.printf("size_installed: %s\n", this.size_installed);
 	}
 }

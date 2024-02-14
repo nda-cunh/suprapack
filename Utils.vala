@@ -112,4 +112,30 @@ namespace Utils {
 		}
 		return "";
 	}
+	public int64 size_folder (string folder_name) {
+		File file = File.new_for_commandline_arg (folder_name);
+		return size_folder_it(file);
+	}
+
+	private int64 size_folder_it (File file) {
+		int64 result = 0;
+		try {
+			FileEnumerator enumerator = file.enumerate_children ("standard::*", FileQueryInfoFlags.NOFOLLOW_SYMLINKS);
+			FileInfo info = null;
+			while (((info = enumerator.next_file ()) != null)) {
+				if (info.get_file_type () == FileType.DIRECTORY) {
+					var thread = new Thread<long>(null, () => {
+							File subdir = file.resolve_relative_path(info.get_name());
+							var subdir_size = size_folder_it(subdir);
+							return (long)subdir_size;
+						});
+					result += (int64)thread.join();
+				} else {
+					result += info.get_size ();
+				}
+			}
+		} catch(Error e) { }
+		return result;
+	}
+
 }
