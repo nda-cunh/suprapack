@@ -54,6 +54,10 @@ namespace Build {
 		pkg.create_info_file(@"$usr_dir/info");
 
 
+		if (FileUtils.test(@"$usr_dir/pre_install.sh", FileTest.EXISTS))
+			FileUtils.chmod(@"$usr_dir/pre_install.sh", 0777);
+		if (FileUtils.test(@"$usr_dir/post_install.sh", FileTest.EXISTS))
+			FileUtils.chmod(@"$usr_dir/post_install.sh", 0777);
 		// compress the package
 		var name_pkg = @"$(pkg.name)-$(pkg.version)";
 		if(Utils.run_silent({"tar", "-cJf", @"$(name_pkg).suprapack", "-C", usr_dir, "."}) != 0)
