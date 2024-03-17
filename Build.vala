@@ -49,10 +49,9 @@ namespace Build {
 		}
 		else {
 			pkg = Package.from_input();
-			pkg.size_installed = Utils.size_folder(usr_dir).to_string();
-			pkg.create_info_file(@"$usr_dir/info");
 		}
-
+		pkg.size_installed = Utils.size_folder(usr_dir).to_string();
+		pkg.create_info_file(@"$usr_dir/info");
 
 
 		// compress the package
