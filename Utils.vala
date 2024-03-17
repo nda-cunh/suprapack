@@ -5,6 +5,16 @@ namespace Utils {
 		yield;
 	}
 
+
+	// Teste stdin request @default is false
+	bool stdin_bool_choose (string str = "") {
+		print(str);
+		var result = stdin.read_line().strip().ascii_down();
+		if ("y" in result || "o" in result || result == "1")
+			return true;
+		return false;
+	}
+
 	void create_pixmaps_link() {
 		string HOME = Environment.get_home_dir ();
 		try {
@@ -58,7 +68,6 @@ namespace Utils {
 			print_error(e.message);
 		}
 	}
-
 
 	SupraList[] sort_supralist_version(SupraList []lst) {
 		var list = lst.copy();
