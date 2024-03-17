@@ -71,7 +71,7 @@ private void script_pre_install(string dir) throws Error {
 		var envp = Environ.get();
 		envp = Environ.set_variable(envp, "SRCDIR", dir, true);
 		envp = Environ.set_variable(envp, "PKGDIR", config.prefix, true);
-		if(Utils.run({@"$dir/pre_install.sh"}, envp) != 0)
+		if (Utils.run({@"$dir/pre_install.sh"}, envp) != 0)
 			throw new ErrorSP.FAILED("non zero exit code of pre installation script");
 	}
 }
@@ -100,9 +100,10 @@ public void install_suprapackage(string suprapack) throws Error {
 		throw new ErrorSP.ACCESS(@"$suprapack n'existe pas");
 	var tmp_dir = DirUtils.make_tmp("suprastore_XXXXXX");
 	print_info(@"Extraction de $(CYAN)$(suprapack)$(NONE)");
-	if(Utils.run_silent({"tar", "-xf", suprapack, "-C", tmp_dir}) != 0) 
+	if (Utils.run_silent({"tar", "-xf", suprapack, "-C", tmp_dir}) != 0) 
 		throw new ErrorSP.FAILED(@"unable to decompress package\npackage => $(suprapack)");
 	var pkg = Package.from_file(@"$tmp_dir/info");
+	script_pre_install(tmp_dir);
 	if (Query.is_exist(pkg.name)) {
 		Query.uninstall(pkg.name);
 	}
@@ -120,7 +121,6 @@ public void install_suprapackage(string suprapack) throws Error {
 		}
 		print_info("All dependencies have been installed !", "Dependency");
 	}
-	script_pre_install(tmp_dir);
 	print_info(@"Installation de $(CYAN)$(pkg.name) $(pkg.version)$(NONE) par $(pkg.author)");
 	var list = new List<string>();
 	list_file_dir(tmp_dir, ref list);	
