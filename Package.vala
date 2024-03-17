@@ -13,6 +13,7 @@ public struct Package {
 	string size_tar;
 	string size_installed;
 	string installed_files;
+	string exclude_package; 
 
 
 	private void init() {
@@ -24,6 +25,7 @@ public struct Package {
 		this.dependency = "";
 		this.installed_files = "";
 		this.optional_dependency = "";
+		this.exclude_package = "";
 		this.size_tar = "";
 		this.size_installed = "";
 	}
@@ -37,6 +39,7 @@ public struct Package {
 		this.description = Utils.get_input("Description: ");
 		this.dependency = Utils.get_input("Dependency: ");
 		this.optional_dependency = Utils.get_input("Optional Dependency: ");
+		this.exclude_package = Utils.get_input("Exclude Package: ");
 		print("Can be empty if %s is the binary name\n", this.name);
 		this.binary = Utils.get_input("Binary: ");
 		this.size_tar = "";
@@ -60,22 +63,24 @@ public struct Package {
 				value = line.offset(line.index_of_char(':') + 1);
 				if (line.has_prefix("name"))
 					this.name = value.strip();
-				if (line.has_prefix("version"))
+				else if (line.has_prefix("version"))
 					this.version = value.strip();
-				if (line.has_prefix("author"))
+				else if (line.has_prefix("author"))
 					this.author = value.strip();
-				if (line.has_prefix("description"))
+				else if (line.has_prefix("description"))
 					this.description = value.strip();
-				if (line.has_prefix("binary"))
+				else if (line.has_prefix("binary"))
 					this.binary = value.strip();
-				if (line.has_prefix("dependency"))
+				else if (line.has_prefix("dependency"))
 					this.dependency = value.strip();
-				if (line.has_prefix("optional_dependency"))
+				else if (line.has_prefix("optional_dependency"))
 					this.optional_dependency = value.strip();
-				if (line.has_prefix("size_tar"))
+				else if (line.has_prefix("size_tar"))
 					this.size_tar = value.strip();
-				if (line.has_prefix("size_installed"))
+				else if (line.has_prefix("size_installed"))
 					this.size_installed = value.strip();
+				else if (line.has_prefix("exclude_package"))
+					this.exclude_package = value.strip();
 			}
 			if ("[FILES]" in contents) {
 				value = contents.offset(contents.index_of("[FILES]") + 8);
@@ -108,6 +113,7 @@ public struct Package {
 		fs.printf("binary: %s\n", this.binary);
 		fs.printf("description: %s\n", this.description);
 		fs.printf("dependency: %s\n", this.dependency);
+		fs.printf("exclude_package: %s\n", this.exclude_package);
 		fs.printf("optional_dependency: %s\n", this.optional_dependency);
 		fs.printf("size_tar: %s\n", this.size_tar);
 		fs.printf("size_installed: %s\n", this.size_installed);

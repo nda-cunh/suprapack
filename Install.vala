@@ -82,7 +82,7 @@ private void script_post_install(string dir) {
 		envp = Environ.set_variable(envp, "SRCDIR", dir, true);
 		envp = Environ.set_variable(envp, "PKGDIR", config.prefix, true);
 		print_info(null, "Finition");
-		if(Utils.run({@"$dir/post_install.sh"}, envp) != 0)
+		if (Utils.run({@"$dir/post_install.sh"}, envp) != 0)
 			print_error("non zero exit code of pre installation script");
 	}
 }
@@ -92,6 +92,7 @@ public void install_suprapackage(string suprapack) throws Error {
 	force_suprapack_update();
 
 	Utils.create_pixmaps_link();
+
 	if (FileUtils.test(suprapack, FileTest.EXISTS)) {
 		if (!(suprapack.has_suffix(".suprapack")))
 			throw new ErrorSP.BADFILE("ce fichier n'est pas un suprapack");
@@ -102,11 +103,32 @@ public void install_suprapackage(string suprapack) throws Error {
 	print_info(@"Extraction de $(CYAN)$(suprapack)$(NONE)");
 	if (Utils.run_silent({"tar", "-xf", suprapack, "-C", tmp_dir}) != 0) 
 		throw new ErrorSP.FAILED(@"unable to decompress package\npackage => $(suprapack)");
+
 	var pkg = Package.from_file(@"$tmp_dir/info");
+
+	/* Exclude Package*/
+	foreach (var exclude in pkg.exclude_package.split(" ")) {
+		exclude = exclude.strip();
+		if (Query.is_exist(exclude)) {
+			print_info(@"Impossible to install '$(pkg.name)' because '$(exclude)' is in conflict with him", "Conflict", "\033[31;1m");
+			print_info(@"please choose if you want to uninstall '$(exclude)' [y/N]", "Conflict", "\033[31;1m");
+			if (Utils.stdin_bool_choose(": ") == true) {
+				Query.uninstall(exclude);
+			}
+			else {
+				print_info("Cancelling...");
+				return ;
+			}
+		}
+	}
+
+	/* Pre Install script launch */
 	script_pre_install(tmp_dir);
 	if (Query.is_exist(pkg.name)) {
 		Query.uninstall(pkg.name);
 	}
+
+	/* Install all dependency */
 	if (pkg.dependency != "") {
 		print_info("search dependency...", "Dependency");
 		var dep_list = pkg.dependency.split(" ");
@@ -176,7 +198,7 @@ public void install(string name_search) throws Error{
 			var lst = Utils.sort_supralist_version(queue);
 			pkg = lst[lst.length - 1];
 		}else {
-			print_info("Similar package are found");
+			print_info("Similar package are found", "Conflict", "\033[31;1m");
 			for (int i = 0; i < queue.length; i++) {
 			print("%s", BOLD);
 				print(@"%4d) $(PURPLE)%s/$(WHITE)%s [%s]$(NONE)\n", i, queue[i].repo_name, queue[i].name, queue[i].version);
