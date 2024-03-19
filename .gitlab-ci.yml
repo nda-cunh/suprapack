@@ -27,16 +27,14 @@ build:
     paths:
       - suprapack
       - suprapack*.suprapack
-      # depending on your build setup it's most likely a good idea to cache outputs to reduce the build time
-      # cache:
-      #   paths:
-      #     - "*.o"
+
   release:
     name: 'My awesome release'
     description: 'Suprapack'
     tag_name: '$CI_COMMIT_TAG'
-
+    
 deploy:
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
   stage: deploy
   script: echo "Define your deployment script!"
   environment: production
