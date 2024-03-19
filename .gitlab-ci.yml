@@ -18,7 +18,7 @@ build:
   # instead of calling g++ directly you can also use some build toolkit like make
   # install the necessary build tools when needed
   before_script:
-     - apt update && apt -y install valac clang
+     - apt update && apt -y install valac clang make
   script:
     - make prod
     - cp ./suprapack usr/bin/suprapack
