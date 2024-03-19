@@ -15,7 +15,7 @@ void list_file_dir(string emp_dir, ref List<string> list) {
 			else 
 				list.append(name);
 		}
-	} catch(Error e) {
+	} catch (Error e) {
 		print_error(e.message);
 	}
 }

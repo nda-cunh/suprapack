@@ -223,6 +223,23 @@ bool cmd_prepare() {
 	return true;
 }
 
+private void print_supravim_plugin(ref SupraList repo, bool installed) {
+	if (installed)
+		print("[installed] ");
+	print("%s %s [%s]\n", repo.name, repo.version, repo.description);
+}
+
+bool cmd_search_supravim_plugin(string []av) throws Error {
+	force_suprapack_update();
+	var list = Sync.default().get_list_package();
+	var installed = Query.get_all_installed_pkg();
+	
+	foreach(var i in list) {
+		if (i.name.has_prefix("plugin-"))
+			print_supravim_plugin(ref i, (i.name in installed));
+	}
+	return true;
+}
 
 private void print_search(ref SupraList repo, bool installed) {
 	print("%s%s ", BOLD, PURPLE);
@@ -231,6 +248,8 @@ private void print_search(ref SupraList repo, bool installed) {
 	if (installed)
 		print(" %s[installed]", CYAN);
 	print("%s\n", NONE);
+	if (repo.description != "")
+		print("\t%s%s\n", COM, repo.description);
 }
 
 bool cmd_search(string []av) throws Error {

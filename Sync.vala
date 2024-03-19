@@ -4,13 +4,24 @@
 // version (1.2)
 public struct SupraList {
 	public SupraList (string repo_name, string line) {
-		this.repo_name = repo_name;
-		name = line[0:line.last_index_of_char ('-')];
-		version = line[line.last_index_of_char ('-') + 1 : line.last_index_of_char ('.')];
+		//42cformatter-v1.0.suprapack c formatter for 42 norm
+		MatchInfo match_info;
+		var regex = /(?P<pkgname>.*?)[.]suprapack/;
+
+		if (regex.match(line, 0, out match_info)) {
+			this.repo_name = repo_name;
+			pkg_name = match_info.fetch_named("pkgname") + ".suprapack";
+
+			name = pkg_name[0:pkg_name.last_index_of_char ('-')];
+			version = pkg_name[pkg_name.last_index_of_char ('-') + 1 : pkg_name.last_index_of_char ('.')];
+			description = line.offset(pkg_name.length).strip();
+		}
 	}
 	unowned string repo_name;
+	string pkg_name;
 	string name;
 	string version;
+	string description;
 }
 
 
