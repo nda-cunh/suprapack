@@ -28,16 +28,11 @@ build:
       - suprapack
       - suprapack*.suprapack
 
-release_job:
+deploy:
   stage: release
   image: registry.gitlab.com/gitlab-org/release-cli:latest
-  needs:
-    - job: build
-      artifacts: true
   script:
-    - echo "running release_job for $TAG"
-  release:
-    name: 'Release $TAG'
-    description: 'Created using the release-cli $EXTRA_DESCRIPTION'  # $EXTRA_DESCRIPTION and the $TAG
-    tag_name: '$TAG'                                                 # variables must be defined elsewhere
-    ref: '$CI_COMMIT_SHA'                                            # in the pipeline. For example, in the
+  - release-cli create --name "Release $CI_COMMIT_SHA" --description \
+  "Created using the release-cli $EXTRA_DESCRIPTION" \
+  --tag-name "v${MAJOR}.${MINOR}.${REVISION}" --ref "$CI_COMMIT_SHA" \
+  --released-at "2020-07-15T08:00:00Z" --milestone "m1" --milestone "m2" --milestone "m3"
