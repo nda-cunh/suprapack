@@ -32,10 +32,21 @@ build:
     name: 'My awesome release'
     description: 'Suprapack'
     tag_name: '$CI_COMMIT_TAG'
-    
-deploy:
+
+release_job:
+  stage: release
   image: registry.gitlab.com/gitlab-org/release-cli:latest
-  stage: deploy
-  script: echo "Define your deployment script!"
-  environment: production
-  
+  needs:
+    - job: build
+      artifacts: true
+  script:
+    - echo "running release_job for $TAG"
+  release:
+    name: 'Release $TAG'
+    description: 'Created using the release-cli $EXTRA_DESCRIPTION'  # $EXTRA_DESCRIPTION and the $TAG
+    tag_name: '$TAG'                                                 # variables must be defined elsewhere
+    ref: '$CI_COMMIT_SHA'                                            # in the pipeline. For example, in the
+    assets:
+      links:
+        - name: 'asset1'
+          filepath: './suprapack' # optional
