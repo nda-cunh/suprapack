@@ -95,6 +95,8 @@ public class Main : Object {
 				return cmd_prepare();
 			case "config":
 				return cmd_config(cmd);
+			case "search_supravim_plugin":
+				return cmd_search_supravim_plugin(cmd);
 			case "-g":
 			case "download":
 				return cmd_download(cmd);
