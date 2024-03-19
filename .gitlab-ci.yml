@@ -21,8 +21,8 @@ build:
      - apt update && apt -y install valac clang
   script:
     - make prod
-    cp ./suprapack usr/bin/suprapack
-    ./suprapack build usr
+    - cp ./suprapack usr/bin/suprapack
+    - ./suprapack build usr
   artifacts:
     paths:
       - suprapack
