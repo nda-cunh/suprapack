@@ -11,14 +11,13 @@ void load_env() throws Error{
 		config.change_prefix(prefix);
 }
 
-
 public class Main : Object {
 	public bool all_cmd(string []args) throws Error {
 		string []cmd = {"suprapack"};
 
 		// Load Environment variable
 		load_env();
-
+		
 		foreach (var av in args[1:]) {
 			if (!av.has_prefix("-")) {
 				cmd += av;
@@ -43,7 +42,7 @@ public class Main : Object {
 		}
 
 
-		string av1 = cmd[1].down();
+		string av1 = cmd[1];
 		config.cmd = cmd;
 		
 		if (av1.has_suffix(".suprapack")) {
@@ -51,7 +50,14 @@ public class Main : Object {
 			return true;
 		}
 
+		if (av1.has_prefix("-Sy")) {
+			Sync.refresh_list();
+			av1 = "-S" + av1[av1.last_index_of_char('y')+1:];
+			print("[%s]\n", av1);
+		}
+
 		switch (av1) {
+
 			case "query_get_comp":
 				return cmd_query_get_comp(cmd);
 			case "sync_get_comp":
@@ -59,25 +65,27 @@ public class Main : Object {
 			case "shell":
 				return cmd_shell(cmd);
 			case "list_files":
-			case "-ql":
+			case "-Ql":
 				return cmd_list_files(cmd);
 			case "loading":
 				cmd_loading(cmd);
 			case "run":
+			case "Qr":
 				return cmd_run(cmd);
-			case "-q":
+			case "-Q":
 			case "list":
 				return cmd_list(cmd);
 			case "search":
-			case "-ss":
+			case "-Ss":
 				return cmd_search(cmd);
+			case "-B":
 			case "build":
 				return cmd_build(cmd);
 			case "help":
 				return cmd_help();
 			case "install":
 			case "add":
-			case "-s":
+			case "-S":
 				return cmd_install(cmd);
 			case "uninstall":
 			case "remove":
@@ -86,18 +94,19 @@ public class Main : Object {
 			case "have_update":
 				return cmd_have_update(cmd);
 			case "update":
-			case "-syu":
+			case "-Su":
 				return cmd_update(cmd);
 			case "info":
-			case "-qi":
+			case "-Qi":
 				return cmd_info(cmd);
 			case "prepare":
+			case "-P":
 				return cmd_prepare();
 			case "config":
 				return cmd_config(cmd);
 			case "search_supravim_plugin":
 				return cmd_search_supravim_plugin(cmd);
-			case "-g":
+			case "-G":
 			case "download":
 				return cmd_download(cmd);
 		}

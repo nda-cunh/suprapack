@@ -42,7 +42,7 @@ public class RepoInfo : Object{
             string list_file = @"/tmp/$(this.name)_$(USERNAME)_list";
             // print_info(@"Download list from $(this.name) repo");
             bool should_download = true;
-            if (FileUtils.test(list_file, FileTest.EXISTS)) {
+            if (FileUtils.test (list_file, FileTest.EXISTS)) {
 				var stat = Stat.l(list_file);
 				var now = time_t();
 				if (stat.st_mtime + 700 > now)
@@ -153,6 +153,13 @@ class Sync : Object{
 			}
 		}
 		return _list;
+	}
+
+	public static void refresh_list () {
+		var def = Sync.default();
+		foreach (var i in def._repo) {
+            FileUtils.remove(@"/tmp/$(i.name)_$(USERNAME)_list");
+		}
 	}
 
 	public static string download_package (string pkg_name, string? repo_name = null) {
