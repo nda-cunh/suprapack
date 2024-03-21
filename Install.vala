@@ -91,8 +91,6 @@ private void script_post_install(string dir) {
 public void install_suprapackage(string suprapack) throws Error {
 	force_suprapack_update();
 
-	Utils.create_pixmaps_link();
-
 	if (FileUtils.test(suprapack, FileTest.EXISTS)) {
 		if (!(suprapack.has_suffix(".suprapack")))
 			throw new ErrorSP.BADFILE("ce fichier n'est pas un suprapack");
