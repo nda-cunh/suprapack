@@ -17,24 +17,27 @@ namespace Utils {
 
 	void create_pixmaps_link() {
 		string HOME = Environment.get_home_dir ();
-		try {
-			var pixmaps = @"$HOME/.local/share/pixmaps";
-			if (FileUtils.test(pixmaps, FileTest.IS_SYMLINK)) {
-				return ;
+		print("Create pixmaps link\n");
+		var pixmaps_path = @"$HOME/.local/share/pixmaps";
+		var icons_path = @"$HOME/.icons";
+
+		if (FileUtils.test(icons_path, FileTest.IS_SYMLINK)) {
+			if (!FileUtils.test(pixmaps_path, FileTest.EXISTS)) {
+				DirUtils.remove(pixmaps_path);
+				FileUtils.remove(pixmaps_path);
+				create_pixmaps_link();
 			}
-			else if (FileUtils.test(pixmaps, FileTest.EXISTS)) {
-				FileUtils.remove(pixmaps);
-				var file = File.new_for_path(pixmaps);
-				file.make_symbolic_link(@"$HOME/.icons");
-			}
-			else {
-				DirUtils.create_with_parents(@"$HOME/.local/share/", 0755);
-				var file = File.new_for_path(pixmaps);
-				file.make_symbolic_link(@"$HOME/.icons");
-			}
+			return ;
 		}
-		catch (Error e) {
-			printerr(e.message);
+		else {
+			DirUtils.create_with_parents(@"$HOME/.local/share/", 0755);
+			if (FileUtils.symlink(pixmaps_path, icons_path) != 0) {
+				if (FileUtils.test (pixmaps_path, FileTest.EXISTS))
+					print_error(@"Impossible link to .icons please remove $pixmaps_path");
+				if ( FileUtils.test (icons_path, FileTest.EXISTS))
+					print_error(@"Impossible link to .icons please remove $icons_path");
+
+			}
 		}
 	}
 
