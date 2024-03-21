@@ -15,32 +15,6 @@ namespace Utils {
 		return false;
 	}
 
-	void create_pixmaps_link() {
-		string HOME = Environment.get_home_dir ();
-		print("Create pixmaps link\n");
-		var pixmaps_path = @"$HOME/.local/share/pixmaps";
-		var icons_path = @"$HOME/.icons";
-
-		if (FileUtils.test(icons_path, FileTest.IS_SYMLINK)) {
-			if (!FileUtils.test(pixmaps_path, FileTest.EXISTS)) {
-				DirUtils.remove(pixmaps_path);
-				FileUtils.remove(pixmaps_path);
-				create_pixmaps_link();
-			}
-			return ;
-		}
-		else {
-			DirUtils.create_with_parents(@"$HOME/.local/share/", 0755);
-			if (FileUtils.symlink(pixmaps_path, icons_path) != 0) {
-				if (FileUtils.test (pixmaps_path, FileTest.EXISTS))
-					print_error(@"Impossible link to .icons please remove $pixmaps_path");
-				if ( FileUtils.test (icons_path, FileTest.EXISTS))
-					print_error(@"Impossible link to .icons please remove $icons_path");
-
-			}
-		}
-	}
-
 	int run_silent(string []av) {
 		SpawnFlags flags = 0;
 		string PWD = Environment.get_current_dir();
