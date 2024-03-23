@@ -186,9 +186,13 @@ class Sync {
 	string _download (SupraList pkg) {
 		string pkgdir = @"$(config.cache)/pkg";
 		string pkgname = @"$(pkg.name)-$(pkg.version).suprapack";
-		string output = @"$pkgdir/$(pkg.name)-$(pkg.version).suprapack";
+		string output = @"$pkgdir/$pkgname";
 		DirUtils.create_with_parents(pkgdir, 0755);
 
+		if (FileUtils.test (output, FileTest.EXISTS)) {
+			print_info(output, "Cache");
+			return output;
+		}
 		string url = this.get_url_from_name(pkg.repo_name) + pkgname;
 		if (Utils.run_silent({"curl", "-o", output, url}) != 0) 
 			print_error(@"unable to download package\npackage => $(pkgname)");
