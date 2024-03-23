@@ -1,3 +1,6 @@
+public errordomain HttpError {
+	ERR
+}
 namespace Utils {
 
 	async void sleep(uint ms) {
@@ -132,5 +135,64 @@ namespace Utils {
 		} catch(Error e) { }
 		return result;
 	}
+public void download (string url, string output = "") throws Error {
+	MatchInfo match_info;
+	string name;
+	string uri;
+	string target;
 
+	if (! /(https?:\/\/)?(?P<name>[^\/]*)(?P<uri>.*)/.match (url, 0, out match_info))
+		return;
+	name = match_info.fetch_named ("name");
+	uri = match_info.fetch_named ("uri");
+	if (output == "")
+		target = uri[uri.last_index_of_char ('/') + 1:];
+	else
+		target = output;
+
+
+	var fs = FileStream.open (target, "w");
+	var client = new SocketClient(){tls=true};
+	var conn = client.connect_to_host(name, 443);
+
+	var output_stream = new DataOutputStream(conn.get_output_stream());
+	var input_stream = new DataInputStream(conn.get_input_stream());
+
+
+	output_stream.put_string(@"GET $uri HTTP/1.1\r\n");
+	output_stream.put_string(@"Host: $name\r\n"); // Ajout de l'en-tête "Host"
+	output_stream.put_string("Cache-Control: no-cache\r\n"); // Ignorer le cache
+	output_stream.put_string("\r\n");
+	output_stream.flush();
+
+	// Lecture de la réponse
+	size_t bytes = 0;
+	string line;
+	
+	string error = input_stream.read_line_utf8();
+	error = error.offset(error.index_of_char(' '));
+	int err =  int.parse(error);
+	if (err != 200) {
+		throw new HttpError.ERR(@"$(error) HTTP");
+	}
+
+	while ((line = input_stream.read_line_utf8()) != null) {
+		/* Header Part */
+		if (line.has_prefix("Content-Length: ")) {
+			line.scanf("Content-Length: %zu", out bytes);
+		}
+		/* Data Part */
+		print("%s\n", line.escape());
+		if (line == "\r") {
+			uint8 buffer[65537];
+			while (bytes > 0) {
+				size_t len = input_stream.read (buffer[0:65536]);
+				buffer[len] = '\0';
+				bytes -= len;
+				fs.write (buffer[0:len], 1);
+			}
+			return;
+		}
+	}
+}
 }

@@ -191,12 +191,16 @@ class Sync {
 		DirUtils.create_with_parents(pkgdir, 0755);
 
 		if (FileUtils.test (output, FileTest.EXISTS)) {
-			print_info(output, "Cache");
 			return output;
 		}
 		string url = this.get_url_from_name(pkg.repo_name) + pkgname;
-		if (Utils.run_silent({"curl", "-o", output, url}) != 0) 
-			print_error(@"unable to download package\npackage => $(pkgname)");
+		// if (Utils.run_silent({"curl", "-o", output, url}) != 0) 
+			// print_error(@"unable to download package\npackage => $(pkgname)");
+		try  {
+			Utils.download(url, output); 
+		} catch (Error e) {
+			printerr(e.message);
+		}
 		return output;
 	}
 
