@@ -119,6 +119,7 @@ class Sync {
 		throw new ErrorSP.FAILED(@"Cant found $name_pkg");
 	}
 
+	// TODO better check version
 	// return true if need update else return false
 	public static bool check_update(string package_name) throws Error{
 		try {

@@ -104,48 +104,20 @@ public void install_suprapackage(string suprapack) throws Error {
 
 	var pkg = Package.from_file(@"$tmp_dir/info");
 
-	/* Exclude Package*/
-	foreach (var exclude in pkg.exclude_package.split(" ")) {
-		exclude = exclude.strip();
-		if (Query.is_exist(exclude)) {
-			print_info(@"Impossible to install '$(pkg.name)' because '$(exclude)' is in conflict with him", "Conflict", "\033[31;1m");
-			print_info(@"please choose if you want to uninstall '$(exclude)' [y/N]", "Conflict", "\033[31;1m");
-			if (Utils.stdin_bool_choose(": ") == true) {
-				Query.uninstall(exclude);
-			}
-			else {
-				print_info("Cancelling...");
-				return ;
-			}
-		}
-	}
-
 	/* Pre Install script launch */
 	script_pre_install(tmp_dir);
 	if (Query.is_exist(pkg.name)) {
 		Query.uninstall(pkg.name);
 	}
 
-	/* Install all dependency */
-	if (pkg.dependency != "") {
-		print_info("search dependency...", "Dependency");
-		var dep_list = pkg.dependency.split(" ");
-		foreach(var dep in dep_list) {
-			try {
-				config.force = false;
-				install(dep);
-			} catch (Error err) {
-				if (err is ErrorSP.FAILED)
-					throw err;
-			}
-		}
-		print_info("All dependencies have been installed !", "Dependency");
-	}
 	print_info(@"Installation de $(CYAN)$(pkg.name) $(pkg.version)$(NONE) par $(pkg.author)");
+
 	var list = new List<string>();
 	list_file_dir(tmp_dir, ref list);	
 	install_files(list, tmp_dir.length);
+
 	script_post_install(tmp_dir);
+
 	post_install(list, tmp_dir.length, ref pkg);
 	if(Utils.run_silent({"rm", "-rf", tmp_dir}) != 0)
 		new OptionError.FAILED(@"unable to remove directory\ndirectory => $(tmp_dir)");
@@ -167,7 +139,93 @@ private void force_suprapack_update () throws Error {
 	}
 }
 
-public void install(string name_search, string name_repo = "") throws Error{
+public void install_local (string path) throws Error {
+	if (path.has_suffix(".suprapack")) {
+		SupraList pkg = SupraList("Local", path);//TODO mettre le path dans les '/'
+		add_queue_list(pkg, path);
+		install("");
+	}
+}
+
+public void install(string name_search = "", string name_repo = "") throws Error{
+	force_suprapack_update();
+
+	prepare_install(name_search, name_repo);
+
+	if (config.queue_pkg.length() == 0)
+		print_error("there's nothing to be done");
+	print("resolving dependencies...\n");
+	print("looking for conflicting packages...\n");
+
+	int name_max = 0;
+	int version_max = 0;
+    foreach (var i in config.queue_pkg) {
+
+		foreach (var exclude in i.exclude_package.split(" ")) {
+			exclude = exclude.strip();
+			if (Query.is_exist(exclude)) {
+				print_info(@"Impossible to install '$(i.name)' because '$(exclude)' is in conflict with him", "Conflict", "\033[31;1m");
+				print_info(@"please choose if you want to uninstall '$(exclude)' [y/N]", "Conflict", "\033[31;1m");
+				if (Utils.stdin_bool_choose(": ") == true) {
+					Query.uninstall(exclude);
+				}
+				else {
+					print_info("Cancelling...");
+					return ;
+				}
+			}
+		}
+
+		/* Calc the len for padding*/
+        var len = (i.name.length + i.repo.length + 2);
+        if (len > name_max)
+            name_max = len;
+        len = (i.version.length);
+        if (len > version_max)
+            version_max = len;
+    }
+
+	int64 size_installed = 0;
+	print("Package (%u)\n\n", config.queue_pkg.length());
+	foreach (var i in config.queue_pkg) {
+		string version = i.version;
+		if (Query.is_exist(i.name)) {
+			version = Query.get_from_pkg(i.name).version; 
+		}
+		if (version == i.version)
+			print(" %s/%-*s %s\n", i.repo, name_max - i.repo.length , i.name, i.version);
+		else
+			print(" %s/%-*s %-*s --> %s\n", i.repo, name_max - i.repo.length , i.name, version_max, version, i.version);
+		size_installed += int64.parse(i.size_installed);
+	}
+
+	print("\nTotal Installed Size:  %.2f MiB\n", (double)size_installed / (1 << 20));
+
+	config.queue_pkg.reverse();
+	if (config.allays_yes || Utils.stdin_bool_choose_true(":: Proceed with installation [Y/n] ")) {
+		foreach (var i in config.queue_pkg) {
+			if (config.force == true || i.name == name_search)
+				install_suprapackage(i.output);
+			else {
+				if (Query.is_exist(i.name) == true) {
+					if (Sync.check_update(i.name)) {
+						install_suprapackage(i.output);
+					}
+					else
+						print_info("The package is already installed, use --force if you want to replace it", "Info");
+				}
+
+			}
+			if (!config.is_cached) {
+				FileUtils.unlink(i.output);
+			}
+		}
+	}
+}
+
+void prepare_install(string name_search, string name_repo = "") throws Error{
+	if (name_search == "")
+		return;
 	force_suprapack_update();
 	
 	SupraList[] queue = {};
@@ -187,7 +245,6 @@ public void install(string name_search, string name_repo = "") throws Error{
 	}
 	else if (queue.length == 1){
 		pkg = queue[0];
-		print_info(@"$(pkg.name):$(pkg.version) found in $(pkg.repo_name)");
 	}
 	else {
 		// if Force search auto best package
@@ -209,22 +266,23 @@ public void install(string name_search, string name_repo = "") throws Error{
 			pkg = queue[nb];
 		}
 	}
-	if (config.force == false) {
-		if (Query.is_exist(pkg.name) == true) {
-			if (Sync.check_update(pkg.name)) {
-				config.force = true;
-				update_package(pkg.name);
-				return ;
-			}
-			print_info("The package is already installed, use --force if you want to replace it", "Info");
-			return;
-		}
-	}
 
 	var output = Sync.download(pkg);
-	install_suprapackage(output);
+	add_queue_list(pkg, output);
+}
 
-	if (!config.is_cached) {
-		FileUtils.unlink(output);
+void add_queue_list(SupraList pkg, string output) throws Error {
+
+	Process.spawn_command_line_sync(@"tar -xf $(output) ./info");
+	Package pkgtmp = Package.from_file("./info");
+	pkgtmp.output = output;
+	pkgtmp.repo = pkg.repo_name;
+
+	config.queue_pkg.append(pkgtmp);
+	foreach (var i in pkgtmp.dependency.split(" ")) {
+		if (config.check_if_in_queue(i)) {
+			continue;
+		}
+		prepare_install(i);
 	}
 }

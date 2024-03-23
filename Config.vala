@@ -2,7 +2,9 @@ public class Config : Object{
 	public Config () throws Error {
 		this.change_prefix (@"$HOME/.local");
 		this.load_config();
+		queue_pkg = new List<Package>();
 	}
+
 	public void change_prefix (string prefix) throws Error {
 		this.prefix = prefix;
 		this.cache = prefix + "/.suprapack";
@@ -38,6 +40,7 @@ public class Config : Object{
 		}
 		
 	}
+
 	public void add(string key, string value) throws Error {
 		string contents;
 		var new_contents = new StringBuilder();
@@ -54,7 +57,16 @@ public class Config : Object{
 		FileUtils.set_contents(this.config, new_contents.str);
 	}
 
+	public bool check_if_in_queue(string name) {
+		foreach (var i in queue_pkg)
+			if (i.name == name)
+				return true;
+		return false;
+	}
+
+	public List<Package?>	queue_pkg;
 	public unowned string[] cmd;
+	public bool allays_yes {get;set;default=false;} 
 	public bool force		{get; set; default=false;}
 	public bool supraforce	{get; set; default=false;}
 	public string prefix	{get; set; default=@"$HOME/.local";}
