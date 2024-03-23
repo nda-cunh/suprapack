@@ -1,4 +1,3 @@
-
 async void loading() {
 	const string animation[] = {
 		"⠋ Loading .  ",
@@ -68,6 +67,11 @@ bool cmd_download(string []av) throws Error {
 		var file = File.new_for_path(path);
 		var filed = File.new_for_path(Environment.get_current_dir() + "/" + file.get_basename());
 		file.move(filed, FileCopyFlags.OVERWRITE);
+		if (config.force == true) {
+			var dir_target =  @"./$(supralist.name)-$(supralist.version)";
+			DirUtils.create(dir_target, 0755);
+			Process.spawn_command_line_sync(@"tar -xf $(filed.get_path()) -C $(dir_target)");
+		}
 	}
 
 	return true;
@@ -85,7 +89,7 @@ bool cmd_query_get_comp(string []av) {
 }
 
 bool cmd_sync_get_comp(string []av) {
-	var pkgs = Sync.get_all_package();
+	var pkgs = Sync.get_list_package();
 	for (var i = 0; i != pkgs.length; ++i) {
 		if (i == pkgs.length - 1)
 			print("%s", pkgs[i].name);
@@ -105,10 +109,17 @@ bool cmd_install(string []av) throws Error {
 			return true;
 		} catch(Error e) { }
 	}
+
+	var regex = /((?P<repo>[^\s]*)\/)?(?P<package>[^\s]*)/;
+	MatchInfo match_info;
 	foreach (var i in av[2:av.length]) {
 		try {
-			print_info(i, "Installing");
-			install(i);
+			if (regex.match(i, 0, out match_info)) {
+				string name_pkg = match_info.fetch_named("package");
+				string name_repo = match_info.fetch_named("repo");
+				print_info(i, "Installing");
+				install(name_pkg, name_repo);
+			}
 		}catch (Error e) {
 			printerror(e.message);
 		}
@@ -119,8 +130,10 @@ bool cmd_install(string []av) throws Error {
 bool cmd_build(string []av) {
 	if (av.length == 2)
 		print_error("`suprapack build [...]`");	
-	print_info(@"Build $(av[2])");
-	Build.create_package(av[2]);
+	foreach (var i in av[2:]) {
+		print_info(@"Build $(av[2])");
+		Build.create_package(i);
+	}
 	return true;
 }
 
@@ -231,7 +244,7 @@ private void print_supravim_plugin(ref SupraList repo, bool installed) {
 
 bool cmd_search_supravim_plugin(string []av) throws Error {
 	force_suprapack_update();
-	var list = Sync.default().get_list_package();
+	var list = Sync.get_list_package();
 	var installed = Query.get_all_installed_pkg();
 	
 	foreach(var i in list) {
@@ -254,7 +267,7 @@ private void print_search(ref SupraList repo, bool installed) {
 
 bool cmd_search(string []av) throws Error {
 	force_suprapack_update();
-	var list = Sync.default().get_list_package();
+	var list = Sync.get_list_package();
 	var installed = Query.get_all_installed_pkg();
 	// search without input
 	if (av.length == 2) {
@@ -265,7 +278,7 @@ bool cmd_search(string []av) throws Error {
 	// search with regex pattern 
 	else {
 		try {
-			var regex = new Regex(av[2], RegexCompileFlags.EXTENDED);
+			var regex = new Regex(av[2], RegexCompileFlags.OPTIMIZE);
 			foreach(var i in list) {
 				if (regex.match(i.name) || regex.match(i.version))
 					print_search(ref i, (i.name in installed));
@@ -322,7 +335,7 @@ bool cmd_run(string []av) throws Error {
 
 
 bool update_package(string pkg_name) throws Error{
-	var list = Sync.default().get_list_package();
+	var list = Sync.get_list_package();
 	var pkg = Query.get_from_pkg(pkg_name);
 	string Qversion = pkg.version;
 	string Sversion;
