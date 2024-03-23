@@ -3,9 +3,16 @@
 REPO_LIST=$HOME/.local/.suprapack/repo.list
 if [ -f "$REPO_LIST" ]; then
 	echo "already existing repo.list skipping..."
+	if [ -d "~/.config/suprapack/supravim" ]; then
+		if ! grep -q 'Supravim https://gitlab.com/supraproject/suprastore_repository/-/raw/plugin-supravim/' $REPO_LIST 2>/dev/null; then
+			echo "Supravim https://gitlab.com/supraproject/suprastore_repository/-/raw/plugin-supravim/" >> $REPO_LIST
+		fi
+	fi
 else
 	touch $REPO_LIST
-	echo "Cosmos https://gitlab.com/supraproject/suprastore_repository/-/raw/master/" | cat >> $REPO_LIST
+	echo "Cosmos https://gitlab.com/supraproject/suprastore_repository/-/raw/master/" | >> $REPO_LIST
+	echo "Supravim https://gitlab.com/supraproject/suprastore_repository/-/raw/plugin-supravim/" >> $REPO_LIST
+
 	# echo "Elixir https://raw.githubusercontent.com/Strong214356/suprapack-list/master/" | cat >> $REPO_LIST
 fi
 
