@@ -167,19 +167,18 @@ private void force_suprapack_update () throws Error {
 	}
 }
 
-public void install(string name_search) throws Error{
+public void install(string name_search, string name_repo = "") throws Error{
 	force_suprapack_update();
-	var sync = Sync.default();
 	
 	SupraList[] queue = {};
-	var list = sync.get_list_package();
+	var list = Sync.get_list_package (name_repo);
 	foreach (var pkg in list) {
 		if (pkg.name == name_search) {
 			queue += pkg;
 		}
 	}
 
-	SupraList? pkg = null;
+	SupraList pkg;
 	if (queue.length == 0) {
 		if (Query.is_exist(name_search) == true) {
 			throw new ErrorSP.ACCESS(@"Can't found $name_search but exist in local");
@@ -221,9 +220,11 @@ public void install(string name_search) throws Error{
 			return;
 		}
 	}
-	var output = sync.download(pkg);
+
+	var output = Sync.download(pkg);
 	install_suprapackage(output);
-	if(!config.is_cached) {
+
+	if (!config.is_cached) {
 		FileUtils.unlink(output);
 	}
 }

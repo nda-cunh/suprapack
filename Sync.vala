@@ -66,35 +66,51 @@ public class RepoInfo : Object{
 // he can download list
 // he can download package
 // have to the management of all repository online
-class Sync : Object{
+class Sync {
 	//   SINGLETON 
 	private static Sync? singleton = null;
-	public static unowned Sync default() {
-		if (singleton == null)
-			singleton = new Sync();
-		return (singleton);
+	private static unowned Sync default() {
+		try {
+			if (singleton == null)
+				singleton = new Sync();
+			return (singleton);
+		}
+		catch (Error e) {
+			print_error (e.message);
+		}
 	}
 	// Default private Constructor
-	private Sync () {
-		_list = {};
-		var fs = FileStream.open(config.repo_list, "r");
-		if (fs == null)
-			print_error(@"unable to retreive repository list\nfile => $(config.repo_list)");
-		var line = 1;
-		string tmp;
-		while((tmp = fs.read_line()) != null) {
-			if (tmp != "") {
-				var repoSplit = / +/.split(tmp);
-				if(repoSplit.length != 2)
-					print_error(@"unable to parse repository\nline $(line) => $(tmp)");
-				_repo += new RepoInfo(repoSplit[0], repoSplit[1]);
+	private Sync () throws Error {
+
+		/* init Repo property */
+		string contents;
+		var regex_repo = /(?P<name>[^\s]+)\s*(?P<url>[^\s]+)/;
+		MatchInfo match_info;
+		FileUtils.get_contents(config.repo_list, out contents);
+
+		foreach (var line in contents.split("\n")) {
+			if (regex_repo.match(line, 0, out match_info)) {
+				string name = match_info.fetch_named("name");
+				string url = match_info.fetch_named("url");
+				_repo += new RepoInfo(name, url);
 			}
-			line++;
+		}
+
+		/* init List Property */
+		var regex = /[a-zA-Z0-9]+[-][a-zA-Z0-9.]+[.]suprapack/;
+		foreach (var repo in _repo) {
+			FileUtils.get_contents(repo.list, out contents);
+			foreach (var pkg in contents.split("\n")) {
+				if (regex.match(pkg))
+					_list += SupraList(repo.name, pkg);
+				else if (pkg != "")
+					warning(pkg);
+			}
 		}
 	}
 
 	public static SupraList get_from_pkg(string name_pkg) throws Error{
-		var pkg_list = Sync.default().get_list_package();
+		var pkg_list = Sync.default()._get_list_package();
 		foreach (var pkg in pkg_list) {
 			if (pkg.name == name_pkg) {
 				return pkg;
@@ -111,7 +127,7 @@ class Sync : Object{
 			return (Spkg.version != Qpkg.version);
 		}
 		catch (Error e) {
-			if(e is ErrorSP.FAILED)
+			if (e is ErrorSP.FAILED)
 				return false;
 			throw e;
 		}
@@ -127,64 +143,58 @@ class Sync : Object{
 		return null;
 	}
 
-	public static SupraList []get_all_package() {
-		var pkgs = Sync.default().get_list_package();
-		return pkgs;
+	/* Return supralist from a repo or all supralist */
+	public static SupraList[] get_list_package(string repo_name = "") {
+		return Sync.default()._get_list_package(repo_name);
 	}
+	
 	// return all package in all repo
-	public SupraList []get_list_package () {
-		if (_list.length == 0) {
-			foreach (var repo in _repo) {
-				try {
-					string tmp;
-					FileUtils.get_contents(repo.list, out tmp);
-					var regex = /[a-zA-Z0-9]+[-][a-zA-Z0-9.]+[.]suprapack/;
-					foreach (var pkg in tmp.split("\n")) {
-						if (regex.match(pkg)) {
-							_list += SupraList(repo.name, pkg);
-						}
-						else if (pkg != "")
-							warning(pkg);
-					}
-				}
-				catch (Error e) {
-					print_error(@"unable to retreive repository $(repo.name)\nfile =>$(repo.list)");
-				}
-			}
+	SupraList []_get_list_package (string repo_name = "") {
+		SupraList[] result = {};
+
+		if (repo_name == "")
+			return list;
+		foreach (var i in list) {
+			if (i.repo_name == repo_name)
+				result += i;
 		}
-		return _list;
+		return result;
 	}
 
 	public static void refresh_list () {
-		var def = Sync.default();
-		foreach (var i in def._repo) {
+		foreach (var i in _repo) {
             FileUtils.remove(@"/tmp/$(i.name)_$(USERNAME)_list");
 		}
 	}
 
 	public static string download_package (string pkg_name, string? repo_name = null) {
-		var lst = Sync.default ().get_list_package ();
+		var lst = Sync.default ()._get_list_package ();
 		foreach (var l in lst) {
 			if (repo_name == null || l.repo_name == repo_name)
 				if (l.name == pkg_name)
-					return Sync.default().download(l);
+					return Sync.default()._download(l);
 		}
 		print_error("cant download the file");
 	}
+	
+
+	public static string download (SupraList pkg) {
+		return Sync.default()._download(pkg);
+	}
 
 	// download a package and return this location
-	public string download (SupraList pkg) {
+	string _download (SupraList pkg) {
 		string pkgdir = @"$(config.cache)/pkg";
 		string pkgname = @"$(pkg.name)-$(pkg.version).suprapack";
 		string output = @"$pkgdir/$(pkg.name)-$(pkg.version).suprapack";
 		DirUtils.create_with_parents(pkgdir, 0755);
 
 		string url = this.get_url_from_name(pkg.repo_name) + pkgname;
-		if(Utils.run_silent({"curl", "-o", output, url}) != 0) 
+		if (Utils.run_silent({"curl", "-o", output, url}) != 0) 
 			print_error(@"unable to download package\npackage => $(pkgname)");
 		return output;
 	}
 
-	private SupraList []_list;
-	private RepoInfo []_repo;
+	private static SupraList []list {get;set;}
+	private static RepoInfo []repo {get;set;}
 }
