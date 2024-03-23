@@ -117,13 +117,13 @@ bool cmd_install(string []av) throws Error {
 			if (regex.match(i, 0, out match_info)) {
 				string name_pkg = match_info.fetch_named("package");
 				string name_repo = match_info.fetch_named("repo");
-				print_info(i, "Installing");
-				install(name_pkg, name_repo);
+				prepare_install(name_pkg, name_repo);
 			}
 		}catch (Error e) {
 			printerror(e.message);
 		}
 	}
+	install();
 	return true;
 }
 
@@ -377,8 +377,6 @@ bool cmd_update(string []av) throws Error {
 			if (Sync.check_update(pkg)) {
 				prepare_install(pkg, Sync.get_from_pkg(pkg).repo_name);
 			}
-			// update_package(pkg);
-
 		}
 		install();
 		return true;

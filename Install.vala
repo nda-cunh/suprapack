@@ -143,18 +143,19 @@ public void install_local (string path) throws Error {
 	if (path.has_suffix(".suprapack")) {
 		SupraList pkg = SupraList("Local", path);//TODO mettre le path dans les '/'
 		add_queue_list(pkg, path);
-		install("");
+		install();
 	}
 }
 
 public void install(string name_search = "", string name_repo = "") throws Error{
 	force_suprapack_update();
 
+	print("resolving dependencies...\n");
+
 	prepare_install(name_search, name_repo);
 
 	if (config.queue_pkg.length() == 0)
 		print_error("there's nothing to be done");
-	print("resolving dependencies...\n");
 	print("looking for conflicting packages...\n");
 
 	int name_max = 0;
@@ -187,25 +188,28 @@ public void install(string name_search = "", string name_repo = "") throws Error
 
 	int64 size_installed = 0;
 	print("Package (%u)\n\n", config.queue_pkg.length());
+
 	foreach (var i in config.queue_pkg) {
 		string version = i.version;
 		if (Query.is_exist(i.name)) {
 			version = Query.get_from_pkg(i.name).version; 
 		}
 		if (version == i.version)
-			print(" %s/%-*s %s\n", i.repo, name_max - i.repo.length , i.name, i.version);
+			print(@" $(BOLD)$(PURPLE)%s$(NONE)/%-*s $(BOLD)$(GREEN)%s$(NONE)\n", i.repo, name_max - i.repo.length , i.name, i.version);
 		else
-			print(" %s/%-*s %-*s --> %s\n", i.repo, name_max - i.repo.length , i.name, version_max, version, i.version);
+			print(@" $(BOLD)$(PURPLE)%s$(NONE)/%-*s $(BOLD)$(GREEN)%-*s$(NONE) --> $(BOLD)$(YELLOW)%s$(NONE)\n", i.repo, name_max - i.repo.length , i.name, version_max, version, i.version);
 		size_installed += int64.parse(i.size_installed);
 	}
 
-	print("\nTotal Installed Size:  %.2f MiB\n", (double)size_installed / (1 << 20));
+	print(@"\nTotal Installed Size:  $(BOLD)%.2f MiB$(NONE)\n", (double)size_installed / (1 << 20));
 
 	config.queue_pkg.reverse();
 	if (config.allays_yes || Utils.stdin_bool_choose_true(":: Proceed with installation [Y/n] ")) {
+		print("\n");
 		foreach (var i in config.queue_pkg) {
-			if (config.force == true || i.name == name_search)
+			if (config.force == true || i.name == name_search) {
 				install_suprapackage(i.output);
+			}
 			else {
 				if (Query.is_exist(i.name) == true) {
 					if (Sync.check_update(i.name)) {
@@ -214,7 +218,8 @@ public void install(string name_search = "", string name_repo = "") throws Error
 					else
 						print_info("The package is already installed, use --force if you want to replace it", "Info");
 				}
-
+				else
+					install_suprapackage(i.output);
 			}
 			if (!config.is_cached) {
 				FileUtils.unlink(i.output);
@@ -223,6 +228,7 @@ public void install(string name_search = "", string name_repo = "") throws Error
 	}
 }
 
+//* Add a package in Config.queue *//
 void prepare_install(string name_search, string name_repo = "") throws Error{
 	if (name_search == "")
 		return;
