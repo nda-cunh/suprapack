@@ -14,6 +14,8 @@ public struct Package {
 	string size_installed;
 	string installed_files;
 	string exclude_package; 
+	string output; 
+	string repo; 
 
 
 	private void init() {

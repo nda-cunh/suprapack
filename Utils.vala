@@ -14,6 +14,15 @@ namespace Utils {
 			return true;
 		return false;
 	}
+	
+	// Teste stdin request @default is true 
+	bool stdin_bool_choose_true (string str = "") {
+		print(str);
+		var result = stdin.read_line().strip().ascii_down();
+		if ("n" in result || result == "0")
+			return false;
+		return true;
+	}
 
 	int run_silent(string []av) {
 		SpawnFlags flags = 0;

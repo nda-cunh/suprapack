@@ -29,6 +29,9 @@ public class Main : Object {
 			else if (av.has_prefix ("--force")) {
 				config.force = true;
 			}
+			else if (av.has_prefix ("--yes")) {
+				config.allays_yes = true;
+			}
 			else if (av.has_prefix ("--supraforce")) {
 				config.supraforce = true;
 			}
@@ -46,7 +49,7 @@ public class Main : Object {
 		config.cmd = cmd;
 		
 		if (av1.has_suffix(".suprapack")) {
-			install_suprapackage(cmd[1]);
+			install_local(cmd[1]);
 			return true;
 		}
 

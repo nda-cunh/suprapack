@@ -105,7 +105,7 @@ bool cmd_install(string []av) throws Error {
 
 	if (FileUtils.test(av[2], FileTest.EXISTS)) {
 		try {
-			install_suprapackage(av[2]);
+			install_local(av[2]);
 			return true;
 		} catch(Error e) { }
 	}
@@ -374,8 +374,13 @@ bool cmd_update(string []av) throws Error {
 	if (av.length == 2) {
 		var Qpkg = Query.get_all_installed_pkg();
 		foreach (var pkg in Qpkg) {
-			update_package(pkg);
+			if (Sync.check_update(pkg)) {
+				prepare_install(pkg, Sync.get_from_pkg(pkg).repo_name);
+			}
+			// update_package(pkg);
+
 		}
+		install();
 		return true;
 	}
 	// update pkg_name
