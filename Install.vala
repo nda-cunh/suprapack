@@ -38,15 +38,14 @@ void post_install(List<string> list, int len, ref Package pkg) {
 	}
 }
 
-void draw_install_file(uint min, uint max, string file) {
-	stdout.printf("%s%s[Install]%s [%u/%u] %s\n", BOLD, YELLOW, NONE, min, max, file);
-}
-
 // copy files to PREFIX ~/.local 
 void install_files(List<string> list, int len) {
 	uint nb = 0;
 	unowned string basename;
 	uint list_length = list.length();
+
+	int g_last_size = 0;
+	unowned uint8[] blank = CONST_BLANK.data;
 	try {
 		foreach (var e in list) {
 			basename = e.offset(len);
@@ -58,11 +57,23 @@ void install_files(List<string> list, int len) {
 			path = path[0: path.last_index_of_char('/')];
 			DirUtils.create_with_parents(path, 0755);
 			fileSrc.move(fileDest, FileCopyFlags.OVERWRITE);
-			draw_install_file(++nb, list_length, basename);
+			// draw_install_file(++nb, list_length, basename, blank.data);
+			{
+				int file_len = basename.length;
+				int calc = g_last_size - file_len;
+				
+				if (calc <= 0)
+					calc = 1;
+				blank[calc] = '\0';
+				stdout.printf("%s%s[Install]%s [%u/%u] %s%s\r", BOLD, YELLOW, NONE, ++nb, list_length, basename, (string)blank);
+				blank[calc] = ' ';
+				g_last_size = file_len;
+			}
 		}
 	} catch (Error e) {
 		print_error(@"FATAL ERROR >>> $(e.message)");
 	}
+	print("\n");
 }
 
 private void script_pre_install(string dir) throws Error {
@@ -139,20 +150,10 @@ private void force_suprapack_update () throws Error {
 	}
 }
 
-public void install_local (string path) throws Error {
-	if (path.has_suffix(".suprapack")) {
-		SupraList pkg = SupraList("Local", path);//TODO mettre le path dans les '/'
-		add_queue_list(pkg, path);
-		install();
-	}
-}
-
-public void install(string name_search = "", string name_repo = "") throws Error{
+public void install() throws Error {
 	force_suprapack_update();
 
 	print("resolving dependencies...\n");
-
-	prepare_install(name_search, name_repo);
 
 	if (config.queue_pkg.length() == 0)
 		print_error("there's nothing to be done");
@@ -203,11 +204,13 @@ public void install(string name_search = "", string name_repo = "") throws Error
 
 	print(@"\nTotal Installed Size:  $(BOLD)%.2f MiB$(NONE)\n", (double)size_installed / (1 << 20));
 
+
+	unowned var first_package = config.queue_pkg.nth_data(0).name;
 	config.queue_pkg.reverse();
 	if (config.allays_yes || Utils.stdin_bool_choose_true(":: Proceed with installation [Y/n] ")) {
 		print("\n");
 		foreach (var i in config.queue_pkg) {
-			if (config.force == true || i.name == name_search) {
+			if (config.force == true || i.name == first_package) {
 				install_suprapackage(i.output);
 			}
 			else {
@@ -216,7 +219,7 @@ public void install(string name_search = "", string name_repo = "") throws Error
 						install_suprapackage(i.output);
 					}
 					else
-						print_info("The package is already installed, use --force if you want to replace it", "Info");
+						print_info(@"$(i.name) is already installed", "Info", "\033[37m");
 				}
 				else
 					install_suprapackage(i.output);
@@ -234,6 +237,14 @@ void prepare_install(string name_search, string name_repo = "") throws Error{
 		return;
 	force_suprapack_update();
 	
+	print("%s\n", name_search);
+	if (name_search.has_suffix(".suprapack")) {
+		SupraList pkg = SupraList("Local", name_search); //TODO mettre le path dans les '/'
+		add_queue_list(pkg, name_search);
+		return;
+	}
+
+
 	SupraList[] queue = {};
 	var list = Sync.get_list_package (name_repo);
 	foreach (var pkg in list) {
@@ -281,6 +292,7 @@ void add_queue_list(SupraList pkg, string output) throws Error {
 
 	Process.spawn_command_line_sync(@"tar -xf $(output) ./info");
 	Package pkgtmp = Package.from_file("./info");
+	FileUtils.unlink("./info");
 	pkgtmp.output = output;
 	pkgtmp.repo = pkg.repo_name;
 
