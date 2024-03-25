@@ -37,6 +37,9 @@ public class Config : Object{
 			if (line.has_prefix ("is_cached")) {
 				is_cached = bool.parse(line[line.index_of_char(':') + 1:]);
 			}
+			else if (line.has_prefix ("show_script")) {
+				show_script = bool.parse(line[line.index_of_char(':') + 1:]);
+			}
 		}
 		
 	}
@@ -73,5 +76,7 @@ public class Config : Object{
 	public string cache		{get; private set;}
 	public string config	{get; private set;}
 	public string repo_list {get; private set;}
+
 	public bool is_cached	{get; private set; default=false;}
+	public bool show_script {get; private set; default=false;}
 }

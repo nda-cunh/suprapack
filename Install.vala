@@ -77,24 +77,40 @@ void install_files(List<string> list, int len) {
 }
 
 private void script_pre_install(string dir) throws Error {
-	if (FileUtils.test(@"$dir/pre_install.sh", FileTest.EXISTS | FileTest.IS_EXECUTABLE)) {
+	var filename = @"$dir/pre_install.sh";
+	if (FileUtils.test(filename, FileTest.EXISTS | FileTest.IS_EXECUTABLE)) {
+		if (config.show_script == true && config.allays_yes == false) {
+			string contents;
+			FileUtils.get_contents(filename, out contents);
+			print("[PreInstall] {\n%s\n}\n", contents);
+			if (Utils.stdin_bool_choose_true("Continue ? [Y/n]") == false)
+				throw new ErrorSP.ACCESS("you refused to execute the script.");
+		}
 		print_info(null, "Pre Install");
 		var envp = Environ.get();
 		envp = Environ.set_variable(envp, "SRCDIR", dir, true);
 		envp = Environ.set_variable(envp, "PKGDIR", config.prefix, true);
-		if (Utils.run({@"$dir/pre_install.sh"}, envp) != 0)
+		if (Utils.run({filename}, envp) != 0)
 			throw new ErrorSP.FAILED("non zero exit code of pre installation script");
 	}
 }
 
-private void script_post_install(string dir) {
-	if (FileUtils.test(@"$dir/post_install.sh", FileTest.EXISTS | FileTest.IS_EXECUTABLE)) {
+private void script_post_install(string dir) throws Error {
+	var filename = @"$dir/post_install.sh";
+	if (FileUtils.test(filename, FileTest.EXISTS | FileTest.IS_EXECUTABLE)) {
+		if (config.show_script == true && config.allays_yes == false) {
+			string contents;
+			FileUtils.get_contents(filename, out contents);
+			print("[PostInstall] {\n%s\n}\n", contents);
+			if (Utils.stdin_bool_choose_true("Continue ? [Y/n]") == false)
+				throw new ErrorSP.ACCESS("you refused to execute the script.");
+		}
 		var envp = Environ.get();
 		envp = Environ.set_variable(envp, "SRCDIR", dir, true);
 		envp = Environ.set_variable(envp, "PKGDIR", config.prefix, true);
 		print_info(null, "Post Install");
-		if (Utils.run({@"$dir/post_install.sh"}, envp) != 0)
-			print_error("non zero exit code of pre installation script");
+		if (Utils.run({filename}, envp) != 0)
+			throw new ErrorSP.FAILED("non zero exit code of pre installation script");
 	}
 }
 
