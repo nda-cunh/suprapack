@@ -426,6 +426,10 @@ bool cmd_help() {
 	print(@"	  $(COM) build a suprapack you need a prefix look note part\n");
 	print(@"	  $(COM) you can add a post_install.sh or pre_install.sh\n");
 	print(@"	  $(COM) install script can use $$SRCDIR and $$PKGDIR\n");
+	print(@"	$(suprapack) prepare\n");
+	print(@"	  $(COM) prepare your repository\n");
+	print(@"	  $(COM) to run in your folder full of suprapack files\n");
+	print(@"	  $(COM) this command generate a list file\n");
 	print(@"\n");
 	print(@"$(BOLD)$(YELLOW)[Note]$(NONE)\n");
 	print(@"	$(WHITE)PREFIX is a folder with this directory like: $(NONE)\n");
