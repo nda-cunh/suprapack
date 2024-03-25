@@ -102,22 +102,18 @@ bool cmd_sync_get_comp(string []av) {
 bool cmd_install(string []av) throws Error {
 	if (av.length == 2)
 		print_error("`suprapack install [...]`");	
-
-	if (FileUtils.test(av[2], FileTest.EXISTS)) {
-		try {
-			install_local(av[2]);
-			return true;
-		} catch(Error e) { }
-	}
-
+	
 	var regex = /((?P<repo>[^\s]*)\/)?(?P<package>[^\s]*)/;
 	MatchInfo match_info;
 	foreach (var i in av[2:av.length]) {
 		try {
-			if (regex.match(i, 0, out match_info)) {
+			if (regex.match(i, 0, out match_info) && !i.has_suffix(".suprapack")) {
 				string name_pkg = match_info.fetch_named("package");
 				string name_repo = match_info.fetch_named("repo");
 				prepare_install(name_pkg, name_repo);
+			}
+			else if (i.has_suffix(".suprapack")){
+				prepare_install(i);
 			}
 		}catch (Error e) {
 			printerror(e.message);
@@ -334,6 +330,7 @@ bool cmd_run(string []av) throws Error {
 }
 
 
+/*
 bool update_package(string pkg_name) throws Error{
 	var list = Sync.get_list_package();
 	var pkg = Query.get_from_pkg(pkg_name);
@@ -365,7 +362,7 @@ bool update_package(string pkg_name) throws Error{
 	}
 	return false;
 }
-
+*/
 bool cmd_update(string []av) throws Error {
 	force_suprapack_update();
 	unowned string pkg_name;
@@ -387,8 +384,8 @@ bool cmd_update(string []av) throws Error {
 		if (Query.is_exist(pkg_name) == false) {
 			print_error(@"$pkg_name is not installed");
 		}
-		if (update_package(pkg_name) == false)
-			print_error(@"target not found: $pkg_name");
+		// if (update_package(pkg_name) == false)
+			// print_error(@"target not found: $pkg_name");
 		return true;
 	}
 }

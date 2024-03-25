@@ -182,7 +182,7 @@ public void download (string url, string output = "") throws Error {
 			line.scanf("Content-Length: %zu", out bytes);
 		}
 		/* Data Part */
-		print("%s\n", line.escape());
+		// print("%s\n", line.escape());
 		if (line == "\r") {
 			uint8 buffer[65537];
 			while (bytes > 0) {

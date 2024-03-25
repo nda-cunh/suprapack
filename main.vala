@@ -1,6 +1,7 @@
 public string HOME;
 public string USERNAME;
 public string? CONFIG = null;
+public string CONST_BLANK;
 
 public Config config;
 
@@ -49,7 +50,8 @@ public class Main : Object {
 		config.cmd = cmd;
 		
 		if (av1.has_suffix(".suprapack")) {
-			install_local(cmd[1]);
+			prepare_install(cmd[1]);
+			install();
 			return true;
 		}
 
@@ -120,6 +122,7 @@ public class Main : Object {
 	public Main(string []args) {
 		HOME = Environment.get_home_dir();
 		USERNAME = Environment.get_user_name();
+		CONST_BLANK = string.nfill(255, ' ');
 		Intl.setlocale();
 		try {
 			config = new Config();
