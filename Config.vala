@@ -25,7 +25,10 @@ public class Config : Object{
 			FileUtils.set_contents (this.config, "is_cached:false");
 		}
 		if (FileUtils.test (this.repo_list, FileTest.EXISTS) == false) {
-			FileUtils.set_contents (this.repo_list, "Cosmos https://gitlab.com/supraproject/suprastore_repository/-/raw/master/");
+			var simple_repo = """Cosmos https://gitlab.com/supraproject/suprastore_repository/-/raw/master/
+Supravim https://gitlab.com/supraproject/suprastore_repository/-/raw/plugin-supravim/
+			""";
+			FileUtils.set_contents (this.repo_list, simple_repo);
 		}
 	}
 
