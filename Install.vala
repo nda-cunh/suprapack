@@ -254,7 +254,9 @@ void prepare_install(string name_search, string name_repo = "") throws Error{
 	force_suprapack_update();
 	
 	if (name_search.has_suffix(".suprapack")) {
-		SupraList pkg = SupraList("Local", name_search); //TODO mettre le path dans les '/'
+		if (!FileUtils.test(name_search, FileTest.EXISTS))
+			throw new ErrorSP.ACCESS (@"$name_search not found");
+		SupraList pkg = SupraList("Local", name_search); 
 		add_queue_list(pkg, name_search);
 		return;
 	}
@@ -316,6 +318,11 @@ void add_queue_list(SupraList pkg, string output) throws Error {
 		if (config.check_if_in_queue(i)) {
 			continue;
 		}
-		prepare_install(i);
+		if (Query.is_exist(i) && config.force == false) {
+			if (Sync.check_update(i))
+				prepare_install(i);
+		}
+		else
+			prepare_install(i);
 	}
 }
