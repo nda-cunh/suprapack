@@ -1,7 +1,11 @@
 public class Config : Object{
 	public Config () throws Error {
+		var env = Environ.get();
 		this.change_prefix (@"$HOME/.local");
 		this.load_config();
+		var prefix_tmp = Environ.get_variable(env, "PREFIX");
+		if (prefix_tmp != null)
+			this.change_prefix(prefix_tmp);
 		queue_pkg = new List<Package>();
 	}
 
@@ -30,7 +34,7 @@ public class Config : Object{
 		FileUtils.get_contents (this.config, out contents);
 
 		var lines = contents.split("\n");
-		var reg = /^[a-zA-Z0-9_]+[:][a-zA-Z0-9_]+$/;
+		var reg = /^([^:]+)[:]([^\s]+)$/;
 		foreach (var line in lines) {
 			if (!reg.match(line))
 				continue;
@@ -39,6 +43,9 @@ public class Config : Object{
 			}
 			else if (line.has_prefix ("show_script")) {
 				show_script = bool.parse(line[line.index_of_char(':') + 1:]);
+			}
+			else if (line.has_prefix ("prefix")) {
+				this.change_prefix(line[line.index_of_char(':') + 1:].replace("~", HOME));
 			}
 		}
 		
@@ -72,7 +79,7 @@ public class Config : Object{
 	public bool allays_yes {get;set;default=false;} 
 	public bool force		{get; set; default=false;}
 	public bool supraforce	{get; set; default=false;}
-	public string prefix	{get; set; default=@"$HOME/.local";}
+	public string prefix	{get; private set; default=@"$HOME/.local";}
 	public string cache		{get; private set;}
 	public string config	{get; private set;}
 	public string repo_list {get; private set;}

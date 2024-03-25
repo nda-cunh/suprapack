@@ -5,20 +5,10 @@ public string CONST_BLANK;
 
 public Config config;
 
-void load_env() throws Error{
-	var env = Environ.get();
-	var prefix = Environ.get_variable(env, "PREFIX");
-	if (prefix != null)
-		config.change_prefix(prefix);
-}
-
 public class Main : Object {
 	public bool all_cmd(string []args) throws Error {
 		string []cmd = {"suprapack"};
 
-		// Load Environment variable
-		load_env();
-		
 		foreach (var av in args[1:]) {
 			if (!av.has_prefix("-")) {
 				cmd += av;
