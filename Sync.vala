@@ -119,13 +119,13 @@ class Sync {
 		throw new ErrorSP.FAILED(@"Cant found $name_pkg");
 	}
 
-	// TODO better check version
 	// return true if need update else return false
 	public static bool check_update(string package_name) throws Error{
 		try {
 			var Qpkg = Query.get_from_pkg(package_name);
 			var Spkg = Sync.get_from_pkg(package_name);
-			return (Spkg.version != Qpkg.version);
+
+			return Utils.compare_versions (Spkg.version, Qpkg.version);
 		}
 		catch (Error e) {
 			if (e is ErrorSP.FAILED)
