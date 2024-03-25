@@ -78,7 +78,7 @@ void install_files(List<string> list, int len) {
 
 private void script_pre_install(string dir) throws Error {
 	if (FileUtils.test(@"$dir/pre_install.sh", FileTest.EXISTS | FileTest.IS_EXECUTABLE)) {
-		print_info(null, "Preparation");
+		print_info(null, "Pre Install");
 		var envp = Environ.get();
 		envp = Environ.set_variable(envp, "SRCDIR", dir, true);
 		envp = Environ.set_variable(envp, "PKGDIR", config.prefix, true);
@@ -92,7 +92,7 @@ private void script_post_install(string dir) {
 		var envp = Environ.get();
 		envp = Environ.set_variable(envp, "SRCDIR", dir, true);
 		envp = Environ.set_variable(envp, "PKGDIR", config.prefix, true);
-		print_info(null, "Finition");
+		print_info(null, "Post Install");
 		if (Utils.run({@"$dir/post_install.sh"}, envp) != 0)
 			print_error("non zero exit code of pre installation script");
 	}
@@ -237,7 +237,6 @@ void prepare_install(string name_search, string name_repo = "") throws Error{
 		return;
 	force_suprapack_update();
 	
-	print("%s\n", name_search);
 	if (name_search.has_suffix(".suprapack")) {
 		SupraList pkg = SupraList("Local", name_search); //TODO mettre le path dans les '/'
 		add_queue_list(pkg, name_search);
