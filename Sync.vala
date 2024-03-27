@@ -48,9 +48,13 @@ public class RepoInfo : Object{
 				if (stat.st_mtime + 700 > now)
 					should_download = false;
             }
-            if (should_download && Utils.run_silent({"curl", "-o", list_file, this.url + "list"}) !=  0) {
-                print_error(@"unable to download file\nfile => {$(list_file) located at $(this.url)}");
-            }
+			try {
+				if (should_download == true) {
+					Utils.download(this.url + "list", list_file, true); 
+				}
+			} catch (Error e) {
+                print_error(@"unable to download file\n $(e.message)");
+			}
             _list = list_file;
         }
         return _list;

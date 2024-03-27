@@ -12,7 +12,7 @@ namespace Utils {
 	// Teste stdin request @default is false
 	bool stdin_bool_choose (string str = "") {
 		print(str);
-		var result = stdin.read_line().strip().ascii_down();
+		var result = stdin.read_line()?.strip() ?? "".ascii_down();
 		if ("y" in result || "o" in result || result == "1")
 			return true;
 		return false;
@@ -21,7 +21,7 @@ namespace Utils {
 	// Teste stdin request @default is true 
 	bool stdin_bool_choose_true (string str = "") {
 		print(str);
-		var result = stdin.read_line().strip().ascii_down();
+		var result = stdin.read_line()?.strip() ?? "".ascii_down();
 		if ("n" in result || result == "0")
 			return false;
 		return true;
@@ -170,7 +170,7 @@ namespace Utils {
 
 
 
-public void download (string url, string output = "") throws Error {
+public void download (string url, string output = "", bool no_print = false) throws Error {
 	MatchInfo match_info;
 	string name;
 	string uri;
@@ -197,6 +197,7 @@ public void download (string url, string output = "") throws Error {
 	output_stream.put_string(@"GET $uri HTTP/1.1\r\n");
 	output_stream.put_string(@"Host: $name\r\n"); // Ajout de l'en-tête "Host"
 	output_stream.put_string("Cache-Control: no-cache\r\n"); // Ignorer le cache
+	output_stream.put_string("Connection: close\r\n"); // Ignorer le cache
 	output_stream.put_string("\r\n");
 	output_stream.flush();
 
@@ -212,22 +213,56 @@ public void download (string url, string output = "") throws Error {
 	}
 
 	while ((line = input_stream.read_line_utf8()) != null) {
+
 		/* Header Part */
 		if (line.has_prefix("Content-Length: ")) {
 			line.scanf("Content-Length: %zu", out bytes);
 		}
+
+
+		void modify_percent_bar (uint8[] buffer, double percent) {
+			int calc = (int)((percent * 20) / 100);
+			for (int i = 0; i != calc; ++i) {
+				buffer[i+1] = '-';
+			}
+			buffer[21] = ']';
+		}
+
+		// print("header\n");
 		/* Data Part */
-		// print("%s\n", line.escape());
 		if (line == "\r") {
-			uint8 buffer[65537];
+			// print("data\n");
+			size_t SIZE_BUFFER = 16777216;
+			var buffer = new uint8[SIZE_BUFFER];
+			const double Mib = 1048576.0;
+			double max = bytes;
+			double actual = 0;
+			string name_file = uri[uri.last_index_of_char ('/') + 1:];
+			uint8[] progress_bar = "[                    ]".data;
 			while (bytes > 0) {
-				size_t len = input_stream.read (buffer[0:65536]);
+				// print("data2\n");
+				if (no_print == false){
+					double percent = (100 * actual) / max;
+					modify_percent_bar(progress_bar, percent);
+					stdout.printf("%-50s %8s\r", name_file, "%.2f Mib / %.2f Mib %s %.1f%%".printf(actual / Mib, max / Mib, (string)progress_bar, percent));
+				}
+				// stdout.printf("%*.*s]%.2f%%\r".printf(50, 37, (string)progress_bar, percent));
+				size_t len = input_stream.read (buffer[0:SIZE_BUFFER - 1]);
 				buffer[len] = '\0';
 				bytes -= len;
+				actual += len;
 				fs.write (buffer[0:len], 1);
+				// print("here\n");
+			}
+			if (no_print == false){
+				modify_percent_bar(progress_bar, 100);
+				// stdout.printf("%-70s %8s  \n", "%s %.2f Mib/%.2f Mib".printf(name_file, actual / Mib, max / Mib), "%s 100%%".printf((string)progress_bar));
+					stdout.printf("%-50s %8s\n", name_file, "%.2f Mib / %.2f Mib %s %.1f%%".printf(actual / Mib, max / Mib, (string)progress_bar, 100.0));
 			}
 			return;
 		}
 	}
 }
 }
+// 20 -> 100
+// ?  -> 27
