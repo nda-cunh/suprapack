@@ -171,7 +171,7 @@ private void force_suprapack_update () throws Error {
 public void install() throws Error {
 	force_suprapack_update();
 
-	print("resolving dependencies...\n");
+	print("\nresolving dependencies...\n");
 
 	if (config.queue_pkg.length() == 0)
 		print_error("there's nothing to be done");
