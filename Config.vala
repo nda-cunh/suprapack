@@ -6,7 +6,7 @@ public class Config : Object{
 		var prefix_tmp = Environ.get_variable(env, "PREFIX");
 		if (prefix_tmp != null)
 			this.change_prefix(prefix_tmp);
-		queue_pkg = new List<Package>();
+		queue_pkg = new List<Package?>();
 	}
 
 	public void change_prefix (string prefix) throws Error {
