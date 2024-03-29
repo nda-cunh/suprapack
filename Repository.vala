@@ -28,7 +28,7 @@ namespace Repository {
 			string lore = "";
 			try {
 				int status;
-				Process.spawn_command_line_sync(@"tar -xf $(file) ./info", null, null, out status);
+				Process.spawn_command_line_sync(@"tar -xf '$(file)' ./info", null, null, out status);
 				if (status != 0)
 					throw new ShellError.FAILED ("can't open it");
 				var pkg = Package.from_file("./info");
