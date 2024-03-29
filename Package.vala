@@ -38,14 +38,15 @@ public struct Package {
 			this.name = Utils.get_input("Name: ");
 			this.name = /\f\r\n\t\v /.replace(name, -1, 0, "");
 			this.version = Utils.get_input("Version: ");
+			this.version = /[^0-9.]/.replace(name, -1, 0, "");
 			this.version = this.version.replace("-", ".");
-			this.author = Utils.get_input("Author: ");
-			this.description = Utils.get_input("Description: ");
+			this.author = Utils.get_input("Author: ", false);
+			this.description = Utils.get_input("Description: ", false);
 			this.dependency = Utils.get_input("Dependency: ");
 			this.optional_dependency = Utils.get_input("Optional Dependency: ");
 			this.exclude_package = Utils.get_input("Exclude Package: ");
 			print("Can be empty if %s is the binary name\n", this.name);
-			this.binary = Utils.get_input("Binary: ");
+			this.binary = Utils.get_input("Binary: ", false);
 			this.size_tar = "";
 			this.size_installed = "";
 			this.installed_files = "";
