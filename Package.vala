@@ -38,7 +38,7 @@ public struct Package {
 			this.name = Utils.get_input("Name: ");
 			this.name = /\f\r\n\t\v /.replace(name, -1, 0, "");
 			this.version = Utils.get_input("Version: ");
-			this.version = /[^0-9.]/.replace(name, -1, 0, "");
+			this.version = /[^0-9.]/.replace(this.version, -1, 0, "");
 			this.version = this.version.replace("-", ".");
 			this.author = Utils.get_input("Author: ", false);
 			this.description = Utils.get_input("Description: ", false);
@@ -69,10 +69,14 @@ public struct Package {
 				if (line == "[FILES]")
 					break;
 				value = line.offset(line.index_of_char(':') + 1);
-				if (line.has_prefix("name"))
+				if (line.has_prefix("name")) {
 					this.name = value.strip();
-				else if (line.has_prefix("version"))
+					this.name = /\f\r\n\t\v /.replace(name, -1, 0, "");
+				}
+				else if (line.has_prefix("version")) {
 					this.version = value.strip();
+					this.version = /[^0-9.]/.replace(this.version, -1, 0, "");
+				}
 				else if (line.has_prefix("author"))
 					this.author = value.strip();
 				else if (line.has_prefix("description"))
