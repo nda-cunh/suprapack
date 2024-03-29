@@ -34,19 +34,24 @@ public struct Package {
 
 	// constructor
 	public Package.from_input() {
-		this.name = Utils.get_input("Name: ");
-		this.version = Utils.get_input("Version: ");
-		this.version = this.version.replace("-", ".");
-		this.author = Utils.get_input("Author: ");
-		this.description = Utils.get_input("Description: ");
-		this.dependency = Utils.get_input("Dependency: ");
-		this.optional_dependency = Utils.get_input("Optional Dependency: ");
-		this.exclude_package = Utils.get_input("Exclude Package: ");
-		print("Can be empty if %s is the binary name\n", this.name);
-		this.binary = Utils.get_input("Binary: ");
-		this.size_tar = "";
-		this.size_installed = "";
-		this.installed_files = "";
+		try {
+			this.name = Utils.get_input("Name: ");
+			this.name = /\f\r\n\t\v /.replace(name, -1, 0, "");
+			this.version = Utils.get_input("Version: ");
+			this.version = this.version.replace("-", ".");
+			this.author = Utils.get_input("Author: ");
+			this.description = Utils.get_input("Description: ");
+			this.dependency = Utils.get_input("Dependency: ");
+			this.optional_dependency = Utils.get_input("Optional Dependency: ");
+			this.exclude_package = Utils.get_input("Exclude Package: ");
+			print("Can be empty if %s is the binary name\n", this.name);
+			this.binary = Utils.get_input("Binary: ");
+			this.size_tar = "";
+			this.size_installed = "";
+			this.installed_files = "";
+		} catch (Error e) {
+			printerr(e.message);
+		}
 	}
 	
 	public Package.from_file(string info_file) {
