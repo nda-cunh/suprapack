@@ -100,11 +100,12 @@ namespace Utils {
 
 
 	// return a stdin line with downcase and strip space
-	string get_input(string msg) {
+	string get_input(string msg, bool down_force = true) {
 		print(msg);
 		string? str = stdin.read_line();
 		if (str != null) {
-			str = str.down();
+			if (down_force)
+				str = str.down();
 			str = str.strip();
 			return str;
 		}
@@ -180,6 +181,7 @@ public void download (string url, string output = "", bool no_print = false) thr
 		return;
 	name = match_info.fetch_named ("name");
 	uri = match_info.fetch_named ("uri");
+	uri = uri.replace (" ", "%20");
 	if (output == "")
 		target = uri[uri.last_index_of_char ('/') + 1:];
 	else
@@ -238,6 +240,7 @@ public void download (string url, string output = "", bool no_print = false) thr
 			double max = bytes;
 			double actual = 0;
 			string name_file = uri[uri.last_index_of_char ('/') + 1:];
+			name_file = name_file.replace ("%20", " ");
 			uint8[] progress_bar = "[                    ]".data;
 			while (bytes > 0) {
 				// print("data2\n");
