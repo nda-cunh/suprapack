@@ -13,7 +13,7 @@ suprapack_dev: build
 	ninja install -C build
 
 prod:
-	valac $(SRC) -X -flto -X -O2 -X -w --pkg=gio-2.0 -o suprapack 
+	valac $(SRC) --enable-experimental -X -flto -X -O2 -X -w --pkg=gio-2.0 -o suprapack 
 
 install: prod
 	mkdir -p usr/bin
