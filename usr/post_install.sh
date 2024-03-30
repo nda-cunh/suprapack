@@ -1,19 +1,21 @@
 #!/bin/sh
 
+SUPRAVIM_REPO='Supravim https://gitlab.com/supraproject/suprastore_repository/-/raw/plugin-supravim/'
+COSMOS_x86_64='Cosmos https://gitlab.com/supraproject/suprastore_repository/-/raw/master/'
+
 REPO_LIST=$HOME/.local/.suprapack/repo.list
 if [ -f "$REPO_LIST" ]; then
 	echo "already existing repo.list skipping..."
-	if [ -d "~/.config/suprapack/supravim" ]; then
-		if ! grep -q 'Supravim https://gitlab.com/supraproject/suprastore_repository/-/raw/plugin-supravim/' $REPO_LIST 2>/dev/null; then
-			echo "Supravim https://gitlab.com/supraproject/suprastore_repository/-/raw/plugin-supravim/" | >> $REPO_LIST
-		fi
+	if ! grep -q $SUPRAVIM_REPO $REPO_LIST 2>/dev/null; then
+		echo $SUPRAVIM_REPO >> $REPO_LIST
+	fi
+	if ! grep -q $COSMOS_x86_64 $REPO_LIST 2>/dev/null; then
+		echo $COSMOS_x86_64 >> $REPO_LIST
 	fi
 else
 	touch $REPO_LIST
-	echo "Cosmos https://gitlab.com/supraproject/suprastore_repository/-/raw/master/" | >> $REPO_LIST
-	echo "Supravim https://gitlab.com/supraproject/suprastore_repository/-/raw/plugin-supravim/" | >> $REPO_LIST
-
-	# echo "Elixir https://raw.githubusercontent.com/Strong214356/suprapack-list/master/" | cat >> $REPO_LIST
+	echo $COSMOS_x86_64 >> $REPO_LIST
+	echo $SUPRAVIM_REPO >> $REPO_LIST
 fi
 
 CONFIG=$HOME/.local/.suprapack/user.conf
