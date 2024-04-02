@@ -8,6 +8,26 @@ namespace Utils {
 		yield;
 	}
 
+	public string strip (string str, string character) {
+		int start = 0;
+		int end = str.length;
+
+		uint8 buff[2] = {0, 0};
+		while (str[start] != '\0') {
+			buff[0] = str[start];
+			if (!((string)buff in character))
+				break;
+			++start;
+		}
+		while (end >= 0) {
+			buff[0] = str[end];
+			if (!((string)buff in character))
+				break;
+			--end;	
+		}
+		return str[start:end+1];
+	}
+
 
 	// Teste stdin request @default is false
 	bool stdin_bool_choose (string str = "") {
@@ -171,7 +191,7 @@ namespace Utils {
 
 
 
-public void download (string url, string output = "", bool no_print = false) throws Error {
+public void download (string url, string output = "", bool no_print = false, bool rec = false)throws Error {
 	MatchInfo match_info;
 	string name;
 	string uri;
@@ -182,12 +202,13 @@ public void download (string url, string output = "", bool no_print = false) thr
 	name = match_info.fetch_named ("name");
 	uri = match_info.fetch_named ("uri");
 	uri = uri.replace (" ", "%20");
-	if (output == "")
+	if (output == "" && rec == false)
 		target = uri[uri.last_index_of_char ('/') + 1:];
 	else
 		target = output;
 
 
+	print("[%s[%s]]\n\n", target, output);
 	var fs = FileStream.open (target, "w");
 	var client = new SocketClient(){tls=true};
 	var conn = client.connect_to_host(name, 443);
@@ -211,7 +232,8 @@ public void download (string url, string output = "", bool no_print = false) thr
 	error = error.offset(error.index_of_char(' '));
 	int err =  int.parse(error);
 	if (err != 200) {
-		throw new HttpError.ERR(@"$(error) HTTP");
+		if (err != 302)
+			throw new HttpError.ERR(@"$(error) HTTP");
 	}
 
 	while ((line = input_stream.read_line_utf8()) != null) {
@@ -219,6 +241,12 @@ public void download (string url, string output = "", bool no_print = false) thr
 		/* Header Part */
 		if (line.has_prefix("Content-Length: ")) {
 			line.scanf("Content-Length: %zu", out bytes);
+		}
+		if (line.has_prefix("Location: ")) {
+			uint8 buffer [2048];
+			line.scanf("Location: %s", out buffer);
+			download((string)buffer, output, no_print, true);
+			return;
 		}
 
 
@@ -240,6 +268,8 @@ public void download (string url, string output = "", bool no_print = false) thr
 			double max = bytes;
 			double actual = 0;
 			string name_file = uri[uri.last_index_of_char ('/') + 1:];
+			if (name_file.length >= 25)
+				name_file = name_file[0:25] + "..";
 			name_file = name_file.replace ("%20", " ");
 			uint8[] progress_bar = "[                    ]".data;
 			while (bytes > 0) {
