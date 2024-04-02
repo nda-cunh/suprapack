@@ -1,6 +1,6 @@
 namespace Build {
 
-	public void create_package(string usr_dir) {
+	public void create_package(string usr_dir) throws Error {
 		if (!FileUtils.test(usr_dir, FileTest.IS_DIR)) {
 			new Makepkg (usr_dir);
 			return ;

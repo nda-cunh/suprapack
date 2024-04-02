@@ -123,7 +123,7 @@ bool cmd_install(string []av) throws Error {
 	return true;
 }
 
-bool cmd_build(string []av) {
+bool cmd_build(string []av) throws Error {
 	if (av.length == 2)
 		print_error("`suprapack build [...]`");	
 	foreach (var i in av[2:]) {
