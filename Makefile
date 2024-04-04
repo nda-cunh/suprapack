@@ -1,10 +1,10 @@
-SRC= main.vala Run.vala Build.vala Repository.vala Utils.vala Command.vala Query.vala Log.vala Sync.vala Install.vala Package.vala Config.vala
+SRC= main.vala Run.vala Makepkg.vala Build.vala Repository.vala Utils.vala Command.vala Query.vala Log.vala Sync.vala Install.vala Package.vala Config.vala
 NAME=suprapack_dev
 
 all: install 
 
-suprapack:
-	valac $(SRC) -X -O2 -X -w -X -fsanitize=address --pkg=gio-2.0 -o suprapack 
+debug:
+	valac $(SRC) --debug -X -O2 -X -w -X -fsanitize=address --pkg=gio-2.0 -o suprapack 
 
 build:
 	meson build --prefix=$(PWD)/ --bindir=. -Db_sanitize=address
@@ -15,15 +15,16 @@ suprapack_dev: build
 prod:
 	valac $(SRC) --enable-experimental -X -flto -X -O2 -X -w --pkg=gio-2.0 -o suprapack 
 
-install: prod
+install: debug 
 	mkdir -p usr/bin
 	cp ./suprapack usr/bin/suprapack
 	tar -cJf suprapack.suprapack -C usr .
 	./suprapack install suprapack.suprapack
 
-run: $(NAME) 
-	cp suprapack ~/.local/bin/suprapack
-	# ./suprapack add suprapack --force 
+run: prod 
+	./suprapack build PKGBUILD
+	@# cp suprapack ~/.local/bin/suprapack
+	@# ./suprapack add suprapack --force 
 	@#./$(NAME) uninstall nodejs 
 	@# ./$(NAME) update suprapatate 
 	@# ./$(NAME) 

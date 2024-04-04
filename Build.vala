@@ -1,6 +1,11 @@
 namespace Build {
 
 	public void create_package(string usr_dir) {
+		if (!FileUtils.test(usr_dir, FileTest.IS_DIR)) {
+			new Makepkg (usr_dir);
+			return ;
+		}
+
 		// check if USR_DIR is a valid directory
 		if (!(FileUtils.test(usr_dir, FileTest.EXISTS)) || !(FileUtils.test(usr_dir, FileTest.IS_DIR)))
 			print_error(@"$usr_dir is not a dir or doesn't exist");
