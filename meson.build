@@ -1,5 +1,7 @@
 project('suprapack', ['c', 'vala'])
 
+add_project_arguments('-w', language: 'c')
+
 executable('suprapack',
            'Log.vala',
            'Utils.vala',
@@ -12,6 +14,7 @@ executable('suprapack',
            'Build.vala',
            'Config.vala',
            'Sync.vala',
+           'Run.vala',
            dependencies : [
               dependency('glib-2.0'),
               dependency('gobject-2.0'),
