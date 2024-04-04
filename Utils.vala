@@ -125,8 +125,8 @@ namespace Utils {
 		string? str = stdin.read_line();
 		if (str != null) {
 			if (down_force)
-				str = str.down();
-			str = str.strip();
+				str = str?.down();
+			str = str?.strip();
 			return str;
 		}
 		return "";

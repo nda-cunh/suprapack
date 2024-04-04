@@ -15,7 +15,7 @@ public class Config : Object{
 		this.config = this.cache + "/user.conf";
 		this.repo_list = this.cache + "/repo.list";
 		FileUtils.symlink(@"$HOME/.local/.suprapack", @"$HOME/.config/suprapack");
-
+		
 		DirUtils.create_with_parents(this.prefix, 0755);
 		DirUtils.create_with_parents(this.cache, 0755);
 		if (FileUtils.test (this.cache, FileTest.EXISTS) == false) {
