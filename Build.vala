@@ -12,8 +12,8 @@ namespace Build {
 
 		if (check(usr_dir) == false) {
 			print_info("Your usr_dir is not good are you sure ? [Y/n]\n");
-			var s = stdin.read_line().down();
-			if ("n" in s) {
+			var s = stdin.read_line()?.down();
+			if ("n" in (s ?? "")) {
 				print_info("Cancel...");
 				Process.exit(0);
 			}

@@ -4,8 +4,9 @@ public class Makepkg : Object {
 	private Regex regex_attribut;
 	private Regex regex_variable;
 	private Regex regex_url;
+	private Regex regex_git_url;
 
-	public string get_function (string contents, string function_name) throws Error {
+	public string? get_function (string contents, string function_name) throws Error {
 		unowned string tmp = contents;
 		while (tmp != null) {
 			var index = tmp.index_of (function_name);
@@ -31,7 +32,7 @@ public class Makepkg : Object {
 			}
 			tmp = tmp.offset(1);
 		}
-		return "";
+		return null;
 	}
 
 
@@ -60,13 +61,14 @@ public class Makepkg : Object {
 
 	public Makepkg (string pkgbuild) throws Error{
 		MatchInfo match_info;
-		print("\n\n\n\n");
 		string contents;
 		var env = Environ.get ();
 		var srcdir = @"$PWD/makepkg/src";
 		var pkgdir = @"$PWD/makepkg/pkg";
+
+		Process.spawn_command_line_sync (@"rm -rf $(srcdir)");
 		DirUtils.create_with_parents (srcdir, 0755);
-		DirUtils.create_with_parents (pkgdir, 0755);
+		DirUtils.create_with_parents (pkgdir + "/usr", 0755);
 
 		env = Environ.set_variable (env, "srcdir", srcdir, true);
 		env = Environ.set_variable (env, "pkgdir", pkgdir, true);
@@ -74,25 +76,34 @@ public class Makepkg : Object {
 		regex_attribut = new Regex("""^([^\s]+)[=](([(].*?[)])|(.*?$))""", MULTILINE | DOTALL);
 		regex_function = new Regex("""^[^\s]*\s*[(]\s*[)]\s*[{]""", MULTILINE | DOTALL | ANCHORED);
 		regex_url = /^https?[:][\/][\/]/;
+		regex_git_url = /^git[+](?P<name_url>(https?[:][\/][\/][^\s]*))/;//TODO
 		regex_variable = /[$][{(]?([0-9a-zA-Z_]+)[)}]?/;
 
 		FileUtils.get_contents (pkgbuild, out contents);
+
+		var pkgver = get_function (contents, "pkgver");
+		if (pkgver != null) {
+			string output;
+			Process.spawn_sync (srcdir, {"bash", "-c", pkgver}, env, GLib.SpawnFlags.SEARCH_PATH, null, out output, null, null);
+			set_data<string>("pkgver", output);
+			env = Environ.set_variable (env, "pkgver", output, true);
+		}
 
 		if (regex_attribut.match (contents, 0, out match_info)) {
 			do {
 				string name = match_info.fetch(1);
 				string value = match_info.fetch(2);	
 
-				value = replace_variable_in_string (value);
-				value = Utils.strip (value, "()\f\r\n\t\v \'\"");
-				print("Name:%s Value: %s\n", name, value);
-				set_data<string> (name, value);
-				env = Environ.set_variable (env, name, value, true);
-				} while (match_info.next ());
+				if (get_data<string>(name) == null)  {
+					value = replace_variable_in_string (value);
+					value = Utils.strip (value, "()\f\r\n\t\v \'\"");
+					set_data<string> (name, value);
+					env = Environ.set_variable (env, name, value, true);
+				}
+			} while (match_info.next ());
 		}
-	
 
-		foreach (var str in get_data<string>("source")?.replace("\n", " ").split(" "))
+		foreach (var str in get_data<string>("source")?.replace("\n", " ")?.split(" "))
 		{
 			string url;
 			string output;
@@ -113,11 +124,19 @@ public class Makepkg : Object {
 				url = tmp;
 			}
 
+			url = Utils.strip (url, "\'\"() \f\r\n\t\v");
 			print("download [%s] to [%s]\n", url, @"$srcdir/$output");
-			if (regex_url.match (url)) {
-				// print("DOWNLOAD\n");
+			if (regex_git_url.match (url, 0, out match_info)) {
+				string url_name = match_info.fetch_named("name_url");
+				int wait_status;
+				Process.spawn_sync (srcdir, {"git", "clone", url_name, @"$srcdir/$output"}, null, SpawnFlags.SEARCH_PATH, null, null, null, out wait_status);
+				if (wait_status != 0)
+					throw new ShellError.FAILED("impossible to git clone");
+			}
+			else if (regex_url.match (url)) {
 				Utils.download (url, @"$srcdir/$output", false);
-			} else {
+			}
+			else {
 				var file_src = @"$PWD/$url";
 				try {
 					// print("COPY %s\n", url);
@@ -132,22 +151,33 @@ public class Makepkg : Object {
 		}
 
 
+
 		var prepare = get_function (contents, "prepare");
-		if (prepare != "") {
+		if (prepare != null) {
 			print("Prepare()\n");
 			Process.spawn_sync (srcdir, {"bash", "-c", prepare}, env, GLib.SpawnFlags.SEARCH_PATH, null, null, null, null);
 		}
 		var package = get_function (contents, "package");
-		if (package != "") {
+		if (package != null) {
 			print("Package()\n");
 			Process.spawn_sync (srcdir, {"bash", "-c", package}, env, GLib.SpawnFlags.SEARCH_PATH, null, null, null, null);
 		}
 	
 		Package pkg = {};
-		pkg.name = get_data<string> ("pkgname" ?? "");
-		pkg.version= get_data<string> ("pkgver" ?? "");
-		pkg.description = get_data<string> ("pkgdesc" ?? "");
-		pkg.dependency= get_data<string> ("dependency" ?? ""); //TODO
+		pkg.init();
+		pkg.name = get_data<string>			("pkgname") ?? "";
+		pkg.version= get_data<string>		("pkgver") ?? "";
+		pkg.description = get_data<string>	("pkgdesc") ?? "";
+		pkg.author = get_data<string>		("pkgauthor") ?? "";
+		
+		string dependencies = get_data("depends");
+		pkg.dependency = "";
+		foreach (var i in dependencies?.replace("\n", " ")?.split(" ")) {
+			pkg.dependency += Utils.strip (i, "\'\"()\f\r\t\v ") + " ";
+		}
+
+
+
 
 		pkg.create_info_file (@"$pkgdir/usr/info");
 		Process.spawn_command_line_sync (@"suprapack build $pkgdir/usr");
