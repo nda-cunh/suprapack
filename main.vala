@@ -1,4 +1,5 @@
 public string HOME;
+public string PWD;
 public string USERNAME;
 public string? CONFIG = null;
 public string CONST_BLANK;
@@ -111,6 +112,7 @@ public class Main : Object {
 	// INIT
 	public Main(string []args) {
 		HOME = Environment.get_home_dir();
+		PWD = Environment.get_current_dir();
 		USERNAME = Environment.get_user_name();
 		CONST_BLANK = string.nfill(255, ' ');
 		Intl.setlocale();
