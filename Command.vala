@@ -316,17 +316,7 @@ bool cmd_run(string []av) throws Error {
 		foreach (var i in av[3: av.length])
 			av_binary += i;	
 	}
-	var env = Environ.get();
-	env = Environ.set_variable(env, "LD_LIBRARY_PATH",	 @"$(config.prefix)/lib:$(Environ.get_variable(env, "LD_LIBRARY_PATH") ?? "")", true);
-	env = Environ.set_variable(env, "LIBRARY_PATH",	 	 @"$(config.prefix)/lib:$(Environ.get_variable(env, "LIBRARY_PATH") ?? "")", true);
-	env = Environ.set_variable(env, "C_INCLUDE_PATH",	 @"$(config.prefix)/include:$(Environ.get_variable(env, "C_INCLUDE_PATH") ?? "")", true);
-	env = Environ.set_variable(env, "CPLUS_INCLUDE_PATH",@"$(config.prefix)/include:$(Environ.get_variable(env, "CPLUS_INCLUDE_PATH") ?? "")", true);
-	env = Environ.set_variable(env, "PATH",	 @"$(config.prefix)/bin:$(Environ.get_variable(env, "PATH") ?? "")", true);
-
-	env = Environ.set_variable(env, "XDG_DATA_DIRS", @"$(config.prefix)/share", true);
-	env = Environ.set_variable(env, "PKG_CONFIG_PATH", @"$(config.prefix)/share/pkgconfig:$(config.prefix)/lib/pkgconfig", true);
-	env = Environ.set_variable(env, "PS1", "%B%F{blue}(Suprapack)%f%b%~ $ ", true);
-	Process.exit(Process.exit_status(Utils.run(av_binary, env)));
+	run(av_binary);
 }
 
 
