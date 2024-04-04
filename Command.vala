@@ -319,40 +319,6 @@ bool cmd_run(string []av) throws Error {
 	run(av_binary);
 }
 
-
-/*
-bool update_package(string pkg_name) throws Error{
-	var list = Sync.get_list_package();
-	var pkg = Query.get_from_pkg(pkg_name);
-	string Qversion = pkg.version;
-	string Sversion;
-
-	foreach (var i in list) {
-		if (i.name == pkg_name) {
-			Sversion = i.version;
-			if (Sversion != Qversion) {
-				print_info(@"Update avaiable for $(pkg_name) $(CYAN)$(pkg.version) --> $(i.version)");
-				if (config.force == false) {
-					print_info(@"Do you want update it ? [yes/No]");
-					var input = stdin.read_line().strip().down();
-					config.force = true;
-					if (input == "" || "y" in input)
-						install(pkg_name);
-					else
-						print_info("Cancel ...");
-				}
-				else {
-					install(pkg_name);
-				}
-			}else {
-				// print_info(@"No update avaiable for $(pkg_name) $(i.version)");
-			}
-			return true;
-		}
-	}
-	return false;
-}
-*/
 bool cmd_update(string []av) throws Error {
 	force_suprapack_update();
 	unowned string pkg_name;
