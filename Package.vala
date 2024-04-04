@@ -18,7 +18,7 @@ public struct Package {
 	string repo; 
 
 
-	private void init() {
+	public void init() {
 		this.name = "";
 		this.author = "";
 		this.version = ""; 

@@ -50,7 +50,7 @@ public class RepoInfo : Object{
             }
 			try {
 				if (should_download == true) {
-					Utils.download(this.url + "list", list_file, true); 
+					Utils.download(this.url + "list", list_file, false); 
 				}
 			} catch (Error e) {
                 print_error(@"unable to download file\n $(e.message)");
