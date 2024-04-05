@@ -181,11 +181,8 @@ public class Makepkg : Object {
 			pkg.dependency += Utils.strip (i, "\'\"()\f\r\t\v ") + " ";
 		}
 
-
-
-
 		pkg.create_info_file (@"$pkgdir/usr/info");
-		Process.spawn_command_line_sync (@"suprapack build $pkgdir/usr"); //TODO degeulasse
+		Build.create_package (@"$pkgdir/usr");
 	}
 
 }
