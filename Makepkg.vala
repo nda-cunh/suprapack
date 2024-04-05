@@ -63,15 +63,17 @@ public class Makepkg : Object {
 		MatchInfo match_info;
 		string contents;
 		var env = Environ.get ();
-		var srcdir = @"$PWD/makepkg/src";
-		var pkgdir = @"$PWD/makepkg/pkg";
+		var srcdir = @"$PWD/src";
+		var pkgdir = @"$PWD/pkg";
 
 		Process.spawn_command_line_sync (@"rm -rf $(srcdir)");
+		Process.spawn_command_line_sync (@"rm -rf $(pkgdir)");
 		DirUtils.create_with_parents (srcdir, 0755);
 		DirUtils.create_with_parents (pkgdir + "/usr", 0755);
 
 		env = Environ.set_variable (env, "srcdir", srcdir, true);
 		env = Environ.set_variable (env, "pkgdir", pkgdir, true);
+		env = Environ.set_variable (env, "prefix", config.prefix, true);
 
 		regex_attribut = new Regex("""^([^\s]+)[=](([(].*?[)])|(.*?$))""", MULTILINE | DOTALL);
 		regex_function = new Regex("""^[^\s]*\s*[(]\s*[)]\s*[{]""", MULTILINE | DOTALL | ANCHORED);
@@ -125,8 +127,9 @@ public class Makepkg : Object {
 			}
 
 			url = Utils.strip (url, "\'\"() \f\r\n\t\v");
-			print("download [%s] to [%s]\n", url, @"$srcdir/$output");
+			output = Utils.strip (output, "\'\"() \f\r\n\t\v");
 			if (regex_git_url.match (url, 0, out match_info)) {
+				print("git clone [%s] to [%s]\n", url, @"$srcdir/$output");
 				string url_name = match_info.fetch_named("name_url");
 				int wait_status;
 				Process.spawn_sync (srcdir, {"git", "clone", url_name, @"$srcdir/$output"}, null, SpawnFlags.SEARCH_PATH, null, null, null, out wait_status);
@@ -134,9 +137,11 @@ public class Makepkg : Object {
 					throw new ShellError.FAILED("impossible to git clone");
 			}
 			else if (regex_url.match (url)) {
+				print("download [%s] to [%s]\n", url, @"$srcdir/$output");
 				Utils.download (url, @"$srcdir/$output", false);
 			}
 			else {
+				print("copy [%s] to [%s]\n", url, @"$srcdir/$output");
 				var file_src = @"$PWD/$url";
 				try {
 					// print("COPY %s\n", url);
@@ -180,7 +185,7 @@ public class Makepkg : Object {
 
 
 		pkg.create_info_file (@"$pkgdir/usr/info");
-		Process.spawn_command_line_sync (@"suprapack build $pkgdir/usr");
+		Process.spawn_command_line_sync (@"suprapack build $pkgdir/usr"); //TODO degeulasse
 	}
 
 }

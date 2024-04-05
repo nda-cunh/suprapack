@@ -8,26 +8,25 @@ namespace Utils {
 		yield;
 	}
 
-	public string strip (string str, string character) {
-		int start = 0;
+	public string strip (string str, string character = "\f\r\n\t\v ") {
 		int end = str.length;
+		int start = 0;
+		unichar t;
 
-		uint8 buff[2] = {0, 0};
-		while (str[start] != '\0') {
-			buff[0] = str[start];
-			if (!((string)buff in character))
+		while (str.get_next_char (ref start, out t)){
+			if (character.index_of_char (t) == -1) {
+				str.get_prev_char (ref start, out t);
 				break;
-			++start;
+			}
 		}
-		while (end >= 0) {
-			buff[0] = str[end];
-			if (!((string)buff in character))
+		while (str.get_prev_char (ref end, out t)){
+			if (character.index_of_char (t) == -1) {
+				str.get_next_char(ref end, out t);
 				break;
-			--end;	
+			}
 		}
-		return str[start:end+1];
+		return str[start:end];
 	}
-
 
 	// Teste stdin request @default is false
 	bool stdin_bool_choose (string str = "") {
@@ -207,9 +206,9 @@ public void download (string url, string output = "", bool no_print = false, boo
 	else
 		target = output;
 
-
-	print("[%s[%s]]\n\n", target, output);
 	var fs = FileStream.open (target, "w");
+	if (fs == null)
+		throw new HttpError.ERR (@"Impossible to create target_file: ($target) file");
 	var client = new SocketClient(){tls=true};
 	var conn = client.connect_to_host(name, 443);
 
@@ -281,10 +280,12 @@ public void download (string url, string output = "", bool no_print = false, boo
 				}
 				// stdout.printf("%*.*s]%.2f%%\r".printf(50, 37, (string)progress_bar, percent));
 				size_t len = input_stream.read (buffer[0:SIZE_BUFFER - 1]);
-				buffer[len] = '\0';
-				bytes -= len;
-				actual += len;
-				fs.write (buffer[0:len], 1);
+				if (len > 0) {
+					buffer[len] = '\0';
+					bytes -= len;
+					actual += len;
+					fs.write (buffer[0:len], 1);
+				}
 				// print("here\n");
 			}
 			if (no_print == false){
