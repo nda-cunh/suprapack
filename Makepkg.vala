@@ -81,8 +81,13 @@ public class Makepkg : Object {
 		regex_git_url = /^git[+](?P<name_url>(https?[:][\/][\/][^\s]*))/;//TODO
 		regex_variable = /[$][{(]?([0-9a-zA-Z_]+)[)}]?/;
 
+
+
+		/* Get all the PKGBUILD and set it in contents-string */
 		FileUtils.get_contents (pkgbuild, out contents);
 
+		
+		/* call pkgver() function if exist and set pkgver */
 		var pkgver = get_function (contents, "pkgver");
 		if (pkgver != null) {
 			string output;
@@ -105,6 +110,9 @@ public class Makepkg : Object {
 			} while (match_info.next ());
 		}
 
+
+
+		/* Parse Source('item1' 'item2') */
 		foreach (var str in get_data<string>("source")?.replace("\n", " ")?.split(" "))
 		{
 			string url;
@@ -128,20 +136,28 @@ public class Makepkg : Object {
 
 			url = Utils.strip (url, "\'\"() \f\r\n\t\v");
 			output = Utils.strip (output, "\'\"() \f\r\n\t\v");
+			
+			/* Download with git binary */
 			if (regex_git_url.match (url, 0, out match_info)) {
-				print("git clone [%s] to [%s]\n", url, @"$srcdir/$output");
 				string url_name = match_info.fetch_named("name_url");
 				int wait_status;
-				Process.spawn_sync (srcdir, {"git", "clone", url_name, @"$srcdir/$output"}, null, SpawnFlags.SEARCH_PATH, null, null, null, out wait_status);
+				Process.spawn_sync (srcdir,
+						{"git", "clone", url_name, @"$srcdir/$output"},
+						null,
+						SEARCH_PATH,
+						null,
+						null,
+						null,
+						out wait_status);
 				if (wait_status != 0)
 					throw new ShellError.FAILED("impossible to git clone");
 			}
+			/* Download with HTTP 1.x */
 			else if (regex_url.match (url)) {
-				print("download [%s] to [%s]\n", url, @"$srcdir/$output");
 				Utils.download (url, @"$srcdir/$output", false);
 			}
+			/* Simple copy */
 			else {
-				print("copy [%s] to [%s]\n", url, @"$srcdir/$output");
 				var file_src = @"$PWD/$url";
 				try {
 					// print("COPY %s\n", url);
@@ -157,6 +173,7 @@ public class Makepkg : Object {
 
 
 
+		/* Run Prepare and Package function  */
 		var prepare = get_function (contents, "prepare");
 		if (prepare != null) {
 			print("Prepare()\n");
@@ -167,7 +184,10 @@ public class Makepkg : Object {
 			print("Package()\n");
 			Process.spawn_sync (srcdir, {"bash", "-c", package}, env, GLib.SpawnFlags.SEARCH_PATH, null, null, null, null);
 		}
-	
+
+
+
+		/* Create Package info */
 		Package pkg = {};
 		pkg.init();
 		pkg.name = get_data<string>			("pkgname") ?? "";
@@ -180,8 +200,12 @@ public class Makepkg : Object {
 		foreach (var i in dependencies?.replace("\n", " ")?.split(" ")) {
 			pkg.dependency += Utils.strip (i, "\'\"()\f\r\t\v ") + " ";
 		}
-
 		pkg.create_info_file (@"$pkgdir/usr/info");
+		
+
+
+
+		/* build the usr folder created in pkgdir/usr */
 		Build.create_package (@"$pkgdir/usr");
 	}
 
