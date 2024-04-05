@@ -15,6 +15,7 @@ executable('suprapack',
            'Config.vala',
            'Sync.vala',
            'Run.vala',
+           'Makepkg.vala',
            dependencies : [
               dependency('glib-2.0'),
               dependency('gobject-2.0'),
