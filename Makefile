@@ -21,8 +21,9 @@ install: debug
 	tar -cJf suprapack.suprapack -C usr .
 	./suprapack install suprapack.suprapack
 
-run: $(NAME) 
-	cp -f suprapack ~/.local/bin/suprapack
+run: prod 
+	./suprapack build PKGBUILD
+	@# cp suprapack ~/.local/bin/suprapack
 	@# ./suprapack add suprapack --force 
 	@#./$(NAME) uninstall nodejs 
 	@# ./$(NAME) update suprapatate 
