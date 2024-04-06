@@ -64,8 +64,15 @@ namespace Build {
 			FileUtils.chmod(@"$usr_dir/post_install.sh", 0777);
 		// compress the package
 		var name_pkg = @"$(pkg.name)-$(pkg.version)";
-		if (Utils.run_silent({"tar", "--zstd", "-cf", @"$(name_pkg).suprapack", "-C", usr_dir, "."}) != 0)
-			print_error(@"unable to create package\npackage => $(name_pkg)");
+		var loop = new MainLoop();
+		var thread = new Thread<void>(null, ()=> {
+			if (Utils.run_silent({"tar", "--zstd", "-cf", @"$(name_pkg).suprapack", "-C", usr_dir, "."}) != 0)
+				print_error(@"unable to create package\npackage => $(name_pkg)");
+			loop.quit();
+		});
+		loading.begin();
+		loop.run ();
+		thread.join ();
 		print_info(@"$(name_pkg).suprapack is created\n");
 	}
 	
