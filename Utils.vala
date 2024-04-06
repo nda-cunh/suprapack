@@ -238,16 +238,17 @@ public void download (string url, string output = "", bool no_print = false, boo
 	while ((line = input_stream.read_line_utf8()) != null) {
 
 		/* Header Part */
+		debug("HEADER: %s\n", line);
 		if (line.has_prefix("Content-Length: ")) {
 			line.scanf("Content-Length: %zu", out bytes);
 		}
 		if (line.has_prefix("Location: ")) {
 			uint8 buffer [2048];
 			line.scanf("Location: %s", out buffer);
+			debug("redirect to %s\n", (string)buffer);
 			download((string)buffer, output, no_print, true);
 			return;
 		}
-
 
 		void modify_percent_bar (uint8[] buffer, double percent) {
 			int calc = (int)((percent * 20) / 100);
@@ -257,10 +258,8 @@ public void download (string url, string output = "", bool no_print = false, boo
 			buffer[21] = ']';
 		}
 
-		// print("header\n");
 		/* Data Part */
 		if (line == "\r") {
-			// print("data\n");
 			size_t SIZE_BUFFER = 16777216;
 			var buffer = new uint8[SIZE_BUFFER];
 			const double Mib = 1048576.0;
@@ -271,32 +270,31 @@ public void download (string url, string output = "", bool no_print = false, boo
 				name_file = name_file[0:25] + "..";
 			name_file = name_file.replace ("%20", " ");
 			uint8[] progress_bar = "[                    ]".data;
-			while (bytes > 0) {
-				// print("data2\n");
+			size_t len = 1;
+			while (len > 0) {
 				if (no_print == false){
-					double percent = (100 * actual) / max;
-					modify_percent_bar(progress_bar, percent);
-					stdout.printf("%-50s %8s\r", name_file, "%.2f Mib / %.2f Mib %s %.1f%%".printf(actual / Mib, max / Mib, (string)progress_bar, percent));
+					if (max == 0.0)
+						stdout.printf("%-50s %8s\r", name_file, "%.2f Mib / ??? Mib".printf(actual / Mib));
+					else {
+						double percent = (100 * actual) / max;
+						modify_percent_bar(progress_bar, percent);
+						stdout.printf("%-50s %8s\r", name_file, "%.2f Mib / %.2f Mib %s %.1f%%".printf(actual / Mib, max / Mib, (string)progress_bar, percent));
+					}
 				}
-				// stdout.printf("%*.*s]%.2f%%\r".printf(50, 37, (string)progress_bar, percent));
-				size_t len = input_stream.read (buffer[0:SIZE_BUFFER - 1]);
+				len = input_stream.read (buffer[0:SIZE_BUFFER - 1]);
 				if (len > 0) {
 					buffer[len] = '\0';
 					bytes -= len;
 					actual += len;
 					fs.write (buffer[0:len], 1);
 				}
-				// print("here\n");
 			}
 			if (no_print == false){
 				modify_percent_bar(progress_bar, 100);
-				// stdout.printf("%-70s %8s  \n", "%s %.2f Mib/%.2f Mib".printf(name_file, actual / Mib, max / Mib), "%s 100%%".printf((string)progress_bar));
-					stdout.printf("%-50s %8s\n", name_file, "%.2f Mib / %.2f Mib %s %.1f%%".printf(actual / Mib, max / Mib, (string)progress_bar, 100.0));
+					stdout.printf("%-50s %8s\n", name_file, "%.2f Mib / %.2f Mib %s 100.0%%".printf(actual / Mib, actual / Mib, (string)progress_bar));
 			}
 			return;
 		}
 	}
 }
 }
-// 20 -> 100
-// ?  -> 27
