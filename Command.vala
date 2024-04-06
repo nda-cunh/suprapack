@@ -116,6 +116,9 @@ bool cmd_install(string []av) throws Error {
 				prepare_install(i);
 			}
 		}catch (Error e) {
+			if (e is ErrorSP.FAILED) {
+				throw e;
+			}
 			printerror(e.message);
 		}
 	}
