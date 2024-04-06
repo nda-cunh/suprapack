@@ -128,7 +128,9 @@ public class Makepkg : Object {
 			set_data<string> (attr, value);
 			env = Environ.set_variable (env, attr, value, true);
 		}
-		
+	
+		print("\n");
+		print_info ("Downloading all sources", "Source", "\033[36;1m");
 		/* Parse Source('item1' 'item2') */
 		foreach (var str in get_data<string>("source")?.replace("\n", " ")?.split(" "))
 		{
@@ -137,7 +139,6 @@ public class Makepkg : Object {
 			var tmp = str;
 
 			int index;
-			print("%s\n", str);
 			if ((index = tmp.index_of ("::")) > 0) {
 				output = tmp[0:index];
 				url = tmp[index+2:];
@@ -175,9 +176,9 @@ public class Makepkg : Object {
 			}
 			/* Simple copy */
 			else {
+				print("%s\n", output);
 				var file_src = @"$PWD/$url";
 				try {
-					// print("COPY %s\n", url);
 					var @in = File.new_for_path (file_src);
 					var @out = File.new_for_path (@"$srcdir/$output");
 					@in.copy (@out, FileCopyFlags.OVERWRITE);
@@ -189,16 +190,17 @@ public class Makepkg : Object {
 		}
 
 
-
 		/* Run Prepare and Package function  */
+
+		print("\n");
 		var prepare = get_function (contents, "prepare");
 		if (prepare != null) {
-			print("Prepare()\n");
+			print_info ("running prepare script", "Prepare", "\033[36;1m");
 			Process.spawn_sync (srcdir, {"bash", "-c", prepare}, env, GLib.SpawnFlags.SEARCH_PATH, null, null, null, null);
 		}
 		var package = get_function (contents, "package");
 		if (package != null) {
-			print("Package()\n");
+			print_info ("running package script", "Package", "\033[36;1m");
 			Process.spawn_sync (srcdir, {"bash", "-c", package}, env, GLib.SpawnFlags.SEARCH_PATH, null, null, null, null);
 		}
 
