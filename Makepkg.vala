@@ -76,7 +76,7 @@ public class Makepkg : Object {
 		env = Environ.set_variable (env, "prefix", config.prefix, true);
 
 		regex_attribut = new Regex("""^([^\s]+)[=](([(].*?[)])|(.*?$))""", MULTILINE | DOTALL);
-		regex_function = new Regex("""^[^\s]*\s*[(]\s*[)]\s*[{]""", MULTILINE | DOTALL | ANCHORED);
+		regex_function = new Regex("""^(.+?)[(].*?[)].*?[{]""", MULTILINE);
 		regex_url = /^https?[:][\/][\/]/;
 		regex_git_url = /^git[+](?P<name_url>(https?[:][\/][\/][^\s]*))/;//TODO
 		regex_variable = /[$][{(]?([0-9a-zA-Z_]+)[)}]?/;
@@ -86,32 +86,49 @@ public class Makepkg : Object {
 		/* Get all the PKGBUILD and set it in contents-string */
 		FileUtils.get_contents (pkgbuild, out contents);
 
-		
-		/* call pkgver() function if exist and set pkgver */
-		var pkgver = get_function (contents, "pkgver");
-		if (pkgver != null) {
-			string output;
-			Process.spawn_sync (srcdir, {"bash", "-c", pkgver}, env, GLib.SpawnFlags.SEARCH_PATH, null, out output, null, null);
-			set_data<string>("pkgver", output);
-			env = Environ.set_variable (env, "pkgver", output, true);
-		}
-
+	
+		/* Get All Attributs  (name=value) or (name=(value1 value2)) */
+		string []attributs = {};
 		if (regex_attribut.match (contents, 0, out match_info)) {
 			do {
 				string name = match_info.fetch(1);
 				string value = match_info.fetch(2);	
 
-				if (get_data<string>(name) == null)  {
-					value = replace_variable_in_string (value);
-					value = Utils.strip (value, "()\f\r\n\t\v \'\"");
-					set_data<string> (name, value);
-					env = Environ.set_variable (env, name, value, true);
-				}
+				attributs += name;
+				value = Utils.strip (value, "()\f\r\n\t\v \'\"");
+				env = Environ.set_variable (env, name, value, true);
+				set_data<string> (name, value);
 			} while (match_info.next ());
 		}
 
+		/* Execute All Attributs function (name () { shell-script }) */
+		if (regex_function.match(contents, 0, out match_info)) {
+			do {
+				var function_name = match_info.fetch(1);
+				if (function_name != "package" && function_name != "prepare") {
+					var pkgver = get_function (contents, function_name);
+					if (pkgver != null) {
+						string output;
+						int wait_status;
+						Process.spawn_sync (srcdir, {"bash", "-c", pkgver}, env, SEARCH_PATH, null, out output, null, out wait_status);
+						set_data<string>(function_name, output);
+						env = Environ.set_variable (env, function_name, output, true);
+						if (wait_status != 0)
+							throw new ShellError.FAILED("function -> %s send error", function_name);
+					}
+				}
 
+			} while (match_info.next ());
+		}
 
+		/* Replace all ${VARIABLE} in attributs */
+		foreach (var attr in attributs) {
+			string value = get_data<string> (attr);
+			value = replace_variable_in_string (value);
+			set_data<string> (attr, value);
+			env = Environ.set_variable (env, attr, value, true);
+		}
+		
 		/* Parse Source('item1' 'item2') */
 		foreach (var str in get_data<string>("source")?.replace("\n", " ")?.split(" "))
 		{
