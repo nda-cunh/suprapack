@@ -8,6 +8,25 @@ namespace Utils {
 		yield;
 	}
 
+	public string strip (string str, string character = "\f\r\n\t\v ") {
+		int end = str.length;
+		int start = 0;
+		unichar t;
+
+		while (str.get_next_char (ref start, out t)){
+			if (character.index_of_char (t) == -1) {
+				str.get_prev_char (ref start, out t);
+				break;
+			}
+		}
+		while (str.get_prev_char (ref end, out t)){
+			if (character.index_of_char (t) == -1) {
+				str.get_next_char(ref end, out t);
+				break;
+			}
+		}
+		return str[start:end];
+	}
 
 	// Teste stdin request @default is false
 	bool stdin_bool_choose (string str = "") {
@@ -105,8 +124,8 @@ namespace Utils {
 		string? str = stdin.read_line();
 		if (str != null) {
 			if (down_force)
-				str = str.down();
-			str = str.strip();
+				str = str?.down();
+			str = str?.strip();
 			return str;
 		}
 		return "";
@@ -171,7 +190,7 @@ namespace Utils {
 
 
 
-public void download (string url, string output = "", bool no_print = false) throws Error {
+public void download (string url, string output = "", bool no_print = false, bool rec = false)throws Error {
 	MatchInfo match_info;
 	string name;
 	string uri;
@@ -182,13 +201,14 @@ public void download (string url, string output = "", bool no_print = false) thr
 	name = match_info.fetch_named ("name");
 	uri = match_info.fetch_named ("uri");
 	uri = uri.replace (" ", "%20");
-	if (output == "")
+	if (output == "" && rec == false)
 		target = uri[uri.last_index_of_char ('/') + 1:];
 	else
 		target = output;
 
-
 	var fs = FileStream.open (target, "w");
+	if (fs == null)
+		throw new HttpError.ERR (@"Impossible to create target_file: ($target) file");
 	var client = new SocketClient(){tls=true};
 	var conn = client.connect_to_host(name, 443);
 
@@ -211,16 +231,24 @@ public void download (string url, string output = "", bool no_print = false) thr
 	error = error.offset(error.index_of_char(' '));
 	int err =  int.parse(error);
 	if (err != 200) {
-		throw new HttpError.ERR(@"$(error) HTTP");
+		if (err != 302)
+			throw new HttpError.ERR(@"$(error) HTTP".replace("\r", ""));
 	}
 
 	while ((line = input_stream.read_line_utf8()) != null) {
 
 		/* Header Part */
+		debug("HEADER: %s\n", line);
 		if (line.has_prefix("Content-Length: ")) {
 			line.scanf("Content-Length: %zu", out bytes);
 		}
-
+		if (line.has_prefix("Location: ")) {
+			uint8 buffer [2048];
+			line.scanf("Location: %s", out buffer);
+			debug("redirect to %s\n", (string)buffer);
+			download((string)buffer, output, no_print, true);
+			return;
+		}
 
 		void modify_percent_bar (uint8[] buffer, double percent) {
 			int calc = (int)((percent * 20) / 100);
@@ -230,42 +258,43 @@ public void download (string url, string output = "", bool no_print = false) thr
 			buffer[21] = ']';
 		}
 
-		// print("header\n");
 		/* Data Part */
 		if (line == "\r") {
-			// print("data\n");
 			size_t SIZE_BUFFER = 16777216;
 			var buffer = new uint8[SIZE_BUFFER];
 			const double Mib = 1048576.0;
 			double max = bytes;
 			double actual = 0;
 			string name_file = uri[uri.last_index_of_char ('/') + 1:];
+			if (name_file.length >= 25)
+				name_file = name_file[0:25] + "..";
 			name_file = name_file.replace ("%20", " ");
 			uint8[] progress_bar = "[                    ]".data;
-			while (bytes > 0) {
-				// print("data2\n");
+			size_t len = 1;
+			while (len > 0) {
 				if (no_print == false){
-					double percent = (100 * actual) / max;
-					modify_percent_bar(progress_bar, percent);
-					stdout.printf("%-50s %8s\r", name_file, "%.2f Mib / %.2f Mib %s %.1f%%".printf(actual / Mib, max / Mib, (string)progress_bar, percent));
+					if (max == 0.0)
+						stdout.printf("%-50s %8s\r", name_file, "%.2f Mib / ??? Mib".printf(actual / Mib));
+					else {
+						double percent = (100 * actual) / max;
+						modify_percent_bar(progress_bar, percent);
+						stdout.printf("%-50s %8s\r", name_file, "%.2f Mib / %.2f Mib %s %.1f%%".printf(actual / Mib, max / Mib, (string)progress_bar, percent));
+					}
 				}
-				// stdout.printf("%*.*s]%.2f%%\r".printf(50, 37, (string)progress_bar, percent));
-				size_t len = input_stream.read (buffer[0:SIZE_BUFFER - 1]);
-				buffer[len] = '\0';
-				bytes -= len;
-				actual += len;
-				fs.write (buffer[0:len], 1);
-				// print("here\n");
+				len = input_stream.read (buffer[0:SIZE_BUFFER - 1]);
+				if (len > 0) {
+					buffer[len] = '\0';
+					bytes -= len;
+					actual += len;
+					fs.write (buffer[0:len], 1);
+				}
 			}
 			if (no_print == false){
 				modify_percent_bar(progress_bar, 100);
-				// stdout.printf("%-70s %8s  \n", "%s %.2f Mib/%.2f Mib".printf(name_file, actual / Mib, max / Mib), "%s 100%%".printf((string)progress_bar));
-					stdout.printf("%-50s %8s\n", name_file, "%.2f Mib / %.2f Mib %s %.1f%%".printf(actual / Mib, max / Mib, (string)progress_bar, 100.0));
+					stdout.printf("%-50s %8s\n", name_file, "%.2f Mib / %.2f Mib %s 100.0%%".printf(actual / Mib, actual / Mib, (string)progress_bar));
 			}
 			return;
 		}
 	}
 }
 }
-// 20 -> 100
-// ?  -> 27

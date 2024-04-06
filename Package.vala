@@ -18,7 +18,7 @@ public struct Package {
 	string repo; 
 
 
-	private void init() {
+	public void init() {
 		this.name = "";
 		this.author = "";
 		this.version = ""; 
@@ -106,7 +106,10 @@ public struct Package {
 	}
 
 	public string []get_installed_files() {
-		var sp = this.installed_files.split("\n");
+		string []sp = this.installed_files?.split("\n");
+
+		if (sp == null || sp.length == 0)
+			return {};
 		if (sp[sp.length - 1] == "") {
 			sp[sp.length -1] = null;
 			sp.resize(sp.length - 1);
