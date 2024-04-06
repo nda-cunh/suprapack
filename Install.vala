@@ -277,7 +277,7 @@ void prepare_install(string name_search, string name_repo = "") throws Error{
 		if (Query.is_exist(name_search) == true) {
 			throw new ErrorSP.ACCESS(@"Can't found $name_search but exist in local");
 		}
-		throw new ErrorSP.FAILED(@"$(name_search) not found");
+		throw new ErrorSP.ACCESS(@"$(name_search) not found");
 	}
 	else if (queue.length == 1){
 		pkg = queue[0];
@@ -316,15 +316,20 @@ void add_queue_list(SupraList pkg, string output) throws Error {
 	pkgtmp.repo = pkg.repo_name;
 
 	config.queue_pkg.append(pkgtmp);
-	foreach (var i in pkgtmp.dependency.split(" ")) {
-		if (config.check_if_in_queue(i)) {
-			continue;
-		}
-		if (Query.is_exist(i) && config.force == false) {
-			if (Sync.check_update(i))
+	try {
+		foreach (var i in pkgtmp.dependency.split(" ")) {
+			if (config.check_if_in_queue(i)) {
+				continue;
+			}
+			if (Query.is_exist(i) && config.force == false) {
+				if (Sync.check_update(i))
+					prepare_install(i);
+				continue;
+			}
+			else
 				prepare_install(i);
 		}
-		else
-			prepare_install(i);
+	} catch (Error e) {
+		throw new ErrorSP.FAILED("Dependency of %s -> %s", pkg.name, e.message);
 	}
 }
