@@ -1,6 +1,7 @@
 project('suprapack', ['c', 'vala'])
 
 add_project_arguments('-w', language: 'c')
+add_project_arguments('--enable-experimental', language: 'vala')
 
 executable('suprapack',
            'Log.vala',
