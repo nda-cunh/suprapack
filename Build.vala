@@ -1,14 +1,19 @@
 namespace Build {
 
-	public void create_package(string usr_dir) {
+	public void create_package(string usr_dir) throws Error {
+		if (!FileUtils.test(usr_dir, FileTest.IS_DIR)) {
+			new Makepkg (usr_dir);
+			return ;
+		}
+
 		// check if USR_DIR is a valid directory
 		if (!(FileUtils.test(usr_dir, FileTest.EXISTS)) || !(FileUtils.test(usr_dir, FileTest.IS_DIR)))
 			print_error(@"$usr_dir is not a dir or doesn't exist");
 
 		if (check(usr_dir) == false) {
 			print_info("Your usr_dir is not good are you sure ? [Y/n]\n");
-			var s = stdin.read_line().down();
-			if ("n" in s) {
+			var s = stdin.read_line()?.down();
+			if ("n" in (s ?? "")) {
 				print_info("Cancel...");
 				Process.exit(0);
 			}
@@ -20,7 +25,6 @@ namespace Build {
 			// modify /etc 
 			if (FileUtils.test(@"$usr_dir/../etc", FileTest.EXISTS)) {
 				Process.spawn_command_line_sync(@"mv $usr_dir/../etc $usr_dir/etc");
-				Process.spawn_command_line_sync(@"ls $usr_dir/");
 			}
 
 			// modify x86_64-linux
@@ -60,8 +64,15 @@ namespace Build {
 			FileUtils.chmod(@"$usr_dir/post_install.sh", 0777);
 		// compress the package
 		var name_pkg = @"$(pkg.name)-$(pkg.version)";
-		if (Utils.run_silent({"tar", "--zstd", "-cf", @"$(name_pkg).suprapack", "-C", usr_dir, "."}) != 0)
-			print_error(@"unable to create package\npackage => $(name_pkg)");
+		var loop = new MainLoop();
+		var thread = new Thread<void>(null, ()=> {
+			if (Utils.run_silent({"tar", "--zstd", "-cf", @"$(name_pkg).suprapack", "-C", usr_dir, "."}) != 0)
+				print_error(@"unable to create package\npackage => $(name_pkg)");
+			loop.quit();
+		});
+		loading.begin();
+		loop.run ();
+		thread.join ();
 		print_info(@"$(name_pkg).suprapack is created\n");
 	}
 	
