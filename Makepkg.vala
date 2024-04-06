@@ -208,19 +208,31 @@ public class Makepkg : Object {
 
 		/* Create Package info */
 		Package pkg = {};
-		pkg.init();
-		pkg.name = get_data<string>			("pkgname") ?? "";
-		pkg.version= get_data<string>		("pkgver") ?? "";
-		pkg.description = get_data<string>	("pkgdesc") ?? "";
-		pkg.author = get_data<string>		("pkgauthor") ?? "";
-		
-		string dependencies = get_data("depends");
-		pkg.dependency = "";
-		foreach (var i in dependencies?.replace("\n", " ")?.split(" ")) {
-			pkg.dependency += Utils.strip (i, "\'\"()\f\r\t\v ") + " ";
+		with (pkg) {
+			init();
+			name = get_data("pkgname") ?? "";
+			version= get_data("pkgver") ?? "";
+			description = get_data("pkgdesc") ?? "";
+			author = get_data("pkgauthor") ?? "";
+			
+			string dependencies = get_data("depends");
+			foreach (var i in dependencies?.replace("\n", " ")?.split(" ")) {
+				dependency += Utils.strip (i, "\'\"()\f\r\t\v ") + " ";
+			}
+
+			string excludes = get_data("conflicts");
+			foreach (var i in excludes?.replace("\n", " ")?.split(" ")) {
+				exclude_package	 += Utils.strip (i, "\'\"()\f\r\t\v ") + " ";
+			}
+			create_info_file (@"$pkgdir/usr/info");
 		}
-		pkg.create_info_file (@"$pkgdir/usr/info");
-		
+
+		/* Make Dependency */
+		string makedependency = get_data("makedepends");
+		foreach (var i in makedependency?.replace("\n", " ")?.split(" ")) {
+			if (Query.is_exist (i) == false)
+				throw new ErrorSP.ACCESS("%s is not installed cancelling...", i);
+		}
 
 
 
