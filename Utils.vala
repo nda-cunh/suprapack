@@ -232,7 +232,7 @@ public void download (string url, string output = "", bool no_print = false, boo
 	int err =  int.parse(error);
 	if (err != 200) {
 		if (err != 302)
-			throw new HttpError.ERR(@"$(error) HTTP");
+			throw new HttpError.ERR(@"$(error) HTTP".replace("\r", ""));
 	}
 
 	while ((line = input_stream.read_line_utf8()) != null) {
