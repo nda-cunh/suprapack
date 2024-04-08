@@ -128,7 +128,33 @@ public class Makepkg : Object {
 			env = Environ.set_variable (env, attr, value, true);
 			debug("Attributs: [%s]->[%s]", attr, value);
 		}
-	
+
+
+
+		/* Make Dependency */
+		{
+			string makedependency = get_data("makedepends");
+			string []dependency = {};
+			foreach (var i in makedependency?.replace("\n", " ")?.split(" ")) {
+				dependency += Utils.strip (i, "\f\r\n\t\v\"\'[()] ");
+			}
+			foreach (var i in dependency) {
+				if (Query.is_exist (i) == false) {
+					print_info(@"$i is not installed cancelling...");
+					foreach (var pkg in dependency) {
+						if (!(Query.is_exist (pkg)))
+							prepare_install (pkg);
+					}
+					install ();
+					break;
+				}
+			}
+				
+		}
+
+
+
+
 		print("\n");
 		print_info ("Downloading all sources", "Source", "\033[36;1m");
 		/* Parse Source('item1' 'item2') */
@@ -158,11 +184,12 @@ public class Makepkg : Object {
 			output = @"$srcdir/$output";
 			print(output);
 			debug("Source: %s", url);
-			if (FileUtils.test (output, FileTest.EXISTS)) {
-				print("%s ever install skip\n", output);
-			}
 			/* Download with git binary */
-			else if (regex_git_url.match (url, 0, out match_info)) {
+			if (regex_git_url.match (url, 0, out match_info)) {
+				if (FileUtils.test (output, FileTest.EXISTS)) {
+					print("%s ever install skip\n", output);
+					continue;
+				}
 				debug("Git %s to -> %s", url, output);
 				string url_name = match_info.fetch_named("name_url");
 				string branch = match_info.fetch_named("branch") ?? "";
@@ -189,6 +216,10 @@ public class Makepkg : Object {
 			}
 			/* Download with HTTP 1.x */
 			else if (regex_url.match (url)) {
+				if (FileUtils.test (output, FileTest.EXISTS)) {
+					print("%s ever install skip\n", output);
+					continue;
+				}
 				debug("Download %s to -> %s", url, output);
 				Utils.download (url, output, false);
 			}
@@ -244,13 +275,6 @@ public class Makepkg : Object {
 				exclude_package	 += Utils.strip (i, "\'\"()\f\r\t\v ") + " ";
 			}
 			create_info_file (@"$pkgdir/usr/info");
-		}
-
-		/* Make Dependency */
-		string makedependency = get_data("makedepends");
-		foreach (var i in makedependency?.replace("\n", " ")?.split(" ")) {
-			if (Query.is_exist (i) == false)
-				throw new ErrorSP.ACCESS("%s is not installed cancelling...", i);
 		}
 
 
