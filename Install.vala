@@ -190,8 +190,7 @@ public void install() throws Error {
 					Query.uninstall(exclude);
 				}
 				else {
-					print_info("Cancelling...");
-					return ;
+					throw new ErrorSP.CANCEL("Cancelling...");
 				}
 			}
 		}
