@@ -14,8 +14,8 @@ if [ -f "$REPO_LIST" ]; then
 	fi
 else
 	touch $REPO_LIST
-	echo $COSMOS_x86_64 >> $REPO_LIST
-	echo $SUPRAVIM_REPO >> $REPO_LIST
+	echo "$COSMOS_x86_64" >> $REPO_LIST
+	echo "$SUPRAVIM_REPO" >> $REPO_LIST
 fi
 
 CONFIG=$HOME/.local/.suprapack/user.conf
