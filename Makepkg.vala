@@ -245,13 +245,19 @@ public class Makepkg : Object {
 		print("\n");
 		var prepare = get_function (contents, "prepare");
 		if (prepare != null) {
+			int wait_status;
 			print_info ("running prepare script", "Prepare", "\033[36;1m");
-			Process.spawn_sync (srcdir, {"bash", "-c", prepare}, env, GLib.SpawnFlags.SEARCH_PATH, null, null, null, null);
+			Process.spawn_sync (srcdir, {"bash", "-c", prepare}, env, GLib.SpawnFlags.SEARCH_PATH, null, null, null, out wait_status);
+			if (wait_status != 0)
+				throw new ErrorSP.CANCEL("prepare() send [%d] error code", wait_status);
 		}
 		var package = get_function (contents, "package");
 		if (package != null) {
+			int wait_status;
 			print_info ("running package script", "Package", "\033[36;1m");
-			Process.spawn_sync (srcdir, {"bash", "-c", package}, env, GLib.SpawnFlags.SEARCH_PATH, null, null, null, null);
+			Process.spawn_sync (srcdir, {"bash", "-c", package}, env, GLib.SpawnFlags.SEARCH_PATH, null, null, null, out wait_status);
+			if (wait_status != 0)
+				throw new ErrorSP.CANCEL("prepare() send [%d] error code", wait_status);
 		}
 
 
