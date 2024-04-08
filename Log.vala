@@ -14,6 +14,7 @@ public const string NONE = "\033[0m";
 errordomain ErrorSP {
 	ACCESS,
 	FAILED,
+	CANCEL,
 	BADFILE
 	
 }
