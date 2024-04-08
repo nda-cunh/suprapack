@@ -66,7 +66,6 @@ public class Makepkg : Object {
 		var srcdir = @"$PWD/src";
 		var pkgdir = @"$PWD/pkg";
 
-		Process.spawn_command_line_sync (@"rm -rf $(srcdir)");
 		Process.spawn_command_line_sync (@"rm -rf $(pkgdir)");
 		DirUtils.create_with_parents (srcdir, 0755);
 		DirUtils.create_with_parents (pkgdir + "/usr", 0755);
@@ -75,10 +74,10 @@ public class Makepkg : Object {
 		env = Environ.set_variable (env, "pkgdir", pkgdir, true);
 		env = Environ.set_variable (env, "prefix", config.prefix, true);
 
-		regex_attribut = new Regex("""^([^\s]+)[=](([(].*?[)])|(.*?$))""", MULTILINE | DOTALL);
+		regex_attribut = new Regex("""^([^\s]+?)[=](([(].*?[)])|(.*?$))""", MULTILINE | DOTALL); 
 		regex_function = new Regex("""^(.+?)[(].*?[)].*?[{]""", MULTILINE);
 		regex_url = /^https?[:][\/][\/]/;
-		regex_git_url = /^git[+](?P<name_url>(https?[:][\/][\/][^\s]*))/;//TODO
+		regex_git_url = /^git[+](?P<name_url>(https?[:][\/][\/][^\s#]*))([#]branch[=](?P<branch>([^\s]*)))?/;
 		regex_variable = /[$][{(]?([0-9a-zA-Z_]+)[)}]?/;
 
 
@@ -127,6 +126,7 @@ public class Makepkg : Object {
 			value = replace_variable_in_string (value);
 			set_data<string> (attr, value);
 			env = Environ.set_variable (env, attr, value, true);
+			debug("Attributs: [%s]->[%s]", attr, value);
 		}
 	
 		print("\n");
@@ -154,13 +154,30 @@ public class Makepkg : Object {
 
 			url = Utils.strip (url, "\'\"() \f\r\n\t\v");
 			output = Utils.strip (output, "\'\"() \f\r\n\t\v");
-			
+	
+			output = @"$srcdir/$output";
+			print(output);
+			debug("Source: %s", url);
+			if (FileUtils.test (output, FileTest.EXISTS)) {
+				print("%s ever install skip\n", output);
+			}
 			/* Download with git binary */
-			if (regex_git_url.match (url, 0, out match_info)) {
+			else if (regex_git_url.match (url, 0, out match_info)) {
+				debug("Git %s to -> %s", url, output);
 				string url_name = match_info.fetch_named("name_url");
+				string branch = match_info.fetch_named("branch") ?? "";
+					
+				string []argv_exec = {"git", "clone", "--depth", "1", url_name, output};
+				if (branch != "") {
+					debug("Git branch found %s", branch);
+					argv_exec += "-b";
+					argv_exec += branch;
+				}
+
+
 				int wait_status;
 				Process.spawn_sync (srcdir,
-						{"git", "clone", url_name, @"$srcdir/$output"},
+						argv_exec,
 						null,
 						SEARCH_PATH,
 						null,
@@ -172,15 +189,17 @@ public class Makepkg : Object {
 			}
 			/* Download with HTTP 1.x */
 			else if (regex_url.match (url)) {
-				Utils.download (url, @"$srcdir/$output", false);
+				debug("Download %s to -> %s", url, output);
+				Utils.download (url, output, false);
 			}
 			/* Simple copy */
 			else {
 				print("%s\n", output);
 				var file_src = @"$PWD/$url";
+				debug("Copy %s to -> %s", file_src, output);
 				try {
 					var @in = File.new_for_path (file_src);
-					var @out = File.new_for_path (@"$srcdir/$output");
+					var @out = File.new_for_path (output);
 					@in.copy (@out, FileCopyFlags.OVERWRITE);
 				} catch (Error e) {
 					e.message = "Impossible to move %s  (%s)\n".printf(file_src, e.message);
