@@ -281,12 +281,19 @@ public void download (string url, string output = "", bool no_print = false, boo
 						stdout.printf("%-50s %8s\r", name_file, "%.2f Mib / %.2f Mib %s %.1f%%".printf(actual / Mib, max / Mib, (string)progress_bar, percent));
 					}
 				}
-				len = input_stream.read (buffer[0:SIZE_BUFFER - 1]);
-				if (len > 0) {
-					buffer[len] = '\0';
-					bytes -= len;
-					actual += len;
-					fs.write (buffer[0:len], 1);
+				try {
+					len = input_stream.read (buffer[0:SIZE_BUFFER - 1]);
+					if (len > 0) {
+						buffer[len] = '\0';
+						bytes -= len;
+						actual += len;
+						fs.write (buffer[0:len], 1);
+					}
+				}catch (Error e) {
+					if (bytes == 0)
+						break;
+					else
+						throw e;
 				}
 			}
 			if (no_print == false){
