@@ -246,6 +246,9 @@ public void install() throws Error {
 			}
 		}
 	}
+	else {
+		throw new ErrorSP.CANCEL("Cancelling...");
+	}
 }
 
 //* Add a package in Config.queue *//
