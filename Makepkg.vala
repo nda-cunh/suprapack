@@ -89,7 +89,7 @@ public class Makepkg : Object {
 	string autoconfig () throws Error {
 		var autoconfig = Utils.strip(get_data("autoconfig"));
 		var result = new StringBuilder();
-		if (autoconfig == "0" || autoconfig == "false") {
+		if (!(autoconfig == "0" || autoconfig == "false")) {
 			autoconfig_iter_dir (result, @"$pkgdir/usr/lib/pkgconfig/");
 			autoconfig_iter_dir (result, @"$pkgdir/usr/include/pkgconfig/");
 		}
@@ -324,11 +324,11 @@ public class Makepkg : Object {
 		
 		if (pre_install != "") {
 			if (FileUtils.test (@"$pkgdir/pre_install.sh", FileTest.EXISTS)) {
-				FileUtils.get_contents (@"$pkgdir/pre_install.sh", out contents);
-				FileUtils.set_contents (@"$pkgdir/pre_install.sh", contents + pre_install);
+				FileUtils.get_contents (@"$pkgdir/usr/pre_install.sh", out contents);
+				FileUtils.set_contents (@"$pkgdir/usr/pre_install.sh", contents + pre_install);
 			}
 			else {
-				FileUtils.set_contents (@"$pkgdir/pre_install.sh", "#!/bin/bash\n" + pre_install);
+				FileUtils.set_contents (@"$pkgdir/usr/pre_install.sh", "#!/bin/bash\n" + pre_install);
 			}
 		}
 
