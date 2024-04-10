@@ -8,7 +8,7 @@ namespace Utils {
 		yield;
 	}
 
-	public string strip (string str, string character = "\f\r\n\t\v ") {
+	public string strip (string str, string character = "\f\r\n\t\v [(\'\")]") {
 		int end = str.length;
 		int start = 0;
 		unichar t;
