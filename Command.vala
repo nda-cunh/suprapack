@@ -287,6 +287,7 @@ bool cmd_search(string []av) throws Error {
 			print_error(e.message);
 		}
 	}
+	print(NONE);
 	return true;
 }
 
