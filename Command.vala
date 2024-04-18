@@ -227,6 +227,7 @@ bool cmd_list(string []av) {
 	} catch (Error e) {
 		print_error(e.message);
 	}
+	print(NONE);
 	return true;
 }
 
