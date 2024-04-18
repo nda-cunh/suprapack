@@ -173,8 +173,11 @@ public void install() throws Error {
 
 	print("\nresolving dependencies...\n");
 
-	if (config.queue_pkg.length() == 0)
-		print_error("there's nothing to be done");
+	if (config.queue_pkg.length() == 0){
+		print_info("there's nothing to be done");
+		return;
+	}
+
 	print("looking for conflicting packages...\n");
 
 	int name_max = 0;
