@@ -15,10 +15,10 @@ suprapack_dev: build
 prod:
 	valac $(SRC) $(LDFLAGS) -o suprapack 
 
-install: debug 
+install: prod 
 	mkdir -p usr/bin
 	cp ./suprapack usr/bin/suprapack
-	tar -cJf suprapack.suprapack -C usr .
+	tar --zstd -cf suprapack.suprapack -C usr .
 	./suprapack install suprapack.suprapack
 
 run: $(NAME) 
