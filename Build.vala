@@ -56,6 +56,7 @@ namespace Build {
 		}
 		pkg.size_installed = Utils.size_folder(usr_dir).to_string();
 		pkg.create_info_file(@"$usr_dir/info");
+		autoconfig (usr_dir);
 
 
 		if (FileUtils.test(@"$usr_dir/pre_install.sh", FileTest.EXISTS))
@@ -85,5 +86,44 @@ namespace Build {
 		if (FileUtils.test(@"$usr_dir/share", FileTest.EXISTS))
 			n++;
 		return (n != 0);
+	}
+
+	private void autoconfig_iter_dir (StringBuilder result, string file_directory) throws Error {
+		Dir dir;
+		try {
+			dir = Dir.open(file_directory);
+		} catch (Error e){
+			return ;
+		}
+		string filename;
+		string contents;
+
+		while ((filename = dir.read_name ()) != null) {
+			var output = @"$file_directory/$filename";
+			debug("pkg-config %s", output);
+			FileUtils.get_contents (output, out contents);
+			var regex = new Regex("""^prefix.*?$""", RegexCompileFlags.MULTILINE);
+			contents = regex.replace (contents, contents.length, 0, "prefix=$PREFIX");
+			FileUtils.set_contents (output, contents);
+			result.append ("sed -i \"s|\\$PREFIX|$(echo $PKGDIR)|g\" $SRCDIR");
+			result.append (file_directory.offset(file_directory.last_index_of ("/usr/") + 4) + filename);
+			result.append_c ('\n');
+		}
+	}
+
+	private void autoconfig (string pkgdir) throws Error {
+		var result = new StringBuilder();
+		string contents;
+		autoconfig_iter_dir (result, @"$pkgdir/lib/pkgconfig/");
+		autoconfig_iter_dir (result, @"$pkgdir/include/pkgconfig/");
+		if (result.str != "") {
+			if (FileUtils.test (@"$pkgdir/pre_install.sh", FileTest.EXISTS)) {
+				FileUtils.get_contents (@"$pkgdir/pre_install.sh", out contents);
+				FileUtils.set_contents (@"$pkgdir/pre_install.sh", contents + result.str);
+			}
+			else {
+				FileUtils.set_contents (@"$pkgdir/pre_install.sh", "#!/bin/bash\n" + result.str);
+			}
+		}
 	}
 }
