@@ -66,7 +66,7 @@ namespace Build {
 		var name_pkg = @"$(pkg.name)-$(pkg.version)";
 		var loop = new MainLoop();
 		var thread = new Thread<void>(null, ()=> {
-			if (Utils.run_silent({"tar", "--zstd", "-cf", @"$(name_pkg).suprapack", "-C", usr_dir, "."}) != 0)
+			if (Utils.run_silent({"fakeroot", "tar", "--zstd", "-cf", @"$(name_pkg).suprapack", "-C", usr_dir, "."}) != 0)
 				print_error(@"unable to create package\npackage => $(name_pkg)");
 			loop.quit();
 		});
