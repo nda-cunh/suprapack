@@ -61,41 +61,6 @@ public class Makepkg : Object {
 		return builder.str;
 	}
 	
-
-	void autoconfig_iter_dir (StringBuilder result, string file_directory) throws Error {
-		Dir dir;
-		try {
-			dir = Dir.open(file_directory);
-		} catch (Error e){
-			return ;
-		}
-		string filename;
-		string contents;
-
-		while ((filename = dir.read_name ()) != null) {
-			var output = @"$file_directory/$filename";
-			debug("pkg-config %s", output);
-			FileUtils.get_contents (output, out contents);
-			var regex = new Regex("""^prefix.*?$""", RegexCompileFlags.MULTILINE);
-			contents = regex.replace (contents, contents.length, 0, "prefix=$PREFIX");
-			FileUtils.set_contents (output, contents);
-			result.append ("sed -i \"s|\\$PREFIX|$(echo $PKGDIR)|g\" $SRCDIR");
-			result.append (file_directory.offset(file_directory.last_index_of ("/usr/") + 4) + filename);
-			result.append_c ('\n');
-		}
-	}
-
-	/* Generate the pkg-config file (file.pc) if is true */
-	string autoconfig () throws Error {
-		var autoconfig = Utils.strip(get_data("autoconfig"));
-		var result = new StringBuilder();
-		if (!(autoconfig == "0" || autoconfig == "false")) {
-			autoconfig_iter_dir (result, @"$pkgdir/usr/lib/pkgconfig/");
-			autoconfig_iter_dir (result, @"$pkgdir/usr/include/pkgconfig/");
-		}
-		return (owned)result.str;
-	}
-
 	public Makepkg (string pkgbuild) throws Error{
 		MatchInfo match_info;
 		string contents;
@@ -297,8 +262,6 @@ public class Makepkg : Object {
 				throw new ErrorSP.CANCEL("prepare() send [%d] error code", wait_status);
 		}
 
-
-
 		/* Create Package info */
 		Package pkg = {};
 		with (pkg) {
@@ -318,18 +281,6 @@ public class Makepkg : Object {
 				exclude_package	 += Utils.strip (i) + " ";
 			}
 			create_info_file (@"$pkgdir/usr/info");
-		}
-
-		var pre_install = autoconfig ();
-		
-		if (pre_install != "") {
-			if (FileUtils.test (@"$pkgdir/pre_install.sh", FileTest.EXISTS)) {
-				FileUtils.get_contents (@"$pkgdir/usr/pre_install.sh", out contents);
-				FileUtils.set_contents (@"$pkgdir/usr/pre_install.sh", contents + pre_install);
-			}
-			else {
-				FileUtils.set_contents (@"$pkgdir/usr/pre_install.sh", "#!/bin/bash\n" + pre_install);
-			}
 		}
 
 		/* build the usr folder created in pkgdir/usr */
