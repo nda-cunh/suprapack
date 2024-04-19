@@ -9,7 +9,7 @@
 # Compiling - install
 
 ```bash
-git clone https://gitlab.com/hydrasho/suprapack
+git clone https://gitlab.com/nda-cunh/suprapack
 cd suprapack
 make install
 ```
@@ -132,7 +132,7 @@ source support:
 
 use 'git+url' if it's git url
 ```bash
-source=('git+https://gitlab.com/hydrasho/suprapack')
+source=('git+https://gitlab.com/nda-cunh/suprapack')
 ```
 
 my_file will be copied to $srcdir
@@ -142,7 +142,7 @@ source=('my_file')
 
 you can force rename the source with '::'
 ```bash
-source=('name::https://gitlab.com/hydrasho/suprapack')
+source=('name::https://gitlab.com/nda-cunh/suprapack')
 ```
 
 ### other tips
