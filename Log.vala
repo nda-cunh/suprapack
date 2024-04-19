@@ -10,6 +10,8 @@ public const string WHITE = "\033[39m";
 public const string CYAN = "\033[96m";
 public const string PURPLE = "\033[35m";
 public const string NONE = "\033[0m";
+public const string CURSOR = "\033[?25l";
+public const string ENDCURSOR= "\033[?25h";
 
 errordomain ErrorSP {
 	ACCESS,

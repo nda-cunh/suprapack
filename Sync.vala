@@ -200,8 +200,11 @@ class Sync {
 		}
 		string url = this.get_url_from_name(pkg.repo_name) + pkgname;
 		try  {
+			print(CURSOR);
 			Utils.download(url, output, false, false, cancel); 
+			print(ENDCURSOR);
 		} catch (Error e) {
+			print(ENDCURSOR);
 			FileUtils.remove (output);
 			print_error (@"$(e.message) $output");
 		}
