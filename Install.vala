@@ -244,7 +244,7 @@ public void install() throws Error {
 				else
 					install_suprapackage(i.output);
 			}
-			if (!config.is_cached) {
+			if (!config.is_cached && i.repo != "Local") {
 				FileUtils.unlink(i.output);
 			}
 		}
