@@ -210,10 +210,17 @@ void print_download(string name_file, double actual, double max) {
 	}
 }
 
-public void download (string url, string output = "", bool no_print = false, bool rec = false)throws Error {
+public Cancellable cancellable;
+public void download (string url, string output = "", bool no_print = false, bool rec = false, Cancellable? cancel = null)throws Error {
+	cancellable = cancel;
 	string target, name, uri;
 	MatchInfo match_info;
 	const size_t SIZE_BUFFER = 16777216;
+
+	Process.signal (ProcessSignal.INT, ()=>{
+		print("\n");
+		cancellable.cancel ();
+	});
 
 	/* Parsing URL */
 
@@ -253,7 +260,7 @@ public void download (string url, string output = "", bool no_print = false, boo
 
 	/* ERROR HTTP check 404, 400, 502 ...  */
 	{	
-		string error = input_stream.read_line_utf8();
+		string error = input_stream.read_line_utf8(null, cancel);
 		error = error.offset(error.index_of_char(' '));
 		int err =  int.parse(error);
 		if (err != 200) {
@@ -270,7 +277,7 @@ public void download (string url, string output = "", bool no_print = false, boo
 	/* Get All bytes Data */
 	string line;
 	size_t bytes = 0;
-	while ((line = input_stream.read_line_utf8()) != null) {
+	while ((line = input_stream.read_line_utf8(null, cancel)) != null) {
 		/* Header Part */
 		{
 			uint8 buffer [2048];
@@ -303,7 +310,7 @@ public void download (string url, string output = "", bool no_print = false, boo
 				if (no_print == false)
 					print_download (name_file, actual, totalBytes);
 				try {
-					len = input_stream.read (buffer[0:SIZE_BUFFER - 1]);
+					len = input_stream.read (buffer[0:SIZE_BUFFER - 1], cancel);
 					if (len > 0) {
 						buffer[len] = '\0';
 						bytes -= len;

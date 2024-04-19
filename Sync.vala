@@ -184,11 +184,12 @@ class Sync {
 	
 
 	public static string download (SupraList pkg) {
-		return Sync.default()._download(pkg);
+		Cancellable cancel = new Cancellable();
+		return Sync.default()._download(pkg, cancel);
 	}
 
 	// download a package and return this location
-	string _download (SupraList pkg) {
+	string _download (SupraList pkg, Cancellable? cancel = null) {
 		string pkgdir = @"$(config.cache)/pkg";
 		string pkgname = @"$(pkg.name)-$(pkg.version).suprapack";
 		string output = @"$pkgdir/$pkgname";
@@ -198,12 +199,11 @@ class Sync {
 			return output;
 		}
 		string url = this.get_url_from_name(pkg.repo_name) + pkgname;
-		// if (Utils.run_silent({"curl", "-o", output, url}) != 0) 
-			// print_error(@"unable to download package\npackage => $(pkgname)");
 		try  {
-			Utils.download(url, output); 
+			Utils.download(url, output, false, false, cancel); 
 		} catch (Error e) {
-			printerr(e.message);
+			FileUtils.remove (output);
+			print_error (@"$(e.message) $output");
 		}
 		return output;
 	}
