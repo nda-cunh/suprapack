@@ -105,6 +105,8 @@ public class Main : Object {
 			case "-G":
 			case "download":
 				return cmd_download(cmd);
+                        case "refresh":
+                                return cmd_refresh();
 		}
 		print_error(@"La commande \"$(av1)\" n'existe pas.");
 	}
