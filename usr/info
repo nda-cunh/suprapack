@@ -1,6 +1,10 @@
 name: suprapack
-version: 1.4
+version: 2.3.0
 author: nda-cunh
-binary: suprapack 
+binary: suprapack
 description: package-manager without root
 dependency: 
+exclude_package: 
+optional_dependency: 
+size_tar: 
+size_installed: 168852
