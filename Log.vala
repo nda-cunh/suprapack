@@ -10,12 +10,22 @@ public const string WHITE = "\033[39m";
 public const string CYAN = "\033[96m";
 public const string PURPLE = "\033[35m";
 public const string NONE = "\033[0m";
+public const string CURSOR = "\033[?25l";
+public const string ENDCURSOR= "\033[?25h";
 
-public void print_info(string? msg, string prefix = "SupraPack") {
+errordomain ErrorSP {
+	ACCESS,
+	FAILED,
+	CANCEL,
+	BADFILE
+	
+}
+
+public void print_info(string? msg, string prefix = "SupraPack", string color = "\033[33;1m") {
 	if (msg == null)
-		print("\033[33;1m[%s]\033[0m\n", prefix);
+		print("%s[%s]\033[0m\n", color, prefix);
 	else
-		print("\033[33;1m[%s]\033[0m: %s\n", prefix, msg);
+		print("%s[%s]\033[0m: %s\n", color, prefix, msg);
 }
 
 public void print_update(string msg) {
@@ -26,4 +36,9 @@ public void print_update(string msg) {
 public void print_error(string msg) {
 	print("\033[91;1m[Error]\033[0m: %s\n", msg);
 	Process.exit(1);
+}
+
+public void printerror(string msg)
+{
+	print("\033[91;1m[Error]\033[0m: %s\n", msg);
 }
