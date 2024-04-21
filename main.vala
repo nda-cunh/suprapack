@@ -105,6 +105,7 @@ public class Main : Object {
 			case "-G":
 			case "download":
 				return cmd_download(cmd);
+                        case "update_list":
                         case "refresh":
                                 return cmd_refresh();
 		}
