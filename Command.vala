@@ -77,7 +77,7 @@ bool cmd_download(string []av) throws Error {
 	return true;
 }
 
-bool cmd_refresh() {
+bool cmd_refresh() throws Error {
         print_info("Refreshing packages list");
         Sync.refresh_list(); 
         print_info("Packages list Refreshed");
