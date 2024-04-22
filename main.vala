@@ -18,6 +18,9 @@ public class Main : Object {
 			if (av.has_prefix ("--prefix")) {
 				config.change_prefix(av[9:]);
 			}
+			if (av.has_prefix ("--refresh")) {
+				Sync.refresh_list();
+			}
 			else if (av.has_prefix ("--force")) {
 				config.force = true;
 			}
@@ -105,6 +108,9 @@ public class Main : Object {
 			case "-G":
 			case "download":
 				return cmd_download(cmd);
+                        case "update_list":
+                        case "refresh":
+                                return cmd_refresh();
 		}
 		print_error(@"La commande \"$(av1)\" n'existe pas.");
 	}
