@@ -18,6 +18,9 @@ public class Main : Object {
 			if (av.has_prefix ("--prefix")) {
 				config.change_prefix(av[9:]);
 			}
+			if (av.has_prefix ("--refresh")) {
+				Sync.refresh_list();
+			}
 			else if (av.has_prefix ("--force")) {
 				config.force = true;
 			}
