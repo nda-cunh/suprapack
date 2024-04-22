@@ -77,6 +77,13 @@ bool cmd_download(string []av) throws Error {
 	return true;
 }
 
+bool cmd_refresh() throws Error {
+        print_info("Refreshing packages list");
+        Sync.refresh_list(); 
+        print_info("Packages list Refreshed");
+        return true;
+}
+
 bool cmd_query_get_comp(string []av) {
 	var pkgs = Query.get_all_package();
 	for (var i = 0; i != pkgs.length; ++i) {
