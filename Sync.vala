@@ -29,51 +29,51 @@ public struct SupraList {
 // name  (Cosmos)
 // url (http://gitlab/../../)
 public class RepoInfo : Object{
-        public RepoInfo(string name, string url) {
-                this.name = name;
-                this.url = url;
-                this._list = null;
-        }
+	public RepoInfo(string name, string url) {
+		this.name = name;
+		this.url = url;
+		this._list = null;
+	}
 
-        public void refresh_repo() {
-                string list_file = @"/tmp/$(this.name)_$(USERNAME)_list";
-                FileUtils.remove(list_file);
-                try {
-                        Utils.download(this.url + "list", list_file, true); 
-                } catch (Error e) {
-                        print_error(@"unable to download file\n $(e.message)");
-                }
-                _list = list_file;
-        }
+	public void refresh_repo() {
+		string list_file = @"/tmp/$(this.name)_$(USERNAME)_list";
+		FileUtils.remove(list_file);
+		try {
+			Utils.download(this.url + "list", list_file, true); 
+		} catch (Error e) {
+			print_error(@"unable to download file\n $(e.message)");
+		}
+		_list = list_file;
+	}
 
-        private string? _list;
-        public string list {
-                get {
-                        if (_list == null) {
-                                string list_file = @"/tmp/$(this.name)_$(USERNAME)_list";
-                                // print_info(@"Download list from $(this.name) repo");
-                                bool should_download = true;
-                                if (FileUtils.test (list_file, FileTest.EXISTS)) {
-                                        var stat = Stat.l(list_file);
-                                        var now = time_t();
-                                        if (stat.st_mtime + 700 > now)
-                                                should_download = false;
-                                }
-                                try {
-                                        if (should_download == true) {
-                                                Utils.download(this.url + "list", list_file, true); 
-                                        }
-                                } catch (Error e) {
-                                        print_error(@"unable to download file\n $(e.message)");
-                                }
-                                _list = list_file;
-                        }
-                        return _list;
-                }
-        }
+	private string? _list;
+	public string list {
+		get {
+			if (_list == null) {
+				string list_file = @"/tmp/$(this.name)_$(USERNAME)_list";
+				// print_info(@"Download list from $(this.name) repo");
+				bool should_download = true;
+				if (FileUtils.test (list_file, FileTest.EXISTS)) {
+					var stat = Stat.l(list_file);
+					var now = time_t();
+					if (stat.st_mtime + 700 > now)
+						should_download = false;
+				}
+				try {
+					if (should_download == true) {
+						Utils.download(this.url + "list", list_file, true); 
+					}
+				} catch (Error e) {
+					print_error(@"unable to download file\n $(e.message)");
+				}
+				_list = list_file;
+			}
+			return _list;
+		}
+	}
 
-        public string name;
-        public string url;
+	public string name;
+	public string url;
 }
 
 
@@ -97,6 +97,8 @@ class Sync {
 	// Default private Constructor
 	private Sync () throws Error {
 
+		repo = null;
+		list = null;
 		/* init Repo property */
 		string contents;
 		var regex_repo = /(?P<name>[^\s]+)\s*(?P<url>[^\s]+)/;
@@ -163,7 +165,7 @@ class Sync {
 	public static SupraList[] get_list_package(string repo_name = "") {
 		return Sync.default()._get_list_package(repo_name);
 	}
-	
+
 	// return all package in all repo
 	SupraList []_get_list_package (string repo_name = "") {
 		SupraList[] result = {};
@@ -177,17 +179,14 @@ class Sync {
 		return result;
 	}
 
-	public static bool refresh_list () {
-                try {
-                        if(singleton == null)
-                                singleton = new Sync();
-                } catch (Error e) {
-                        print_error (e.message);
-                }
+	public static bool refresh_list () throws Error {
+		if (singleton == null)
+			singleton = new Sync();
 		foreach (var i in repo) {
-                        i.refresh_repo();
+			i.refresh_repo();
 		}
-                return true;
+		singleton = new Sync();
+		return true;
 	}
 
 	public static string download_package (string pkg_name, string? repo_name = null) {
@@ -197,9 +196,9 @@ class Sync {
 				if (l.name == pkg_name)
 					return Sync.default()._download(l);
 		}
-		print_error("cant download the file");
+		print_error("can't download the file");
 	}
-	
+
 
 	public static string download (SupraList pkg) {
 		Cancellable cancel = new Cancellable();
