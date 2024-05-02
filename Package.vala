@@ -2,6 +2,13 @@
 // can build package
 // can extract package
 
+
+
+public struct Opt_dependency {
+	string name;
+	string lore;
+}
+
 public struct Package {
 	string name;
 	string author;
@@ -9,14 +16,14 @@ public struct Package {
 	string description;
 	string binary;
 	string dependency;
-	string optional_dependency;
+	List<Opt_dependency?> *optional_dependency;
 	string size_tar;
 	string size_installed;
 	string installed_files;
 	string exclude_package; 
 	string output; 
 	string repo; 
-
+	List<int> list;
 
 	public void init() {
 		this.name = "";
@@ -26,7 +33,7 @@ public struct Package {
 		this.binary = "";
 		this.dependency = "";
 		this.installed_files = "";
-		this.optional_dependency = "";
+		this.optional_dependency = new List<Opt_dependency?>();
 		this.exclude_package = "";
 		this.size_tar = "";
 		this.size_installed = "";
@@ -42,8 +49,19 @@ public struct Package {
 			this.version = this.version.replace("-", ".");
 			this.author = Utils.get_input("Author: ", false);
 			this.description = Utils.get_input("Description: ", false);
+			/* Dependency */
 			this.dependency = Utils.get_input("Dependency: ");
-			this.optional_dependency = Utils.get_input("Optional Dependency: ");
+			/* Optional Dependency */
+			// TODO
+			var tmp_optional = Utils.get_input("Optional Dependency: ");
+
+			var sp = /'\s*'?/.split(tmp_optional);
+			foreach (var i in sp) {
+				if (i == "")
+					continue;
+				this.optional_dependency->append({name: "abc", lore: "abc"});
+			}
+			/* Exclude Package */
 			this.exclude_package = Utils.get_input("Exclude Package: ");
 			print("Can be empty if %s is the binary name\n", this.name);
 			this.binary = Utils.get_input("Binary: ", false);
@@ -86,7 +104,17 @@ public struct Package {
 				else if (line.has_prefix("dependency"))
 					this.dependency = value.strip();
 				else if (line.has_prefix("optional_dependency"))
-					this.optional_dependency = value.strip();
+				{
+					var sp = /'\s*'?/.split(line);
+					foreach (var i in sp) {
+						if (i == "")
+							continue;
+						var index = i.index_of_char(':');
+						var name = i[0:index].strip();
+						var lore = i[index+1:].strip();
+						this.optional_dependency->append({name: name, lore: lore});
+					}
+				}
 				else if (line.has_prefix("size_tar"))
 					this.size_tar = value.strip();
 				else if (line.has_prefix("size_installed"))
@@ -129,7 +157,7 @@ public struct Package {
 		fs.printf("description: %s\n", this.description);
 		fs.printf("dependency: %s\n", this.dependency);
 		fs.printf("exclude_package: %s\n", this.exclude_package);
-		fs.printf("optional_dependency: %s\n", this.optional_dependency);
+		// fs.printf("optional_dependency: %s\n", this.optional_dependency);
 		fs.printf("size_tar: %s\n", this.size_tar);
 		fs.printf("size_installed: %s\n", this.size_installed);
 	}

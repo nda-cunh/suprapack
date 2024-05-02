@@ -334,6 +334,7 @@ void add_queue_list(SupraList pkg, string output) throws Error {
 			else
 				prepare_install(i);
 		}
+	
 	} catch (Error e) {
 		throw new ErrorSP.FAILED("Dependency of %s -> %s", pkg.name, e.message);
 	}
