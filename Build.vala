@@ -105,8 +105,16 @@ namespace Build {
 			var regex = new Regex("""^prefix.*?$""", RegexCompileFlags.MULTILINE);
 			contents = regex.replace (contents, contents.length, 0, "prefix=$PREFIX");
 			FileUtils.set_contents (output, contents);
-			result.append ("sed -i \"s|\\$PREFIX|$(echo $PKGDIR)|g\" $SRCDIR");
-			result.append (file_directory.offset(file_directory.last_index_of ("/usr/") + 4) + filename);
+			result.append ("sed -i \"s|\\$PREFIX|$(echo $PKGDIR)|g\" ${SRCDIR}/");
+			var index = 0;
+			index = file_directory.last_index_of ("include/");
+			if (index == -1)
+				index = file_directory.last_index_of ("share/");
+			if (index == -1)
+				index = file_directory.last_index_of ("lib/");
+			if (index == -1)
+				warning ("index == -1 error in pkg-config transform");
+			result.append (file_directory.offset(index) + filename);
 			result.append_c ('\n');
 		}
 	}
@@ -115,6 +123,7 @@ namespace Build {
 		var result = new StringBuilder();
 		string contents;
 		autoconfig_iter_dir (result, @"$pkgdir/lib/pkgconfig/");
+		autoconfig_iter_dir (result, @"$pkgdir/share/pkgconfig/");
 		autoconfig_iter_dir (result, @"$pkgdir/include/pkgconfig/");
 		if (result.str != "") {
 			if (FileUtils.test (@"$pkgdir/pre_install.sh", FileTest.EXISTS)) {
