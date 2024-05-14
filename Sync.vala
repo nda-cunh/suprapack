@@ -41,6 +41,12 @@ public class RepoInfo : Object{
 		try {
 			Utils.download(this.url + "list", list_file, true); 
 		} catch (Error e) {
+			printerr("""
+Maybe add
+export GIO_EXTRA_MODULES=/usr/lib/gio/modules
+export GIO_MODULE_DIR=/usr/lib/gio/modules
+or download glib-networking and openssl
+""");
 			print_error(@"unable to download file\n $(e.message)");
 		}
 		_list = list_file;
