@@ -21,8 +21,12 @@ install: prod
 	tar --zstd -cf suprapack.suprapack -C usr .
 	./suprapack install suprapack.suprapack
 
-run: $(NAME) 
-	cp -f suprapack ~/.local/bin/suprapack
+run:
+	valac Main.vala -X -w --pkg=gio-2.0 --pkg=posix --pkg=openssl --vapidir=. -o out
+	./out
+
+# run: $(NAME) 
+	# cp -f suprapack ~/.local/bin/suprapack
 	@# ./suprapack add suprapack --force 
 	@#./$(NAME) uninstall nodejs 
 	@# ./$(NAME) update suprapatate 
