@@ -3,7 +3,8 @@
 // name (suprabear)
 // version (1.2)
 public struct SupraList {
-	public SupraList (string repo_name, string line) {
+	public SupraList (string repo_name, string line, bool is_local = false) {
+		this.is_local = is_local;
 		//42cformatter-v1.0.suprapack c formatter for 42 norm
 		MatchInfo match_info;
 		var regex = /(?P<pkgname>.*?)[.]suprapack/;
@@ -22,6 +23,7 @@ public struct SupraList {
 	string name;
 	string version;
 	string description;
+	bool is_local; 
 }
 
 
@@ -30,16 +32,37 @@ public struct SupraList {
 // url (http://gitlab/../../)
 public class RepoInfo : Object{
 	public RepoInfo(string name, string url) {
+		this.local = false;
 		this.name = name;
 		this.url = url;
 		this._list = null;
 	}
 
+	/* fetch the 'list' file  LOCAL or HTTP */
+	public void fetch_list (string url, string output) throws Error {
+		string url_list = url;
+		// message("URL %s", url_list);
+		if (url.has_prefix ("http")) {
+			url_list += "list";
+			log("Repository", LogLevelFlags.LEVEL_DEBUG, "FETCH HTTP repository %s", url_list);
+			Utils.download(url_list, output, true); 
+		}
+		else {
+			url_list += "/list";
+			var file_list = GLib.File.new_for_path(url_list);
+			var file_output = GLib.File.new_for_path(output);
+			file_list.copy (file_output, FileCopyFlags.OVERWRITE);
+			log("Repository", LogLevelFlags.LEVEL_DEBUG, "FETCH local repository %s", url_list);
+			this.local = true;
+		}
+	}
+
+	/* force download the 'list' file */
 	public void refresh_repo() {
 		string list_file = @"/tmp/$(this.name)_$(USERNAME)_list";
 		FileUtils.remove(list_file);
 		try {
-			Utils.download(this.url + "list", list_file, true); 
+			fetch_list(this.url, list_file);
 		} catch (Error e) {
 			print_error(@"unable to download file\n $(e.message)");
 		}
@@ -51,7 +74,6 @@ public class RepoInfo : Object{
 		get {
 			if (_list == null) {
 				string list_file = @"/tmp/$(this.name)_$(USERNAME)_list";
-				// print_info(@"Download list from $(this.name) repo");
 				bool should_download = true;
 				if (FileUtils.test (list_file, FileTest.EXISTS)) {
 					var stat = Stat.l(list_file);
@@ -61,7 +83,7 @@ public class RepoInfo : Object{
 				}
 				try {
 					if (should_download == true) {
-						Utils.download(this.url + "list", list_file, true); 
+						fetch_list(this.url, list_file);
 					}
 				} catch (Error e) {
 					print_error(@"unable to download file\n $(e.message)");
@@ -74,6 +96,7 @@ public class RepoInfo : Object{
 
 	public string name;
 	public string url;
+	public bool local;
 }
 
 
@@ -118,8 +141,10 @@ class Sync {
 		foreach (var repo in _repo) {
 			FileUtils.get_contents(repo.list, out contents);
 			foreach (var pkg in contents.split("\n")) {
-				if (regex.match(pkg))
-					_list += SupraList(repo.name, pkg);
+				if (regex.match(pkg)) {
+					// print(@"$(pkg) -> $(repo.local)\n");
+					_list += SupraList(repo.name, pkg, repo.local);
+				}
 				else if (pkg != "")
 					warning(pkg);
 			}
@@ -218,7 +243,15 @@ class Sync {
 		string url = this.get_url_from_name(pkg.repo_name) + pkgname;
 		try  {
 			print(CURSOR);
-			Utils.download(url, output, false, false, cancel); 
+			log("Sync", LogLevelFlags.LEVEL_DEBUG, "Download [%s] from [%s] local:(%s)", pkg.name, url, pkg.is_local ? "true" : "false");
+			if (pkg.is_local == true) {
+				var file_list = GLib.File.new_for_path(url);
+				var file_output = GLib.File.new_for_path(output);
+				file_list.copy (file_output, FileCopyFlags.OVERWRITE);
+				log("Sync", LogLevelFlags.LEVEL_DEBUG, "Copy from local name: [%s] repo: [%s]", pkg.name, pkg.repo_name);
+			}
+			else
+				Utils.download(url, output, false, false, cancel); 
 			print(ENDCURSOR);
 		} catch (Error e) {
 			print(ENDCURSOR);
