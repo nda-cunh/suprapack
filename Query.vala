@@ -40,6 +40,26 @@ namespace Query{
 	}
 	
 
+	/* return all package required by name_pkg */ 
+	public string[] get_required_by(string name_pkg) throws Error {
+		string []res = {};
+		string contents;
+		var required_by = @"$(config.cache)/$name_pkg/required_by";
+		if (FileUtils.test(required_by, FileTest.EXISTS) == false) {
+			return res;
+		}
+		else {
+			FileUtils.get_contents(required_by, out contents);	
+			foreach (var deps in contents.split("\n")) {
+				if (deps.strip() == "")
+					continue;
+				res += deps;
+			}
+		}
+		return res;
+	}
+	
+
 	/* remove only ~/suprastore/PKG */
 	private void remove_pkg(string name_pkg) {
 		var pkg = @"$(config.cache)/$name_pkg/";
