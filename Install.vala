@@ -222,7 +222,7 @@ public void install() throws Error {
 		size_installed += int64.parse(i.size_installed);
 	}
 
-	print(@"\nTotal Installed Size:  $(BOLD)%.2f MiB$(NONE)\n", (double)size_installed / (1 << 20));
+	print(@"\nTotal Remove Size:  $(BOLD)%.2f MiB$(NONE)\n", (double)size_installed / (1 << 20));
 
 
 	unowned var first_package = config.queue_pkg.nth_data(0).name;
