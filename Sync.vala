@@ -3,7 +3,7 @@
 // name (suprabear)
 // version (1.2)
 public struct SupraList {
-	public SupraList (string repo_name, string line, bool is_local = false) {
+	public SupraList (string repo_name, string line, bool is_local) {
 		this.is_local = is_local;
 		//42cformatter-v1.0.suprapack c formatter for 42 norm
 		MatchInfo match_info;

@@ -263,7 +263,7 @@ void prepare_install(string name_search, string name_repo = "") throws Error{
 	if (name_search.has_suffix(".suprapack")) {
 		if (!FileUtils.test(name_search, FileTest.EXISTS))
 			throw new ErrorSP.ACCESS (@"$name_search not found");
-		SupraList pkg = SupraList("Local", name_search); 
+		SupraList pkg = SupraList("Local", name_search, true); 
 		add_queue_list(pkg, name_search);
 		return;
 	}
