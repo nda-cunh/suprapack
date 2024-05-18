@@ -1,4 +1,4 @@
-[CCode(cheader_filename="openssl/ssl.h")]
+[CCode(cheader_filename="openssl/ssl.h,openssl/err.h,openssl/bio.h")]
 namespace openssl {
 
 	[Flags]
@@ -58,7 +58,24 @@ namespace openssl {
 	[CCode (cname = "EVP_cleanup")]
 	public void EVP_cleanup();
 	[CCode (cname = "SSL_write")]
-	int SSL_write(void* ssl, char* message, int len);	
+	public int SSL_write(void* ssl, char* message, int len);	
 	[CCode (cname = "SSL_read")]
-	int SSL_read(void* ssl, char* buff, int len);
+	public int SSL_read(void* ssl, char* buff, int len);
+	[CCode (cname = "ERR_print_errors_fp")]
+	public void ERR_print_errors_fp (GLib.FileStream fp);
+	public delegate int Verificator(int ok, void *ctx);
+
+	[CCode (cname = "SSL_VERIFY_NONE")]
+	public const int SSL_VERIFY_NONE;
+	[CCode (cname = "SSL_CTX_set_verify")]
+	public void SSL_CTX_set_verify(void* ctx, int a, void* ptr);
+	[CCode (cname = "SSL_CTX_set_cert_verify_callback")]
+    public void SSL_CTX_set_cert_verify_callback(void* ctx, Verificator callback);
+		
+
+	[CCode (cname = "SSL_CTX_set_options")]
+	public void SSL_CTX_set_options(void* ctx, SSL_OPTIONS opts);
+	[CCode (cname = "SSL_CTX_set_default_verify_paths")]
+	public void SSL_CTX_set_default_verify_paths(void* ctx);
+
 }

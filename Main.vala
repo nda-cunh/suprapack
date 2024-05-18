@@ -45,11 +45,18 @@ public class Http {
 			perror("SSL_CTX_new");
 			return;
 		}
+		SSL_CTX_set_default_verify_paths(ctx);
+		SSL_CTX_set_options(ctx, SSL_OPTIONS.NO_SSLv3 | NO_SSLv2 | NO_COMPRESSION);
+		
+
+
+
 		ssl = SSL_new(ctx);
 		if (ssl == null) {
 			perror("SSL_new");
 			exit(1);
 		}
+
 
 		/*  DNS  Resolver  */
 		getaddrinfo(domain, type, hints, out si);
@@ -82,7 +89,9 @@ public class Http {
 
 	public void send_message (string request) {
 		message("request [%s] uri [%s] domain [%s]", request, uri, domain);
+
 		if (SSL_write(ssl, request, request.length) < 0) {
+			ERR_print_errors_fp (GLib.stdout);
 			error("Erreur lors de l'envoi de la requête HTTP");
 		}
 	}
