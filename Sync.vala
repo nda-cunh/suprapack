@@ -134,11 +134,24 @@ class Sync {
 		MatchInfo match_info;
 		FileUtils.get_contents(config.repo_list, out contents);
 
+		int count = 0;
 		foreach (var line in contents.split("\n")) {
+			if (line == "")
+				continue;
+			count++;
 			if (regex_repo.match(line, 0, out match_info)) {
 				string name = match_info.fetch_named("name");
 				string url = match_info.fetch_named("url");
-				_repo += new RepoInfo(name, url);
+				if (url.has_suffix ("/"))
+					_repo += new RepoInfo(name, url);
+				else {
+					warning ("Bad Format in %s/repo.list", config.prefix);
+					printerr(" \033[33;1m%d\033[0m | %s\033[91m/\033[0m\n", count, line);
+					printerr(" %*s | \033[91m%*s %s\033[0m\n\n", count.to_string().length, "", line.length + 1, "^", "~~ need terminate by  '/'");
+				}
+			}
+			else {
+				warning ("Can't read [%s] in %s/repo.list", line, config.prefix);
 			}
 		}
 
