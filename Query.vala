@@ -33,10 +33,29 @@ namespace Query{
 		print("\n");
 	}
 
-	/* return the Package struct from a package-name */
+	/**
+	 * return the Package struct from a package-name
+	 */
 	public Package get_from_pkg(string name_pkg) {
 		var pkg = Package.from_file(@"$(config.cache)/$name_pkg/info");
 		return pkg;
+	}
+
+	/**
+	 * Add package in required_by ex:  sfml -> openal
+	 */ 
+	public void add_package_to_required_by(string name_pkg, string package_add) throws Error {
+		var dest = @"$(config.cache)/$package_add/required_by";
+		var line = name_pkg + "\n";
+		string contents;
+		if (FileUtils.test(dest, FileTest.EXISTS)) {
+			FileUtils.get_contents(dest, out contents);
+		}
+		else
+			contents = "";
+		if ((line in contents) == false) {
+			FileUtils.set_contents(dest, contents + line);
+		}
 	}
 	
 
@@ -64,6 +83,7 @@ namespace Query{
 	private void remove_pkg(string name_pkg) {
 		var pkg = @"$(config.cache)/$name_pkg/";
 		FileUtils.unlink(pkg + "info");	
+		FileUtils.unlink(pkg + "required_by");	
 		DirUtils.remove(pkg);
 	}
 

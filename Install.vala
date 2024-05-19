@@ -215,14 +215,16 @@ public void install() throws Error {
 		if (Query.is_exist(i.name)) {
 			version = Query.get_from_pkg(i.name).version; 
 		}
-		if (version == i.version)
-			print(@" $(BOLD)$(PURPLE)%s$(NONE)/%-*s $(BOLD)$(GREEN)%s$(NONE)\n", i.repo, name_max - i.repo.length , i.name, i.version);
-		else
-			print(@" $(BOLD)$(PURPLE)%s$(NONE)/%-*s $(BOLD)$(GREEN)%-*s$(NONE) --> $(BOLD)$(YELLOW)%s$(NONE)\n", i.repo, name_max - i.repo.length , i.name, version_max, version, i.version);
+		int n = 0;
+		n += printf("  %s%s%s%s/%-*s %s%s", BOLD, PURPLE, i.repo, NONE, name_max - i.repo.length, i.name, BOLD, GREEN);
+		n += printf("%-*s%s", version_max, version, NONE);
+		if (version != i.version)
+			n += printf(" --> %s%s%s", BOLD, YELLOW, i.version);
+		n+= printf("%s\n", NONE);
 		size_installed += int64.parse(i.size_installed);
 	}
 
-	print(@"\nTotal Remove Size:  $(BOLD)%.2f MiB$(NONE)\n", (double)size_installed / (1 << 20));
+	print(@"\nTotal Installed Size:  $(BOLD)%.2f MiB$(NONE)\n", (double)size_installed / (1 << 20));
 
 
 	unowned var first_package = config.queue_pkg.nth_data(0).name;
@@ -248,6 +250,15 @@ public void install() throws Error {
 				FileUtils.unlink(i.output);
 			}
 		}
+		/* add dependency in  .required_by file */
+		foreach (var i in config.queue_pkg) {
+			//i == sfml
+			foreach (var deps in i.dependency.split(" ")) {
+				Query.add_package_to_required_by(i.name, deps);
+			}
+		}
+
+
 	}
 	else {
 		throw new ErrorSP.CANCEL("Cancelling...");
