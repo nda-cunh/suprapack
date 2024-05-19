@@ -117,6 +117,7 @@ public class Main : Object {
 
 	// INIT
 	public Main(string []args) {
+		init_message();
 		HOME = Environment.get_home_dir();
 		PWD = Environment.get_current_dir();
 		USERNAME = Environment.get_user_name();

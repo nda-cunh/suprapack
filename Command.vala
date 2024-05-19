@@ -186,13 +186,12 @@ bool cmd_have_update(string []av) throws Error{
 	return true;
 }
 
-bool cmd_uninstall(string []av) {
+
+bool cmd_uninstall(string []av) throws Error {
 	if (av.length == 2)
 		print_error("`suprapack uninstall [...]`");	
-	foreach (var i in av[2:av.length]) {
-		print_info(i, "Removing");
-		Query.uninstall(i);
-	}
+
+	Uninstall.uninstall(av);
 	return true;
 }
 
