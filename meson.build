@@ -5,6 +5,7 @@ add_project_arguments('--enable-experimental', language: 'vala')
 
 executable('suprapack',
            'Log.vala',
+           'Uninstall.vala',
            'Utils.vala',
            'Repository.vala',
            'Command.vala',
@@ -17,6 +18,7 @@ executable('suprapack',
            'Sync.vala',
            'Run.vala',
            'Makepkg.vala',
+           c_args: '-O3',#todo
            dependencies : [
               dependency('glib-2.0'),
               dependency('gobject-2.0'),

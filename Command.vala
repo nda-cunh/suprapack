@@ -187,36 +187,11 @@ bool cmd_have_update(string []av) throws Error{
 }
 
 
-
-void add_queue (string name, ref  GenericSet<string> queue) throws Error {
-	var all_required = Query.get_required_by(name);
-	foreach (var deps in all_required) {
-		add_queue(deps, ref queue);
-	}
-	queue.add(name);
-}
-
 bool cmd_uninstall(string []av) throws Error {
 	if (av.length == 2)
 		print_error("`suprapack uninstall [...]`");	
 
-	var queue = new GenericSet<string?>(str_hash , str_equal);
-
-	foreach (var i in av[2:av.length]) {
-		add_queue (i, ref queue);
-	}
-	print("the following packages will be removed\n");
-	print("%sPackage (%u)%s\n\n", BOLD,queue.length, NONE);
-	double size_max = 0;
-	foreach (var i in queue) {
-		var pkg = Query.get_from_pkg(i);
-		var size = double.parse(pkg.size_installed); 
-		size_max += size;
-		print(" - %s %s %.2f Mib\n", i, pkg.version, size / (1 << 20) );
-	}
-	
-	print("\nTotal Installed Size:  %.2f MiB", size_max);
-	// Query.uninstall(i);
+	Uninstall.uninstall(av);
 	return true;
 }
 
