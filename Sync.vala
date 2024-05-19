@@ -45,7 +45,13 @@ public class RepoInfo : Object{
 		if (url.has_prefix ("http")) {
 			url_list += "list";
 			log("Repository", LogLevelFlags.LEVEL_DEBUG, "FETCH HTTP repository %s", url_list);
-			Utils.download(url_list, output, true); 
+			try {
+				Utils.download(url_list, output, true); 
+			}
+			catch (Error e) {
+				FileUtils.remove (output);
+				throw e;
+			}
 		}
 		else {
 			url_list += "/list";
@@ -138,8 +144,8 @@ class Sync {
 		foreach (var line in contents.split("\n")) {
 			if (line == "")
 				continue;
-			count++;
 			if (regex_repo.match(line, 0, out match_info)) {
+				count++;
 				string name = match_info.fetch_named("name");
 				string url = match_info.fetch_named("url");
 				if (url.has_suffix ("/"))
@@ -150,9 +156,8 @@ class Sync {
 					printerr(" %*s | \033[91m%*s %s\033[0m\n\n", count.to_string().length, "", line.length + 1, "^", "~~ need terminate by  '/'");
 				}
 			}
-			else {
+			else
 				warning ("Can't read [%s] in %s/repo.list", line, config.prefix);
-			}
 		}
 
 		/* init List Property */
