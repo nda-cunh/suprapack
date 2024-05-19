@@ -1,4 +1,4 @@
-SRC= main.vala Run.vala Makepkg.vala Build.vala Repository.vala Utils.vala Command.vala Query.vala Log.vala Sync.vala Install.vala Package.vala Config.vala
+SRC= main.vala Uninstall.vala Run.vala Makepkg.vala Build.vala Repository.vala Utils.vala Command.vala Query.vala Log.vala Sync.vala Install.vala Package.vala Config.vala
 NAME=suprapack_dev
 LDFLAGS=-X -O2 --pkg=gio-2.0 -X -w --enable-experimental
 all: install 
