@@ -3,7 +3,8 @@
 // name (suprabear)
 // version (1.2)
 public struct SupraList {
-	public SupraList (string repo_name, string line) {
+	public SupraList (string repo_name, string line, bool is_local) {
+		this.is_local = is_local;
 		//42cformatter-v1.0.suprapack c formatter for 42 norm
 		MatchInfo match_info;
 		var regex = /(?P<pkgname>.*?)[.]suprapack/;
@@ -22,6 +23,7 @@ public struct SupraList {
 	string name;
 	string version;
 	string description;
+	bool is_local; 
 }
 
 
@@ -30,16 +32,43 @@ public struct SupraList {
 // url (http://gitlab/../../)
 public class RepoInfo : Object{
 	public RepoInfo(string name, string url) {
+		this.local = false;
 		this.name = name;
 		this.url = url;
 		this._list = null;
 	}
 
+	/* fetch the 'list' file  LOCAL or HTTP */
+	public void fetch_list (string url, string output) throws Error {
+		string url_list = url;
+		// message("URL %s", url_list);
+		if (url.has_prefix ("http")) {
+			url_list += "list";
+			log("Repository", LogLevelFlags.LEVEL_DEBUG, "FETCH HTTP repository %s", url_list);
+			try {
+				Utils.download(url_list, output, true); 
+			}
+			catch (Error e) {
+				FileUtils.remove (output);
+				throw e;
+			}
+		}
+		else {
+			url_list += "/list";
+			var file_list = GLib.File.new_for_path(url_list);
+			var file_output = GLib.File.new_for_path(output);
+			file_list.copy (file_output, FileCopyFlags.OVERWRITE);
+			log("Repository", LogLevelFlags.LEVEL_DEBUG, "FETCH local repository %s", url_list);
+			this.local = true;
+		}
+	}
+
+	/* force download the 'list' file */
 	public void refresh_repo() {
 		string list_file = @"/tmp/$(this.name)_$(USERNAME)_list";
 		FileUtils.remove(list_file);
 		try {
-			Utils.download(this.url + "list", list_file, true); 
+			fetch_list(this.url, list_file);
 		} catch (Error e) {
 			printerr("""
 Maybe add
@@ -57,7 +86,6 @@ or download glib-networking and openssl
 		get {
 			if (_list == null) {
 				string list_file = @"/tmp/$(this.name)_$(USERNAME)_list";
-				// print_info(@"Download list from $(this.name) repo");
 				bool should_download = true;
 				if (FileUtils.test (list_file, FileTest.EXISTS)) {
 					var stat = Stat.l(list_file);
@@ -67,7 +95,7 @@ or download glib-networking and openssl
 				}
 				try {
 					if (should_download == true) {
-						Utils.download(this.url + "list", list_file, true); 
+						fetch_list(this.url, list_file);
 					}
 				} catch (Error e) {
 					print_error(@"unable to download file\n $(e.message)");
@@ -80,6 +108,7 @@ or download glib-networking and openssl
 
 	public string name;
 	public string url;
+	public bool local;
 }
 
 
@@ -111,12 +140,24 @@ class Sync {
 		MatchInfo match_info;
 		FileUtils.get_contents(config.repo_list, out contents);
 
+		int count = 0;
 		foreach (var line in contents.split("\n")) {
+			if (line == "")
+				continue;
 			if (regex_repo.match(line, 0, out match_info)) {
+				count++;
 				string name = match_info.fetch_named("name");
 				string url = match_info.fetch_named("url");
-				_repo += new RepoInfo(name, url);
+				if (url.has_suffix ("/"))
+					_repo += new RepoInfo(name, url);
+				else {
+					warning ("Bad Format in %s/repo.list", config.prefix);
+					printerr(" \033[33;1m%d\033[0m | %s\033[91m/\033[0m\n", count, line);
+					printerr(" %*s | \033[91m%*s %s\033[0m\n\n", count.to_string().length, "", line.length + 1, "^", "~~ need terminate by  '/'");
+				}
 			}
+			else
+				warning ("Can't read [%s] in %s/repo.list", line, config.prefix);
 		}
 
 		/* init List Property */
@@ -124,8 +165,10 @@ class Sync {
 		foreach (var repo in _repo) {
 			FileUtils.get_contents(repo.list, out contents);
 			foreach (var pkg in contents.split("\n")) {
-				if (regex.match(pkg))
-					_list += SupraList(repo.name, pkg);
+				if (regex.match(pkg)) {
+					// print(@"$(pkg) -> $(repo.local)\n");
+					_list += SupraList(repo.name, pkg, repo.local);
+				}
 				else if (pkg != "")
 					warning(pkg);
 			}
@@ -224,7 +267,15 @@ class Sync {
 		string url = this.get_url_from_name(pkg.repo_name) + pkgname;
 		try  {
 			print(CURSOR);
-			Utils.download(url, output, false, false, cancel); 
+			log("Sync", LogLevelFlags.LEVEL_DEBUG, "Download [%s] from [%s] local:(%s)", pkg.name, url, pkg.is_local ? "true" : "false");
+			if (pkg.is_local == true) {
+				var file_list = GLib.File.new_for_path(url);
+				var file_output = GLib.File.new_for_path(output);
+				file_list.copy (file_output, FileCopyFlags.OVERWRITE);
+				log("Sync", LogLevelFlags.LEVEL_DEBUG, "Copy from local name: [%s] repo: [%s]", pkg.name, pkg.repo_name);
+			}
+			else
+				Utils.download(url, output, false, false, cancel); 
 			print(ENDCURSOR);
 		} catch (Error e) {
 			print(ENDCURSOR);
