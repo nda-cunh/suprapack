@@ -101,7 +101,7 @@ public struct Package {
 			if (this.binary == "")
 				this.binary = this.name;
 		} catch (Error e) {
-			print_error(e.message);
+			error(e.message);
 		}
 	}
 
@@ -121,7 +121,7 @@ public struct Package {
 	public void create_info_file(string info_file) {
 		var fs = FileStream.open(info_file, "w");
 		if (fs == null)
-			print_error(@"cant open $info_file");
+			error(@"cant open $info_file");
 		fs.printf("name: %s\n", this.name);
 		fs.printf("version: %s\n", this.version);
 		fs.printf("author: %s\n", this.author);

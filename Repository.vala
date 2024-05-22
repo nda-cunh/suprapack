@@ -12,7 +12,7 @@ namespace Repository {
 			}
 			return result;
 		} catch (Error e) {
-			print_error(e.message);
+			error(e.message);
 		}
 	}
 
@@ -23,7 +23,7 @@ namespace Repository {
 		lst.sort(strcmp);
 		var fs = FileStream.open(@"$pwd/list", "w");
 		if (fs == null)
-			print_error(@"Cant create $pwd/list");
+			error(@"Cant create $pwd/list");
 		foreach (var file in lst) {
 			string lore = "";
 			try {

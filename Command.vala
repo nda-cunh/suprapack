@@ -56,13 +56,13 @@ bool cmd_shell(string []av) throws Error {
 
 bool cmd_download(string []av) throws Error {
 	if (av.length == 2)
-		print_error("suprapack download <pkg>");
+		error("suprapack download <pkg>");
 	foreach (var pkg in av[2:av.length]) {
 		var supralist = Sync.get_from_pkg(pkg);
 		print_info(@"$(supralist.name) $(supralist.version)", "Download");
 		var path = Sync.download_package(pkg);
 		if (path == null)
-			print_error("Cant download $(av[2])");
+			error("Cant download $(av[2])");
 
 		var file = File.new_for_path(path);
 		var filed = File.new_for_path(Environment.get_current_dir() + "/" + file.get_basename());
@@ -108,7 +108,7 @@ bool cmd_sync_get_comp(string []av) {
 
 bool cmd_install(string []av) throws Error {
 	if (av.length == 2)
-		print_error("`suprapack install [...]`");	
+		error("`suprapack install [...]`");	
 	
 	var regex = /((?P<repo>[^\s]*)\/)?(?P<package>[^\s]*)/;
 	MatchInfo match_info;
@@ -126,7 +126,7 @@ bool cmd_install(string []av) throws Error {
 			if (e is ErrorSP.FAILED) {
 				throw e;
 			}
-			printerror(e.message);
+			warning(e.message);
 		}
 	}
 	install();
@@ -135,7 +135,7 @@ bool cmd_install(string []av) throws Error {
 
 bool cmd_build(string []av) throws Error {
 	if (av.length == 2)
-		print_error("`suprapack build [...]`");	
+		error("`suprapack build [...]`");	
 	foreach (var i in av[2:]) {
 		print_info(@"Build $(av[2])");
 		Build.create_package(i);
@@ -145,7 +145,7 @@ bool cmd_build(string []av) throws Error {
 
 bool cmd_info(string []av) {
 	if (av.length == 2)
-		print_error("`suprapack info [...]`");	
+		error("`suprapack info [...]`");	
 	var info = Query.get_from_pkg(av[2]);
 	print(@"$(BOLD)Nom                      : $(NONE)%s\n", info.name);
 	print(@"$(BOLD)Version                  : $(NONE)%s\n", info.version);
@@ -170,14 +170,14 @@ bool cmd_info(string []av) {
 
 bool cmd_config(string []av) throws Error{
 	if(av.length <= 3)
-		print_error("`suprapack config [Config] [Value]`");
+		error("`suprapack config [Config] [Value]`");
 	config.add(av[2], av[3]);
 	return true;
 }
 
 bool cmd_have_update(string []av) throws Error{
 	if (av.length == 2)
-		print_error("`suprapack have_update [...]`");	
+		error("`suprapack have_update [...]`");	
 	var Qpkg = Query.get_from_pkg(av[2]);
 	var Spkg = Sync.get_from_pkg(av[2]);
 	if (Spkg.version != Qpkg.version) {
@@ -189,7 +189,7 @@ bool cmd_have_update(string []av) throws Error{
 
 bool cmd_uninstall(string []av) throws Error {
 	if (av.length == 2)
-		print_error("`suprapack uninstall [...]`");	
+		error("`suprapack uninstall [...]`");	
 
 	Uninstall.uninstall(av);
 	return true;
@@ -231,7 +231,7 @@ bool cmd_list(string []av) {
 			}
 		}
 	} catch (Error e) {
-		print_error(e.message);
+		error(e.message);
 	}
 	print(NONE);
 	return true;
@@ -291,7 +291,7 @@ bool cmd_search(string []av) throws Error {
 			}
 		}
 		catch (Error e) {
-			print_error(e.message);
+			error(e.message);
 		}
 	}
 	print(NONE);
@@ -300,13 +300,13 @@ bool cmd_search(string []av) throws Error {
 
 bool cmd_run(string []av) throws Error {
 	if (av.length == 2)
-		print_error("`suprapack run [...]`");	
+		error("`suprapack run [...]`");	
 	if (Query.is_exist(av[2]) == false && config.force == false) {
 		print_info(@"$(av[2]) doesn't exist install it...");
 		cmd_install({"", "install", av[2]});
 	}
 	if (Query.is_exist(av[2]) == false && config.force == false) {
-		print_error(@"$(av[2]) is not installed");
+		error(@"$(av[2]) is not installed");
 	}
 
 	string []av_binary;
@@ -349,7 +349,7 @@ bool cmd_update(string []av) throws Error {
 	else {
 		pkg_name = av[2];
 		if (Query.is_exist(pkg_name) == false) {
-			print_error(@"$pkg_name is not installed");
+			error("%s is not installed", pkg_name);
 		}
 		// if (update_package(pkg_name) == false)
 			// print_error(@"target not found: $pkg_name");

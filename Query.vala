@@ -11,7 +11,7 @@ namespace Query{
 		int g_last_size = 0;
 
 		if (Query.is_exist(name_pkg) == false)
-			print_error(@"the package $name_pkg doesn't exist");
+			error("the package %s doesn't exist", name_pkg);
 
 		int prefix_len = config.prefix.length;
 		var lst = Query.get_from_pkg(name_pkg).get_installed_files();
@@ -101,7 +101,7 @@ namespace Query{
 			}
 			return result;
 		}catch(Error e) {
-			print_error(e.message);
+			error(e.message);
 		}
 	}
 
@@ -118,7 +118,7 @@ namespace Query{
 			}
 			return result;
 		}catch(Error e) {
-			print_error(e.message);
+			error(e.message);
 		}
 	}
 }

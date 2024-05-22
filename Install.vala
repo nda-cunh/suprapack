@@ -16,7 +16,7 @@ void list_file_dir(string emp_dir, ref List<string> list) {
 				list.append(name);
 		}
 	} catch (Error e) {
-		print_error(e.message);
+		error(e.message);
 	}
 }
 
@@ -29,7 +29,7 @@ void post_install(List<string> list, int len, ref Package pkg) {
 
 	var fs = FileStream.open(info_file, "a");
 	if (fs == null)
-		print_error(@"Cant open $info_file");
+		error("Cant open %s", info_file);
 	fs.printf("[FILES]\n");
 	foreach(var i in list) {
 		unowned string basename = i.offset(len);
@@ -71,7 +71,7 @@ void install_files(List<string> list, int len) {
 			}
 		}
 	} catch (Error e) {
-		print_error(@"FATAL ERROR >>> $(e.message)");
+		error("FATAL ERROR >>> %s", e.message);
 	}
 	print("\n");
 }
