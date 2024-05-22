@@ -1,5 +1,5 @@
 name: suprapack
-version: 2.4.0
+version: 2.4.1
 author: nda-cunh
 binary: suprapack
 description: package-manager without root

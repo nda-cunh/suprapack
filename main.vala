@@ -112,7 +112,7 @@ public class Main : Object {
                         case "refresh":
                                 return cmd_refresh();
 		}
-		print_error(@"La commande \"$(av1)\" n'existe pas.");
+		error("La commande \"%s\" n'existe pas.", av1);
 	}
 
 	// INIT
@@ -141,7 +141,7 @@ public class Main : Object {
 			if (all_cmd(args) == true)
 				Process.exit(0);
 		} catch (Error e) {
-			printerror(e.message);
+			warning(e.message);
 		}
 		Process.exit(1);
 	}

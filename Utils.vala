@@ -56,7 +56,7 @@ int run_silent(string []av) {
 		Process.spawn_sync(PWD, av, Environ.get(), flags, null, null, null, out status);
 		return status;
 	} catch (Error e) {
-		print_error(e.message);
+		error(e.message);
 	}
 }
 
@@ -73,7 +73,7 @@ int run(string[] av, string[] envp = {}){
 		Process.spawn_sync(PWD, av, _envp, SpawnFlags.SEARCH_PATH | SpawnFlags.CHILD_INHERITS_STDIN, null, null, null, out status);
 		return status;
 	} catch (Error e) {
-		print_error(e.message);
+		error(e.message);
 	}
 }
 

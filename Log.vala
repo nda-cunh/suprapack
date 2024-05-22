@@ -57,7 +57,7 @@ public void init_message () {
 				print("\033[31m[Error]\033[0m: %s \033[35m(", real_message);
 				stdout.write(message[0:len - 2].data);
 				print(")\033[0m\n");
-				break;
+				Process.exit(-1);
 		}
 	});
 }
@@ -73,19 +73,4 @@ errordomain ErrorSP {
 public void print_info(string? msg, string prefix = "SupraPack", string color = "\033[33;1m") {
 	string type = "%s[%s]\033[0m".printf(color, prefix);
 	log(type, LogLevelFlags.LEVEL_INFO, msg ?? "");
-}
-
-public void print_update(string msg) {
-	print("\033[93;1m[Update]\033[0m: %s\n", msg);
-}
-
-[NoReturn]
-public void print_error(string msg) {
-	print("\033[91;1m[Error]\033[0m: %s\n", msg);
-	Process.exit(1);
-}
-
-public void printerror(string msg)
-{
-	print("\033[91;1m[Error]\033[0m: %s\n", msg);
 }

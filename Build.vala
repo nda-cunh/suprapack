@@ -8,7 +8,7 @@ namespace Build {
 
 		// check if USR_DIR is a valid directory
 		if (!(FileUtils.test(usr_dir, FileTest.EXISTS)) || !(FileUtils.test(usr_dir, FileTest.IS_DIR)))
-			print_error(@"$usr_dir is not a dir or doesn't exist");
+			error(@"$usr_dir is not a dir or doesn't exist");
 
 		if (check(usr_dir) == false) {
 			print_info("Your usr_dir is not good are you sure ? [Y/n]\n");
@@ -41,7 +41,7 @@ namespace Build {
 				DirUtils.remove(@"$path");
 			}
 		}catch(Error e) {
-			print_error(e.message);
+			error(e.message);
 		}
 
 
@@ -68,7 +68,7 @@ namespace Build {
 		var loop = new MainLoop();
 		var thread = new Thread<void>(null, ()=> {
 			if (Utils.run_silent({"fakeroot", "tar", "--zstd", "-cf", @"$(name_pkg).suprapack", "-C", usr_dir, "."}) != 0)
-				print_error(@"unable to create package\npackage => $(name_pkg)");
+				error(@"unable to create package\npackage => $(name_pkg)");
 			loop.quit();
 		});
 		loading.begin();
