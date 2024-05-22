@@ -70,13 +70,7 @@ public class RepoInfo : Object{
 		try {
 			fetch_list(this.url, list_file);
 		} catch (Error e) {
-			printerr("""
-Maybe add
-export GIO_EXTRA_MODULES=/usr/lib/gio/modules
-export GIO_MODULE_DIR=/usr/lib/gio/modules
-or download glib-networking and openssl
-""");
-			print_error(@"unable to download file\n $(e.message)");
+			error("unable to download file %s", e.message);
 		}
 		_list = list_file;
 	}
@@ -98,7 +92,7 @@ or download glib-networking and openssl
 						fetch_list(this.url, list_file);
 					}
 				} catch (Error e) {
-					print_error(@"unable to download file\n $(e.message)");
+					error("unable to download file %s", e.message);
 				}
 				_list = list_file;
 			}
@@ -126,7 +120,7 @@ class Sync {
 			return (singleton);
 		}
 		catch (Error e) {
-			print_error (e.message);
+			error (e.message);
 		}
 	}
 	// Default private Constructor
@@ -245,7 +239,7 @@ class Sync {
 				if (l.name == pkg_name)
 					return Sync.default()._download(l);
 		}
-		print_error("can't download the file");
+		error("can't download the file");
 	}
 
 
@@ -280,7 +274,7 @@ class Sync {
 		} catch (Error e) {
 			print(ENDCURSOR);
 			FileUtils.remove (output);
-			print_error (@"$(e.message) $output");
+			error ("%s %s", e.message, output);
 		}
 		return output;
 	}

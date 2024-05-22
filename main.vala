@@ -117,6 +117,19 @@ public class Main : Object {
 
 	// INIT
 	public Main(string []args) {
+		if (Environment.get_variable("GIO_MODULE_DIR") == null) {
+			if (FileUtils.test("/usr/lib/gio/modules", FileTest.IS_DIR | FileTest.EXISTS))
+				Environment.set_variable ("GIO_MODULE_DIR", "/usr/lib/gio/modules", true);
+			else if (FileUtils.test("/usr/lib/x86_64-linux-gnu/gio/modules", FileTest.IS_DIR | FileTest.EXISTS))
+				Environment.set_variable ("GIO_MODULE_DIR", "/usr/lib/x86_64-linux-gnu/gio/modules", true);
+			else {
+				if (Environment.get_variable("GIO_MODULE_DIR") == null) {
+					warning ("gio module not found\n");
+					warning ("try install glib-networking\n");
+					warning ("set GIO_MODULE_DIR to modules directory\n");
+				}
+			}
+		}
 		init_message();
 		HOME = Environment.get_home_dir();
 		PWD = Environment.get_current_dir();
