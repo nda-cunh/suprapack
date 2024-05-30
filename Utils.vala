@@ -292,20 +292,20 @@ public void download (string url, string? output = null, bool no_print = false, 
 		/* Header Part */
 		{
 			uint8 buffer [2048];
-			log("download", LogLevelFlags.LEVEL_DEBUG, "HEADER: [%s]", line);
+			debug("download", "HEADER: [%s]", line);
 			if (line.has_prefix("Content-Length: "))
 				line.scanf("Content-Length: %zu", out bytes);
 			else if (line.has_prefix ("Transfer-Encoding:")) {
 				line.scanf("Transfer-Encoding: %s", out buffer);
 				if (((string)buffer).ascii_down () == "chunked") {
-					log("download", LogLevelFlags.LEVEL_DEBUG, "Retry chunked not supported");
+					debug("download", "Retry chunked not supported");
 					download(url, output, no_print, true);
 					return;
 				}
 			}
 			else if (line.has_prefix("Location: ")) {
 				line.scanf("Location: %s", out buffer);
-				log("download", LogLevelFlags.LEVEL_DEBUG, "redirect to %s", (string)buffer);
+				debug("download", "redirect to %s", (string)buffer);
 				download((string)buffer, output, no_print, true);
 				return;
 			}
