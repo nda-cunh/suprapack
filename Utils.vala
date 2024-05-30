@@ -1,6 +1,14 @@
 public errordomain HttpError {
-	ERR
+	ERR,
+	CANCEL
 }
+
+public uint signal_watch(owned SourceFunc func) {
+    var s = new Unix.SignalSource(2);
+    s.set_callback(func);
+    return s.attach(GLib.MainContext.default());
+}
+
 namespace Utils {
 
 async void sleep(uint ms) {
@@ -210,20 +218,30 @@ void print_download(string name_file, double actual, double max) {
 	}
 }
 
-public Cancellable cancellable;
 public void download (string url, string? output = null, bool no_print = false, bool rec = false, Cancellable? cancel = null)throws Error {
+	var loop = new MainLoop ();	
+	signal_watch (()=> {
+		print("\n");
+		warning("Cancel by Ctrl + C (SIGINT) signal");
+		cancel.cancel ();
+		return false;
+	});
+	_download.begin(url, output, no_print, rec, cancel, ()=> {
+		if (cancel.is_cancelled ())
+			FileUtils.remove (output);
+		loop.quit ();
+	});
+	loop.run ();
+	if (cancel.is_cancelled ())
+		throw new HttpError.CANCEL("the download is cancel");
+}
+
+public async void _download (string url, string? output = null, bool no_print = false, bool rec = false, Cancellable? cancel = null)throws Error {
 	const size_t SIZE_BUFFER = 16777216;
 	unowned string	host;
 	unowned string	query;
 	unowned string	path;
 	int				port;
-
-	// TODO remove it change to GLIB.SourceUnix
-	cancellable = cancel;
-	Process.signal (ProcessSignal.INT, ()=>{
-		print("\n");
-		cancellable.cancel ();
-	});
 
 	/* Parse Url */
 	Uri uri = Uri.parse(url, UriFlags.SCHEME_NORMALIZE | UriFlags.ENCODED);
@@ -246,7 +264,7 @@ public void download (string url, string? output = null, bool no_print = false, 
 	if (fs == null)
 		throw new HttpError.ERR ("Impossible to create target_file: (%s) file", target);
 	var client = new SocketClient(){tls=true};
-	var conn = client.connect_to_host(host, (uint16)port);
+	var conn = yield client.connect_to_host_async (host, (uint16)port, cancel);
 
 	var output_stream = new DataOutputStream(conn.get_output_stream());
 	var input_stream = new DataInputStream(conn.get_input_stream());
@@ -256,9 +274,7 @@ public void download (string url, string? output = null, bool no_print = false, 
 	/* Send GET request with headers */
 
 	{
-		string request = path;
-		if (query != null)
-			request += "?" + query;
+		string request = @"$path$(query != null ? "?"+query : "")";
 		output_stream.put_string(@"GET $request HTTP/1.1\r\n");
 		output_stream.put_string(@"Host: $host\r\n"); // Ajout de l'en-tête "Host"
 		output_stream.put_string("Cache-Control: no-cache\r\n"); // Ignorer le cache
@@ -281,7 +297,7 @@ public void download (string url, string? output = null, bool no_print = false, 
 	}
 
 	string name_file;
-	name_file = Uri.unescape_string(target);
+	name_file = Uri.unescape_string(target[target.last_index_of_char ('/') + 1:]);
 	if (name_file.length >= 25)
 		name_file = name_file[0:25] + "..";
 	
@@ -321,7 +337,8 @@ public void download (string url, string? output = null, bool no_print = false, 
 				if (no_print == false)
 					print_download (name_file, actual, totalBytes);
 				try {
-					len = input_stream.read (buffer[0:SIZE_BUFFER - 1], cancel);
+					len = yield input_stream.read_async (buffer[0:SIZE_BUFFER - 1], Priority.HIGH, cancel);
+
 					if (len > 0) {
 						buffer[len] = '\0';
 						bytes -= len;
