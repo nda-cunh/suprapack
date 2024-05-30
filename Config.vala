@@ -10,26 +10,35 @@ public class Config : Object{
 	}
 
 	public void change_prefix (string prefix) throws Error {
-		this.prefix = prefix;
-		this.cache = prefix + "/.suprapack";
-		this.config = this.cache + "/user.conf";
-		this.repo_list = this.cache + "/repo.list";
+		string contents;
+		var new_prefix = prefix;
+		var new_cache = prefix + "/.suprapack";
+		var new_config = new_cache + "/user.conf";
+		var new_repo_list = new_cache + "/repo.list";
 		FileUtils.symlink(@"$HOME/.local/.suprapack", @"$HOME/.config/suprapack");
 		
-		DirUtils.create_with_parents(this.prefix, 0755);
-		DirUtils.create_with_parents(this.cache, 0755);
-		if (FileUtils.test (this.cache, FileTest.EXISTS) == false) {
-			DirUtils.create(this.cache, 0755);
+		DirUtils.create_with_parents(new_prefix, 0755);
+		DirUtils.create_with_parents(new_cache, 0755);
+		if (FileUtils.test (new_cache, FileTest.EXISTS) == false) {
+			DirUtils.create(new_cache, 0755);
 		}
-		if (FileUtils.test (this.config, FileTest.EXISTS) == false) {
-			FileUtils.set_contents (this.config, "is_cached:false");
+		if (FileUtils.test (new_config, FileTest.EXISTS) == false) {
+			FileUtils.set_contents (new_config, "is_cached:false");
 		}
-		if (FileUtils.test (this.repo_list, FileTest.EXISTS) == false) {
-			// var simple_repo = """Cosmos https://gitlab.com/supraproject/suprastore_repository/-/raw/master/
-// Supravim https://gitlab.com/supraproject/suprastore_repository/-/raw/plugin-supravim/
-			// """;
-			FileUtils.set_contents (this.repo_list, "");
+		if (FileUtils.test (new_repo_list, FileTest.EXISTS) == false) {
+			if (FileUtils.test(this.repo_list, FileTest.EXISTS)) {
+				info("[Repo] Copy all %s content in new prefix", this.prefix); 
+				FileUtils.get_contents (this.repo_list, out contents);
+				FileUtils.set_contents (new_repo_list, contents);
+			}
+			else
+				FileUtils.set_contents (new_repo_list, "");
 		}
+		
+		this.prefix = (owned)new_prefix;
+		this.cache = (owned)new_cache;
+		this.config = (owned)new_config; 
+		this.repo_list = (owned)new_repo_list;
 	}
 
 	private void load_config() throws Error{
