@@ -3,11 +3,6 @@ public errordomain HttpError {
 	CANCEL
 }
 
-public uint signal_watch(owned SourceFunc func) {
-    var s = new Unix.SignalSource(2);
-    s.set_callback((owned)func);
-    return s.attach(GLib.MainContext.default());
-}
 
 namespace Utils {
 
@@ -220,18 +215,23 @@ void print_download(string name_file, double actual, double max) {
 
 public void download (string url, string? output = null, bool no_print = false, bool rec = false, Cancellable? cancel = null)throws Error {
 	var loop = new MainLoop ();	
-	signal_watch (()=> {
+    
+	var s = new Unix.SignalSource(2);
+	s.set_callback(()=> {
 		print("\n");
 		warning("Cancel by Ctrl + C (SIGINT) signal");
 		cancel.cancel ();
 		return false;
 	});
+	s.attach(GLib.MainContext.default());
+
 	_download.begin(url, output, no_print, rec, cancel, ()=> {
 		if (cancel.is_cancelled ())
 			FileUtils.remove (output);
 		loop.quit ();
 	});
 	loop.run ();
+	s.destroy ();
 	if (cancel.is_cancelled ())
 		throw new HttpError.CANCEL("the download is cancel");
 }
