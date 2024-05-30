@@ -70,6 +70,10 @@ errordomain ErrorSP {
 	
 }
 
+public void debug(string type, string msg, ...) {
+	logv(type, LogLevelFlags.LEVEL_DEBUG, msg, va_list());
+}
+	
 public void print_info(string? msg, string prefix = "SupraPack", string color = "\033[33;1m") {
 	string type = "%s[%s]\033[0m".printf(color, prefix);
 	log(type, LogLevelFlags.LEVEL_INFO, msg ?? "");
