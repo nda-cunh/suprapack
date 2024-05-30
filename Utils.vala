@@ -5,7 +5,7 @@ public errordomain HttpError {
 
 public uint signal_watch(owned SourceFunc func) {
     var s = new Unix.SignalSource(2);
-    s.set_callback(func);
+    s.set_callback((owned)func);
     return s.attach(GLib.MainContext.default());
 }
 
@@ -206,7 +206,7 @@ void modify_percent_bar (uint8[] buffer, double percent) {
 
 void print_download(string name_file, double actual, double max) {
 	const double MIB = 1048576.0;
-	uint8[] progress_bar = "[                    ] ".data;
+	uint8[] progress_bar = "[                    ] \0\0\0\0\0".data;
 	if (max == 0.0)
 		stdout.printf("%-50s %8s\r", name_file, "%.2f Mib / ??? Mib     ".printf(actual / MIB));
 	else {
