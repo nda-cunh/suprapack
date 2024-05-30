@@ -44,7 +44,7 @@ public class RepoInfo : Object{
 		// message("URL %s", url_list);
 		if (url.has_prefix ("http")) {
 			url_list += "list";
-			log("Repository", LogLevelFlags.LEVEL_DEBUG, "FETCH HTTP repository %s", url_list);
+			debug("Repository", "FETCH HTTP repository %s", url_list);
 			try {
 				Utils.download(url_list, output, true); 
 			}
@@ -58,7 +58,7 @@ public class RepoInfo : Object{
 			var file_list = GLib.File.new_for_path(url_list);
 			var file_output = GLib.File.new_for_path(output);
 			file_list.copy (file_output, FileCopyFlags.OVERWRITE);
-			log("Repository", LogLevelFlags.LEVEL_DEBUG, "FETCH local repository %s", url_list);
+			debug("Repository", "FETCH local repository %s", url_list);
 			this.local = true;
 		}
 	}
@@ -261,12 +261,12 @@ class Sync {
 		string url = this.get_url_from_name(pkg.repo_name) + pkgname;
 		try  {
 			print(CURSOR);
-			log("Sync", LogLevelFlags.LEVEL_DEBUG, "Download [%s] from [%s] local:(%s)", pkg.name, url, pkg.is_local ? "true" : "false");
+			debug("Sync", "Download [%s] from [%s] local:(%s)", pkg.name, url, pkg.is_local ? "true" : "false");
 			if (pkg.is_local == true) {
 				var file_list = GLib.File.new_for_path(url);
 				var file_output = GLib.File.new_for_path(output);
 				file_list.copy (file_output, FileCopyFlags.OVERWRITE);
-				log("Sync", LogLevelFlags.LEVEL_DEBUG, "Copy from local name: [%s] repo: [%s]", pkg.name, pkg.repo_name);
+				debug("Sync", "Copy from local name: [%s] repo: [%s]", pkg.name, pkg.repo_name);
 			}
 			else
 				Utils.download(url, output, false, false, cancel); 
@@ -274,7 +274,7 @@ class Sync {
 		} catch (Error e) {
 			print(ENDCURSOR);
 			FileUtils.remove (output);
-			error ("%s %s", e.message, output);
+			error ("Can't download %s (%s)", url, e.message);
 		}
 		return output;
 	}
