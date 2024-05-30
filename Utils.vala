@@ -211,51 +211,62 @@ void print_download(string name_file, double actual, double max) {
 }
 
 public Cancellable cancellable;
-public void download (string url, string output = "", bool no_print = false, bool rec = false, Cancellable? cancel = null)throws Error {
-	cancellable = cancel;
-	string target, name, uri;
-	MatchInfo match_info;
+public void download (string url, string? output = null, bool no_print = false, bool rec = false, Cancellable? cancel = null)throws Error {
 	const size_t SIZE_BUFFER = 16777216;
+	unowned string	host;
+	unowned string	query;
+	unowned string	path;
+	int				port;
 
+	// TODO remove it change to GLIB.SourceUnix
+	cancellable = cancel;
 	Process.signal (ProcessSignal.INT, ()=>{
 		print("\n");
 		cancellable.cancel ();
 	});
 
-	/* Parsing URL */
+	/* Parse Url */
+	Uri uri = Uri.parse(url, UriFlags.SCHEME_NORMALIZE | UriFlags.ENCODED);
+	host = uri.get_host ();
+	query = uri.get_query ();
+	path = uri.get_path ();
+	port = uri.get_port ();
 
-	if (! /(https?:\/\/)?(?P<name>[^\/]*)(?P<uri>.*)/.match (url, 0, out match_info))
-		return;
-	name = match_info.fetch_named ("name");
-	uri = match_info.fetch_named ("uri");
-	uri = uri.replace (" ", "%20");
-	if (output == "" && rec == false)
-		target = uri[uri.last_index_of_char ('/') + 1:];
+
+	string target;
+	if (output == null && rec == false)
+		target = path[path.last_index_of_char('/') + 1:];
 	else
-		target = output;
-	
+		target = (!)output;
+
+
 	/* Open Connection-Files */
 
 	var fs = FileStream.open (target, "w");
 	if (fs == null)
-		throw new HttpError.ERR (@"Impossible to create target_file: ($target) file");
+		throw new HttpError.ERR ("Impossible to create target_file: (%s) file", target);
 	var client = new SocketClient(){tls=true};
-	var conn = client.connect_to_host(name, 443);
+	var conn = client.connect_to_host(host, (uint16)port);
 
 	var output_stream = new DataOutputStream(conn.get_output_stream());
 	var input_stream = new DataInputStream(conn.get_input_stream());
-	log("download", LogLevelFlags.LEVEL_DEBUG, "Host [%s] GET [%s]", name, uri);
+	debug("download", "Host [%s] PATH [%s] PORT [%d]", host, path, port);
 
 
 	/* Send GET request with headers */
 
-	output_stream.put_string(@"GET $uri HTTP/1.1\r\n");
-	output_stream.put_string(@"Host: $name\r\n"); // Ajout de l'en-tête "Host"
-	output_stream.put_string("Cache-Control: no-cache\r\n"); // Ignorer le cache
-	output_stream.put_string("Accept-Encoding: identity\r\n"); // Ignorer le cache
-	output_stream.put_string("Connection: close\r\n"); // Ignorer le cache
-	output_stream.put_string("\r\n");
-	output_stream.flush();
+	{
+		string request = path;
+		if (query != null)
+			request += "?" + query;
+		output_stream.put_string(@"GET $request HTTP/1.1\r\n");
+		output_stream.put_string(@"Host: $host\r\n"); // Ajout de l'en-tête "Host"
+		output_stream.put_string("Cache-Control: no-cache\r\n"); // Ignorer le cache
+		output_stream.put_string("Accept-Encoding: identity\r\n"); // Ignorer le cache
+		output_stream.put_string("Connection: close\r\n"); // Ignorer le cache
+		output_stream.put_string("\r\n");
+		output_stream.flush();
+	}
 
 
 	/* ERROR HTTP check 404, 400, 502 ...  */
@@ -269,10 +280,10 @@ public void download (string url, string output = "", bool no_print = false, boo
 		}
 	}
 
-	string name_file = uri[uri.last_index_of_char ('/') + 1:];
+	string name_file;
+	name_file = Uri.unescape_string(target);
 	if (name_file.length >= 25)
 		name_file = name_file[0:25] + "..";
-	name_file = name_file.replace ("%20", " ");
 	
 	/* Get All bytes Data */
 	string line;
