@@ -57,15 +57,14 @@ public struct Package {
 	
 	public Package.from_file(string info_file) {
 		string contents;
-		size_t len;
 		unowned string @value;
 
 		init();
 		try {
-			FileUtils.get_contents(info_file, out contents, out len);
+			FileUtils.get_contents(info_file, out contents);
 			var lines = contents.split("\n");
 			
-			foreach (var line in lines) {
+			foreach (unowned var line in lines) {
 				if (line == "[FILES]")
 					break;
 				value = line.offset(line.index_of_char(':') + 1);

@@ -47,17 +47,16 @@ void install_files(List<string> list, int len) {
 	int g_last_size = 0;
 	unowned uint8[] blank = CONST_BLANK.data;
 	try {
-		foreach (var e in list) {
+		foreach (unowned var e in list) {
 			basename = e.offset(len);
 			var fileSrc = File.new_for_path(e);
 			var last_dest = config.prefix + basename;
 			FileUtils.unlink(last_dest);
 			var fileDest = File.new_for_path(last_dest);
 			string path = fileDest.get_path();
-			path = path[0: path.last_index_of_char('/')];
+			path = Path.get_dirname(path);
 			DirUtils.create_with_parents(path, 0755);
 			fileSrc.move(fileDest, FileCopyFlags.OVERWRITE);
-			// draw_install_file(++nb, list_length, basename, blank.data);
 			{
 				int file_len = basename.length;
 				int calc = g_last_size - file_len;
