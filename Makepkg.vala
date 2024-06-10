@@ -263,15 +263,15 @@ public class Makepkg : Object {
 		}
 
 		/* Create Package info */
-		Package pkg = {};
+		Package pkg = new Package();
 		with (pkg) {
-			init();
 			name = get_data("pkgname") ?? "";
 			version= get_data("pkgver") ?? "";
 			description = get_data("pkgdesc") ?? "";
 			author = get_data("pkgauthor") ?? "";
 			
 			string dependencies = get_data("depends");
+			//TODO
 			foreach (var i in dependencies?.replace("\n", " ")?.split(" ")) {
 				dependency += Utils.strip (i) + " ";
 			}

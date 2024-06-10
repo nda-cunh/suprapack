@@ -155,12 +155,10 @@ bool cmd_info(string []av) {
 		var size = @"$(int64.parse(info.size_installed) / 1024)";
 		print(@"$(BOLD)Installed Size           : $(NONE)%sK\n", size);
 	}
-	var dep_list = info.dependency.split(" ");
-	if (dep_list.length >= 1) {
+	var len_dep_list = info.parse_dependency.length();
+	if (len_dep_list >= 1) {
 		print(@"$(BOLD)Depends                  : $(NONE)");
-		foreach (var dep in dep_list)
-			print("%s ", dep);
-		print("\n");
+		print("%s\n", info.dependency);
 	}
 	if (info.binary != info.name)
 		print(@"$(BOLD)Binary                   : $(NONE)%s\n", info.binary);

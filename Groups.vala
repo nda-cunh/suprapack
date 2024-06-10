@@ -30,7 +30,6 @@ public class Groups {
 
 private class Group {
 	public Group (string line) throws Error {
-		MatchInfo info;
 		list = new List <List<string>>();
 
 		int comma_index = line.index_of_char(':');

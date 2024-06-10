@@ -251,9 +251,18 @@ public void install() throws Error {
 		}
 		/* add dependency in  .required_by file */
 		foreach (var i in config.queue_pkg) {
-			//i == sfml
-			foreach (var deps in i.dependency.split(" ")) {
-				Query.add_package_to_required_by(i.name, deps);
+			foreach (unowned var deps in i.parse_dependency) {
+				if (deps.length() >= 1) {
+					Query.add_package_to_required_by(i.name, deps.nth_data(0));
+				}
+				else {
+					foreach (unowned var choose_dep in deps) {
+						if (Query.is_exist(choose_dep)) {
+							Query.add_package_to_required_by(i.name, choose_dep);
+						}
+
+					}
+				}
 			}
 		}
 
@@ -289,6 +298,7 @@ void prepare_install(string name_search, string name_repo = "") throws Error{
 	}
 
 	// Search in Groups if package exist
+	/*
 	unowned var group = Sync.group_get_from_name(name_search);
 	if (group.length() >= 1) {
 		foreach (unowned var gp in group) {
@@ -321,6 +331,7 @@ void prepare_install(string name_search, string name_repo = "") throws Error{
 			}
 		}
 	}
+	*/
 
 	SupraList pkg;
 	if (queue.length == 0) {
@@ -367,18 +378,28 @@ void add_queue_list(SupraList pkg, string output) throws Error {
 
 	config.queue_pkg.append(pkgtmp);
 	try {
-		foreach (var i in pkgtmp.dependency.split(" ")) {
-			if (config.check_if_in_queue(i)) {
-				continue;
-			}
-			if (Query.is_exist(i) && config.force == false) {
-				print("AVAntle crshhh\n");
-				if (Sync.check_update(i))
+		foreach (unowned var deps in pkgtmp.parse_dependency) {
+			if (deps.length() == 1) {
+				unowned var i = deps.nth_data(0);
+				if (config.check_if_in_queue(i)) {
+					continue;
+				}
+				if (Query.is_exist(i) && config.force == false) {
+					if (Sync.check_update(i))
+						prepare_install(i);
+					continue;
+				}
+				else
 					prepare_install(i);
-				continue;
 			}
-			else
-				prepare_install(i);
+			else {
+				foreach (unowned var choose_dep in deps) {
+
+				}
+			}
+
+
+
 		}
 	} catch (Error e) {
 		throw new ErrorSP.FAILED("Dependency of %s -> %s", pkg.name, e.message);
