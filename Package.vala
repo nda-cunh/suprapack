@@ -2,29 +2,34 @@
 // can build package
 // can extract package
 
-public struct Package {
-	string name;
-	string author;
-	string version; 
-	string description;
-	string binary;
-	string dependency;
-	string optional_dependency;
-	string size_tar;
-	string size_installed;
-	string installed_files;
-	string exclude_package; 
-	string output; 
-	string repo; 
+
+
+public class Package {
+	public string name;
+	public string author;
+	public string version; 
+	public string description;
+	public string binary;
+	public string dependency;
+	public string optional_dependency;
+	public string size_tar;
+	public string size_installed;
+	public string installed_files;
+	public string exclude_package; 
+	public string output; 
+	public string repo; 
+	public List<List<string>> parse_dependency;
 
 
 	public void init() {
+		this.parse_dependency = new List<List<string>>();
+
 		this.name = "";
 		this.author = "";
 		this.version = ""; 
 		this.description = "";
-		this.binary = "";
 		this.dependency = "";
+		this.binary = "";
 		this.installed_files = "";
 		this.optional_dependency = "";
 		this.exclude_package = "";
@@ -99,6 +104,10 @@ public struct Package {
 			}
 			if (this.binary == "")
 				this.binary = this.name;
+
+			/* Parse all dependency */
+
+			this.parse_dependency = Utils.parse_dependency(this.dependency);
 		} catch (Error e) {
 			error(e.message);
 		}
@@ -115,7 +124,7 @@ public struct Package {
 		}
 		return (sp);
 	}
-	
+
 	// public func 
 	public void create_info_file(string info_file) {
 		var fs = FileStream.open(info_file, "w");

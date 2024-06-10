@@ -126,6 +126,7 @@ class Sync {
 	// Default private Constructor
 	private Sync () throws Error {
 
+		groups = new Groups();
 		repo = null;
 		list = null;
 		/* init Repo property */
@@ -158,16 +159,36 @@ class Sync {
 		var regex = /[a-zA-Z0-9]+[-][a-zA-Z0-9.]+[.]suprapack/;
 		foreach (var repo in _repo) {
 			FileUtils.get_contents(repo.list, out contents);
-			foreach (var pkg in contents.split("\n")) {
-				if (regex.match(pkg)) {
-					// print(@"$(pkg) -> $(repo.local)\n");
-					_list += SupraList(repo.name, pkg, repo.local);
+			var lines = contents.split("\n");
+			int i = 0;
+			// foreach (unowned var pkg in lines) {
+			for(; i != lines.length; ++i) {
+				if (lines[i] == "[Groups]")
+					break;
+				else if (regex.match(lines[i])) {
+					_list += SupraList(repo.name, lines[i], repo.local);
 				}
-				else if (pkg != "")
-					warning(pkg);
+				else if (lines[i] != "")
+					warning(lines[i]);
+			}
+			if (lines[i] != "[Groups]")
+				break;
+			for (++i; i != lines.length; ++i) {
+				groups.add_line (lines[i]);
 			}
 		}
 	}
+
+
+	/////////////////////////////////////////////////////////////////
+	//							Groups 
+	/////////////////////////////////////////////////////////////////
+
+
+	public static unowned List<List<string>> group_get_from_name(string name) {
+		return groups[name];
+	}
+
 
 	public static SupraList get_from_pkg(string name_pkg) throws Error{
 		var pkg_list = Sync.default()._get_list_package();
@@ -279,6 +300,7 @@ class Sync {
 		return output;
 	}
 
+	private static Groups groups; 
 	private static SupraList []list {get;set;}
 	private static RepoInfo []repo {get;set;}
 }

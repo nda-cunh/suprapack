@@ -11,6 +11,39 @@ async void sleep(uint ms) {
 	yield;
 }
 
+public List<List<string>> parse_dependency (string line) throws Error {
+	MatchInfo info;
+	var list = new List <List<string>>();
+
+	// Parse all ( | | | )
+	var regex = /\(([^)]*)\)/;
+	if (regex.match(line, 0, out info)) {
+		do {
+			var tmp = new List<string>();
+			var sp = info.fetch(1)?.split(" ");
+			foreach (var i in sp) {
+				if (i == "")
+					continue;
+				tmp.append((owned)i);
+			}
+			list.append((owned)tmp);
+		} while (info.next());
+	}
+	
+	// Parse the needed dependency 
+	var other = /\(.*?\)/.replace(line, line.length, 0, "");
+	var sp = other.split(" ");
+	foreach (var i in sp) {
+		if (i == "")
+			continue;
+		var tmp = new List<string>();
+		tmp.append((owned)i);
+		list.append((owned)tmp);
+	}
+	return list;
+}
+
+
 public string strip (string str, string character = "\f\r\n\t\v [(\'\")]") {
 	int end = str.length;
 	int start = 0;

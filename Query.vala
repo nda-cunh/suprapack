@@ -117,7 +117,7 @@ namespace Query{
 					result += tmp.dup();
 			}
 			return result;
-		}catch(Error e) {
+		} catch (Error e) {
 			error(e.message);
 		}
 	}

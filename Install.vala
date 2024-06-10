@@ -281,9 +281,44 @@ void prepare_install(string name_search, string name_repo = "") throws Error{
 
 	SupraList[] queue = {};
 	var list = Sync.get_list_package (name_repo);
+	// Search in $(name_repo)_list
 	foreach (var pkg in list) {
 		if (pkg.name == name_search) {
 			queue += pkg;
+		}
+	}
+
+	// Search in Groups if package exist
+	unowned var group = Sync.group_get_from_name(name_search);
+	if (group.length() >= 1) {
+		foreach (unowned var gp in group) {
+			// Add Simple Package
+			if (gp.length() == 1) {
+				foreach (var pkg in list) {
+					if (pkg.name == gp.nth_data(0)) {
+						queue += pkg;
+					}
+				}
+			}
+			// Add Package with multi choose like (ccls or clangd)
+			else {
+				bool need_choose = true;
+				foreach (unowned var pkg in gp) {
+					if (Query.is_exist(pkg)) {
+						need_choose = false;
+						break;
+					}
+				}
+				// if no dependency in the choose is installed
+				if (need_choose) {
+					print("please choose one: ");
+					var nb = int.parse(stdin.read_line());
+					if (nb < 0 || nb > queue.length - 1) {
+						print_info("Cancelling...");
+						return ;
+					}
+				}
+			}
 		}
 	}
 
@@ -337,6 +372,7 @@ void add_queue_list(SupraList pkg, string output) throws Error {
 				continue;
 			}
 			if (Query.is_exist(i) && config.force == false) {
+				print("AVAntle crshhh\n");
 				if (Sync.check_update(i))
 					prepare_install(i);
 				continue;

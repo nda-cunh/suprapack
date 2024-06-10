@@ -122,7 +122,7 @@ bool cmd_install(string []av) throws Error {
 			else if (i.has_suffix(".suprapack")){
 				prepare_install(i);
 			}
-		}catch (Error e) {
+		} catch (Error e) {
 			if (e is ErrorSP.FAILED) {
 				throw e;
 			}
