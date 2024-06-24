@@ -3,7 +3,14 @@
 SUPRAVIM_REPO='Supravim https://gitlab.com/supraproject/suprastore_repository/-/raw/plugin-supravim/'
 COSMOS_x86_64='Cosmos https://gitlab.com/supraproject/suprastore_repository/-/raw/master/'
 
-REPO_LIST=$HOME/.local/.suprapack/repo.list
+if test $USER -eq "root"; then
+	REPO_LIST=/.suprapack/repo.list
+	CONFIG=/.suprapack/user.conf
+else
+	REPO_LIST=$HOME/.local/.suprapack/repo.list
+	CONFIG=$HOME/.local/.suprapack/user.conf
+fi
+
 if [ -f "$REPO_LIST" ]; then
 	echo "already existing repo.list skipping..."
 	if ! grep -q $SUPRAVIM_REPO $REPO_LIST 2>/dev/null; then
@@ -18,7 +25,6 @@ else
 	echo "$SUPRAVIM_REPO" >> $REPO_LIST
 fi
 
-CONFIG=$HOME/.local/.suprapack/user.conf
 if [ -f "$CONFIG" ]; then
 	echo "already existing user.conf skipping..."
 else
