@@ -7,6 +7,7 @@ public class Config : Object{
 		if (prefix_tmp != null)
 			this.change_prefix(prefix_tmp);
 		queue_pkg = new List<Package?>();
+		this.load_config();
 		create_source_profile();
 	}
 
