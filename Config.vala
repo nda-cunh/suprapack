@@ -7,6 +7,28 @@ public class Config : Object{
 		if (prefix_tmp != null)
 			this.change_prefix(prefix_tmp);
 		queue_pkg = new List<Package?>();
+		create_source_profile();
+	}
+
+	void create_source_profile () throws Error {
+		var profile = @"$HOME/.suprapack_profile";
+		if (FileUtils.test(profile, FileTest.EXISTS) == false) {
+var str = """# Prefix:%1$s
+export PATH=$PATH:%1$s/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%1$s/lib
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:%1$s/share/pkgconfig:%1$s/lib/pkgconfig
+export XDG_DATA_DIRS=$XDG_DATA_DIRS:%1$s/share
+export XDG_CONFIG_DIRS=$XDG_CONFIG_DIRS:%1$s/etc
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:%1$s/lib"
+export LIBRARY_PATH="$LIBRARY_PATH:%1$s/lib"
+export C_INCLUDE_PATH="$C_INCLUDE_PATH:%1$s/include"
+export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:%1$s/include"
+export GSETTINGS_SCHEMA_DIR=%1$s/share/glib-2.0/schemas/
+export fpath=(/nfs/homes/nda-cunh/.local/bin $fpath)
+""".printf(this.prefix);
+			FileUtils.set_contents(profile, str);
+		}
+
 	}
 
 	public void change_prefix (string prefix) throws Error {
