@@ -3,7 +3,7 @@
 SUPRAVIM_REPO='Supravim https://gitlab.com/supraproject/suprastore_repository/-/raw/plugin-supravim/'
 COSMOS_x86_64='Cosmos https://gitlab.com/supraproject/suprastore_repository/-/raw/master/'
 
-if test $USER -eq "root"; then
+if test $UID -eq 0 ; then
 	REPO_LIST=/.suprapack/repo.list
 	CONFIG=/.suprapack/user.conf
 else
