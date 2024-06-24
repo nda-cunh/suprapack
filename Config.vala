@@ -1,11 +1,10 @@
 public class Config : Object{
 	public Config () throws Error {
 		var env = Environ.get();
-		if (USERNAME == "root")
+		if (Environment.get_real_name() == "root")
 			this.change_prefix ("/");
 		else
 			this.change_prefix (@"$HOME/.local");
-
 		this.load_config();
 		var prefix_tmp = Environ.get_variable(env, "PREFIX");
 		if (prefix_tmp != null)
@@ -29,7 +28,7 @@ export LIBRARY_PATH="$LIBRARY_PATH:%1$s/lib"
 export C_INCLUDE_PATH="$C_INCLUDE_PATH:%1$s/include"
 export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:%1$s/include"
 export GSETTINGS_SCHEMA_DIR=%1$s/share/glib-2.0/schemas/
-export fpath=(/nfs/homes/nda-cunh/.local/bin $fpath)
+export fpath=(%1$s/bin $fpath)
 """.printf(this.prefix);
 			FileUtils.set_contents(profile, str);
 		}
@@ -42,7 +41,6 @@ export fpath=(/nfs/homes/nda-cunh/.local/bin $fpath)
 		var new_cache = prefix + "/.suprapack";
 		var new_config = new_cache + "/user.conf";
 		var new_repo_list = new_cache + "/repo.list";
-		FileUtils.symlink(@"$HOME/.local/.suprapack", @"$HOME/.config/suprapack");
 		
 		DirUtils.create_with_parents(new_prefix, 0755);
 		DirUtils.create_with_parents(new_cache, 0755);
@@ -112,13 +110,24 @@ export fpath=(/nfs/homes/nda-cunh/.local/bin $fpath)
 				return true;
 		return false;
 	}
+	
+	private string _prefix;
+	public string prefix	{
+		get {
+			if (_prefix == null)
+				critical ("Prefix is not set");
+			return _prefix;
+		}
+		private set {
+			_prefix = value;
+		}
+	}
 
 	public List<Package?>	queue_pkg;
 	public unowned string[] cmd;
 	public bool allays_yes {get;set;default=false;} 
 	public bool force		{get; set; default=false;}
 	public bool supraforce	{get; set; default=false;}
-	public string prefix	{get; private set; default=@"$HOME/.local";}
 	public string cache		{get; private set;}
 	public string config	{get; private set;}
 	public string repo_list {get; private set;}
