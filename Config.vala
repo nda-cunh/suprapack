@@ -48,7 +48,10 @@ export fpath=(%1$s/bin $fpath)
 			DirUtils.create(new_cache, 0755);
 		}
 		if (FileUtils.test (new_config, FileTest.EXISTS) == false) {
-			FileUtils.set_contents (new_config, "is_cached:false");
+			if (Environment.get_real_name() == "root")
+				FileUtils.set_contents (new_config, "prefix:\nis_cached:false");
+			else
+				FileUtils.set_contents (new_config, "is_cached:false");
 		}
 		if (FileUtils.test (new_repo_list, FileTest.EXISTS) == false) {
 			if (FileUtils.test(this.repo_list, FileTest.EXISTS)) {
