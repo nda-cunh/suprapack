@@ -1,7 +1,11 @@
 public class Config : Object{
 	public Config () throws Error {
 		var env = Environ.get();
-		this.change_prefix (@"$HOME/.local");
+		if (USERNAME == "root")
+			this.change_prefix ("/");
+		else
+			this.change_prefix (@"$HOME/.local");
+
 		this.load_config();
 		var prefix_tmp = Environ.get_variable(env, "PREFIX");
 		if (prefix_tmp != null)
