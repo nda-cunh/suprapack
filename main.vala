@@ -1,6 +1,6 @@
-public string HOME;
-public string PWD;
-public string USERNAME;
+public unowned string HOME;
+public unowned string PWD;
+public unowned string USERNAME;
 public string? CONFIG = null;
 public string CONST_BLANK;
 
@@ -131,8 +131,8 @@ public class Main : Object {
 			}
 		}
 		init_message();
-		HOME = Environment.get_home_dir();
-		PWD = Environment.get_current_dir();
+		HOME = Environment.get_variable("HOME");
+		PWD = Environment.get_variable("PWD");
 		USERNAME = Environment.get_user_name();
 		CONST_BLANK = string.nfill(255, ' ');
 		Intl.setlocale();
