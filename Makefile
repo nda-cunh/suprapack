@@ -1,7 +1,15 @@
 SRC= main.vala Uninstall.vala Run.vala Makepkg.vala Build.vala Repository.vala Utils.vala Command.vala Query.vala Log.vala Sync.vala Install.vala Package.vala Config.vala
 NAME=suprapack_dev
 LDFLAGS=-X -O2 --pkg=gio-2.0 -X -w --enable-experimental
+
 all: install 
+
+bootstrap:
+	tar -xf bootstrap.tar.gz -C . 
+	cc $(SRC:.vala=.c) -O2 `pkg-config --cflags --libs gio-2.0` -w -o suprapack
+
+valac: $(SRC)
+	valac $(SRC) $(LDFLAGS) -o suprapack 
 
 debug:
 	valac $(SRC) $(LDFLAGS) --debug -X -fsanitize=address -o suprapack 
@@ -13,7 +21,11 @@ suprapack_dev: build
 	ninja install -C build
 
 prod:
-	valac $(SRC) $(LDFLAGS) -o suprapack 
+ifeq ($(shell command -v valac 2> /dev/null),)
+	@$(MAKE) --no-print-directory bootstrap;
+else
+	@$(MAKE) --no-print-directory valac;
+endif
 
 install: prod 
 	mkdir -p usr/bin
@@ -27,3 +39,5 @@ run: $(NAME)
 	@#./$(NAME) uninstall nodejs 
 	@# ./$(NAME) update suprapatate 
 	@# ./$(NAME) 
+
+.PHONY: bootstrap
