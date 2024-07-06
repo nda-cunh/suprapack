@@ -27,7 +27,7 @@ public class Main : Object {
 
 		var opt_context = new OptionContext ("- Suprapack -");
 		opt_context.add_main_entries (options, null);
-		opt_context.set_help_enabled(false);
+			opt_context.set_help_enabled(false);
 		opt_context.parse(ref args);
 
 
