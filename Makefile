@@ -23,7 +23,7 @@ suprapack_dev: build
 	ninja install -C build
 
 suprapack:
-ifeq ($(shell command -v vailac 2> /dev/null),)
+ifeq ($(shell command -v valac 2> /dev/null),)
 	@$(MAKE) --no-print-directory bootstrap;
 else
 	@$(MAKE) --no-print-directory valac;
