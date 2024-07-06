@@ -31,7 +31,7 @@ export fpath=(%1$s/bin $fpath)
 		}
 
 	}
-	
+
 	public void change_strap (string prefix_strap) {
 		this.strap = prefix_strap;
 	}
@@ -43,7 +43,7 @@ export fpath=(%1$s/bin $fpath)
 		var new_config = new_cache + "/user.conf";
 		var new_repo_list = new_cache + "/repo.list";
 		FileUtils.symlink(@"$HOME/.local/.suprapack", @"$HOME/.config/suprapack");
-		
+
 		DirUtils.create_with_parents(new_prefix, 0755);
 		DirUtils.create_with_parents(new_cache, 0755);
 		if (FileUtils.test (new_cache, FileTest.EXISTS) == false) {
@@ -54,17 +54,17 @@ export fpath=(%1$s/bin $fpath)
 		}
 		if (FileUtils.test (new_repo_list, FileTest.EXISTS) == false) {
 			if (FileUtils.test(this.repo_list, FileTest.EXISTS)) {
-				info("[Repo] Copy all %s content in new prefix", this.prefix); 
+				info("[Repo] Copy all %s content in new prefix", this.prefix);
 				FileUtils.get_contents (this.repo_list, out contents);
 				FileUtils.set_contents (new_repo_list, contents);
 			}
 			else
 				FileUtils.set_contents (new_repo_list, "");
 		}
-		
+
 		this.prefix = (owned)new_prefix;
 		this.cache = (owned)new_cache;
-		this.config = (owned)new_config; 
+		this.config = (owned)new_config;
 		this.repo_list = (owned)new_repo_list;
 	}
 
@@ -87,7 +87,7 @@ export fpath=(%1$s/bin $fpath)
 				this.change_prefix(line[line.index_of_char(':') + 1:].replace("~", HOME));
 			}
 		}
-		
+
 	}
 
 	public void add(string key, string value) throws Error {
@@ -115,7 +115,7 @@ export fpath=(%1$s/bin $fpath)
 
 	public List<Package?>	queue_pkg;
 	public unowned string[] cmd;
-	public bool allays_yes {get;set;default=false;} 
+	public bool allays_yes {get;set;default=false;}
 	public bool force		{get; set; default=false;}
 	public bool supraforce	{get; set; default=false;}
 	public string prefix	{get; private set; default=@"$HOME/.local";}
@@ -125,5 +125,4 @@ export fpath=(%1$s/bin $fpath)
 	public string strap {get; private set;}
 	public bool is_cached	{get; private set; default=false;}
 	public bool show_script {get; private set; default=false;}
-
 }

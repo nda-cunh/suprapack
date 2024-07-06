@@ -39,7 +39,7 @@ public class Makepkg : Object {
 	}
 
 
-	string replace_variable_in_string (string str) throws Error { 
+	string replace_variable_in_string (string str) throws Error {
 		MatchInfo match_info;
 		var builder = new StringBuilder.sized(str.length*2);
 
@@ -60,7 +60,7 @@ public class Makepkg : Object {
 			return str;
 		return builder.str;
 	}
-	
+
 	public Makepkg (string pkgbuild) throws Error{
 		MatchInfo match_info;
 		string contents;
@@ -76,7 +76,7 @@ public class Makepkg : Object {
 		env = Environ.set_variable (env, "pkgdir", pkgdir, true);
 		env = Environ.set_variable (env, "prefix", config.prefix, true);
 
-		regex_attribut = new Regex("""^([^\s]+?)[=](([(].*?[)])|(.*?$))""", MULTILINE | DOTALL); 
+		regex_attribut = new Regex("""^([^\s]+?)[=](([(].*?[)])|(.*?$))""", MULTILINE | DOTALL);
 		regex_function = new Regex("""^(.+?)[(].*?[)].*?[{]""", MULTILINE);
 		regex_url = /^https?[:][\/][\/]/;
 		regex_git_url = /^git[+](?P<name_url>(https?[:][\/][\/][^\s#]*))([#]branch[=](?P<branch>([^\s]*)))?/;
@@ -87,13 +87,13 @@ public class Makepkg : Object {
 		/* Get all the PKGBUILD and set it in contents-string */
 		FileUtils.get_contents (pkgbuild, out contents);
 
-	
+
 		/* Get All Attributs  (name=value) or (name=(value1 value2)) */
 		string []attributs = {};
 		if (regex_attribut.match (contents, 0, out match_info)) {
 			do {
 				string name = match_info.fetch(1);
-				string value = match_info.fetch(2);	
+				string value = match_info.fetch(2);
 
 				attributs += name;
 				value = Utils.strip (value);
@@ -151,7 +151,7 @@ public class Makepkg : Object {
 					break;
 				}
 			}
-				
+
 		}
 
 
@@ -182,7 +182,7 @@ public class Makepkg : Object {
 
 			url = Utils.strip (url);
 			output = Utils.strip (output);
-	
+
 			output = @"$srcdir/$output";
 			print(output);
 			debug("Source: %s", url);
@@ -195,7 +195,7 @@ public class Makepkg : Object {
 				debug("Git %s to -> %s", url, output);
 				string url_name = match_info.fetch_named("name_url");
 				string branch = match_info.fetch_named("branch") ?? "";
-					
+
 				string []argv_exec = {"git", "clone", "--depth", "1", url_name, output};
 				if (branch != "") {
 					debug("Git branch found %s", branch);
@@ -270,7 +270,7 @@ public class Makepkg : Object {
 			version= get_data("pkgver") ?? "";
 			description = get_data("pkgdesc") ?? "";
 			author = get_data("pkgauthor") ?? "";
-			
+
 			string dependencies = get_data("depends");
 			foreach (var i in dependencies?.replace("\n", " ")?.split(" ")) {
 				dependency += Utils.strip (i) + " ";

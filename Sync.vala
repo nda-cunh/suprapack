@@ -23,11 +23,11 @@ public struct SupraList {
 	string name;
 	string version;
 	string description;
-	bool is_local; 
+	bool is_local;
 }
 
 
-// RepoInfo contains information of a repo like Cosmos 
+// RepoInfo contains information of a repo like Cosmos
 // name  (Cosmos)
 // url (http://gitlab/../../)
 public class RepoInfo : Object{
@@ -46,7 +46,7 @@ public class RepoInfo : Object{
 			url_list += "list";
 			debug("Repository", "FETCH HTTP repository %s", url_list);
 			try {
-				Utils.download(url_list, output, true); 
+				Utils.download(url_list, output, true);
 			}
 			catch (Error e) {
 				FileUtils.remove (output);
@@ -111,7 +111,7 @@ public class RepoInfo : Object{
 // he can download package
 // have to the management of all repository online
 class Sync {
-	//   SINGLETON 
+	//   SINGLETON
 	private static Sync? singleton = null;
 	private static unowned Sync default() {
 		try {
@@ -269,7 +269,7 @@ class Sync {
 				debug("Sync", "Copy from local name: [%s] repo: [%s]", pkg.name, pkg.repo_name);
 			}
 			else
-				Utils.download(url, output, false, false, cancel); 
+				Utils.download(url, output, false, false, cancel);
 			print(ENDCURSOR);
 		} catch (Error e) {
 			print(ENDCURSOR);

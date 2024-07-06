@@ -55,7 +55,7 @@ public class Main : Object {
 
 		unowned string av1 = commands[1];
 		config.cmd = commands;
-		
+
 		if (av1.has_suffix(".suprapack")) {
 			prepare_install(commands[1]);
 			install();

@@ -22,7 +22,7 @@ namespace Build {
 
 		string stderr;
 		try {
-			// modify /etc 
+			// modify /etc
 			if (FileUtils.test(@"$usr_dir/../etc", FileTest.EXISTS)) {
 				Process.spawn_command_line_sync(@"mv $usr_dir/../etc $usr_dir/etc");
 			}
@@ -76,7 +76,7 @@ namespace Build {
 		thread.join ();
 		print_info(@"$(name_pkg).suprapack is created\n");
 	}
-	
+
 	private bool check(string usr_dir) {
 		int n = 0;
 		if (FileUtils.test(@"$usr_dir/bin", FileTest.EXISTS))
