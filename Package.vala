@@ -5,7 +5,7 @@
 public struct Package {
 	string name;
 	string author;
-	string version; 
+	string version;
 	string description;
 	string binary;
 	string dependency;
@@ -13,15 +13,15 @@ public struct Package {
 	string size_tar;
 	string size_installed;
 	string installed_files;
-	string exclude_package; 
-	string output; 
-	string repo; 
+	string exclude_package;
+	string output;
+	string repo;
 
 
 	public void init() {
 		this.name = "";
 		this.author = "";
-		this.version = ""; 
+		this.version = "";
 		this.description = "";
 		this.binary = "";
 		this.dependency = "";
@@ -54,7 +54,7 @@ public struct Package {
 			printerr(e.message);
 		}
 	}
-	
+
 	public Package.from_file(string info_file) {
 		string contents;
 		unowned string @value;
@@ -63,7 +63,7 @@ public struct Package {
 		try {
 			FileUtils.get_contents(info_file, out contents);
 			var lines = contents.split("\n");
-			
+
 			foreach (unowned var line in lines) {
 				if (line == "[FILES]")
 					break;
@@ -115,8 +115,8 @@ public struct Package {
 		}
 		return (sp);
 	}
-	
-	// public func 
+
+	// public func
 	public void create_info_file(string info_file) {
 		var fs = FileStream.open(info_file, "w");
 		if (fs == null)

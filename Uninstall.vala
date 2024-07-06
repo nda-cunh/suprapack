@@ -41,11 +41,11 @@ namespace Uninstall {
 		int padding_name = calc_padding_max (queue);
 		foreach (var i in queue) {
 			var pkg = Query.get_from_pkg(i);
-			var size = double.parse(pkg.size_installed) / (1 << 20); 
+			var size = double.parse(pkg.size_installed) / (1 << 20);
 			size_max += size;
 			print("%s  %-*s %s%s %5s %s %5.2f Mib%s\n", PURPLE, padding_name, i, BOLD, GREEN, pkg.version, CYAN, size, NONE);
 		}
-		
+
 		printf("\nTotal Remove Size:  %s%.2f MiB%s\n", BOLD, size_max, NONE);
 		if (config.allays_yes || Utils.stdin_bool_choose_true(":: Proceed with installation [Y/n] ")) {
 			foreach (unowned var i in queue) {

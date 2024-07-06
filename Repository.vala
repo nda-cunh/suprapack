@@ -8,7 +8,7 @@ namespace Repository {
 
 			while ((tmp = dir.read_name()) != null) {
 				if (tmp.has_suffix(".suprapack"))
-					result.append(tmp); 
+					result.append(tmp);
 			}
 			return result;
 		} catch (Error e) {

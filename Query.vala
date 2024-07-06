@@ -19,7 +19,7 @@ namespace Query{
 			{
 				int file_len = lst[i].length;
 				int calc = g_last_size - file_len;
-				
+
 				if (calc <= 0)
 					calc = 1;
 				blank[calc] = '\0';
@@ -34,16 +34,16 @@ namespace Query{
 	}
 
 	/**
-	 * return the Package struct from a package-name
-	 */
+	* return the Package struct from a package-name
+	*/
 	public Package get_from_pkg(string name_pkg) {
 		var pkg = Package.from_file(@"$(config.cache)/$name_pkg/info");
 		return pkg;
 	}
 
 	/**
-	 * Add package in required_by ex:  sfml -> openal
-	 */ 
+	* Add package in required_by ex:  sfml -> openal
+	*/
 	public void add_package_to_required_by(string name_pkg, string package_add) throws Error {
 		var dest = @"$(config.cache)/$package_add/required_by";
 		var line = name_pkg + "\n";
@@ -57,9 +57,9 @@ namespace Query{
 			FileUtils.set_contents(dest, contents + line);
 		}
 	}
-	
 
-	/* return all package required by name_pkg */ 
+
+	/* return all package required by name_pkg */
 	public string[] get_required_by(string name_pkg) throws Error {
 		string []res = {};
 		string contents;
@@ -68,7 +68,7 @@ namespace Query{
 			return res;
 		}
 		else {
-			FileUtils.get_contents(required_by, out contents);	
+			FileUtils.get_contents(required_by, out contents);
 			foreach (var deps in contents.split("\n")) {
 				if (deps.strip() == "")
 					continue;
@@ -77,13 +77,13 @@ namespace Query{
 		}
 		return res;
 	}
-	
+
 
 	/* remove only ~/suprastore/PKG */
 	private void remove_pkg(string name_pkg) {
 		var pkg = @"$(config.cache)/$name_pkg/";
-		FileUtils.unlink(pkg + "info");	
-		FileUtils.unlink(pkg + "required_by");	
+		FileUtils.unlink(pkg + "info");
+		FileUtils.unlink(pkg + "required_by");
 		DirUtils.remove(pkg);
 	}
 
@@ -108,7 +108,7 @@ namespace Query{
 	// return all package ever install
 	public string []get_all_installed_pkg() {
 		try {
-			string []result = {};	
+			string []result = {};
 			var dir = Dir.open(config.cache);
 			unowned string? tmp;
 

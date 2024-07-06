@@ -12,7 +12,7 @@ private void list_file_dir(string emp_dir, ref List<string> list) {
 			string name = @"$emp_dir/$it";
 			if (FileUtils.test(name, FileTest.IS_DIR) && !FileUtils.test(name, FileTest.IS_SYMLINK))
 				list_file_dir(name, ref list);
-			else 
+			else
 				list.append(name);
 		}
 	} catch (Error e) {
@@ -20,7 +20,7 @@ private void list_file_dir(string emp_dir, ref List<string> list) {
 	}
 }
 
-// copy files to PREFIX ~/.local 
+// copy files to PREFIX ~/.local
 private void install_files(List<string> list, int len) {
 	uint nb = 0;
 	unowned string basename;
@@ -42,7 +42,7 @@ private void install_files(List<string> list, int len) {
 			{
 				int file_len = basename.length;
 				int calc = g_last_size - file_len;
-				
+
 				if (calc <= 0)
 					calc = 1;
 				blank[calc] = '\0';
@@ -61,7 +61,7 @@ private void install_files(List<string> list, int len) {
 private void post_install(List<string> list, int len, ref Package pkg) {
 	string packinfo = @"$(config.cache)/$(pkg.name)";
 	string info_file = @"$packinfo/info";
-	
+
 	DirUtils.create_with_parents(packinfo, 0755);
 	pkg.create_info_file(info_file);
 
@@ -124,11 +124,11 @@ public void install_suprapackage(string suprapack) throws Error {
 		if (!(suprapack.has_suffix(".suprapack")))
 			throw new ErrorSP.BADFILE("ce fichier n'est pas un suprapack");
 	}
-	else 
+	else
 		throw new ErrorSP.ACCESS(@"$suprapack n'existe pas");
 	var tmp_dir = DirUtils.make_tmp("suprastore_XXXXXX");
 	print_info(@"Extraction de $(CYAN)$(suprapack)$(NONE)");
-	if (Utils.run_silent({"tar", "-xf", suprapack, "-C", tmp_dir}) != 0) 
+	if (Utils.run_silent({"tar", "-xf", suprapack, "-C", tmp_dir}) != 0)
 		throw new ErrorSP.FAILED(@"unable to decompress package\npackage => $(suprapack)");
 
 	var pkg = Package.from_file(@"$tmp_dir/info");
@@ -142,7 +142,7 @@ public void install_suprapackage(string suprapack) throws Error {
 	print_info(@"Installation de $(CYAN)$(pkg.name) $(pkg.version)$(NONE) par $(pkg.author)");
 
 	var list = new List<string>();
-	list_file_dir(tmp_dir, ref list);	
+	list_file_dir(tmp_dir, ref list);
 	install_files(list, tmp_dir.length);
 
 	script_post_install(tmp_dir);
@@ -182,7 +182,7 @@ public void install() throws Error {
 
 	int name_max = 0;
 	int version_max = 0;
-    foreach (var i in config.queue_pkg) {
+	foreach (var i in config.queue_pkg) {
 
 		foreach (var exclude in i.exclude_package.split(" ")) {
 			exclude = exclude.strip();
@@ -199,13 +199,13 @@ public void install() throws Error {
 		}
 
 		/* Calc the len for padding*/
-        var len = (i.name.length + i.repo.length + 2);
-        if (len > name_max)
-            name_max = len;
-        len = (i.version.length);
-        if (len > version_max)
-            version_max = len;
-    }
+		var len = (i.name.length + i.repo.length + 2);
+		if (len > name_max)
+			name_max = len;
+		len = (i.version.length);
+		if (len > version_max)
+			version_max = len;
+	}
 
 	int64 size_installed = 0;
 	print("Package (%u)\n\n", config.queue_pkg.length());
@@ -213,7 +213,7 @@ public void install() throws Error {
 	foreach (var i in config.queue_pkg) {
 		string version = i.version;
 		if (Query.is_exist(i.name)) {
-			version = Query.get_from_pkg(i.name).version; 
+			version = Query.get_from_pkg(i.name).version;
 		}
 		int n = 0;
 		n += printf("  %s%s%s%s/%-*s %s%s", BOLD, PURPLE, i.repo, NONE, name_max - i.repo.length, i.name, BOLD, GREEN);
@@ -270,11 +270,11 @@ void prepare_install(string name_search, string name_repo = "") throws Error{
 	if (name_search == "")
 		return;
 	force_suprapack_update();
-	
+
 	if (name_search.has_suffix(".suprapack")) {
 		if (!FileUtils.test(name_search, FileTest.EXISTS))
 			throw new ErrorSP.ACCESS (@"$name_search not found");
-		SupraList pkg = SupraList("Local", name_search, true); 
+		SupraList pkg = SupraList("Local", name_search, true);
 		add_queue_list(pkg, name_search);
 		return;
 	}
@@ -303,10 +303,11 @@ void prepare_install(string name_search, string name_repo = "") throws Error{
 		if (config.force == true) {
 			var lst = Utils.sort_supralist_version(queue);
 			pkg = lst[lst.length - 1];
-		}else {
+		}
+		else {
 			print_info("Similar package are found", "Conflict", "\033[31;1m");
 			for (int i = 0; i < queue.length; i++) {
-			print("%s", BOLD);
+				print("%s", BOLD);
 				print(@"%4d) $(PURPLE)%s/$(WHITE)%s [%s]$(NONE)\n", i, queue[i].repo_name, queue[i].name, queue[i].version);
 			}
 			print("please choose one: ");
