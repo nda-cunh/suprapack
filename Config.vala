@@ -31,6 +31,10 @@ export fpath=(%1$s/bin $fpath)
 		}
 
 	}
+	
+	public void change_strap (string prefix_strap) {
+		this.strap = prefix_strap;
+	}
 
 	public void change_prefix (string prefix) throws Error {
 		string contents;
@@ -118,7 +122,8 @@ export fpath=(%1$s/bin $fpath)
 	public string cache		{get; private set;}
 	public string config	{get; private set;}
 	public string repo_list {get; private set;}
-
+	public string strap {get; private set;}
 	public bool is_cached	{get; private set; default=false;}
 	public bool show_script {get; private set; default=false;}
+
 }
