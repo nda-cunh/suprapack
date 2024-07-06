@@ -13,20 +13,17 @@ bootstrap:
 	tar -xf bootstrap.tar.gz -C . 
 	cc $(SRC:.vala=.c) -O2 `pkg-config --cflags --libs gio-2.0` -w -o suprapack
 
-valac: $(SRC)
-	valac $(SRC) $(LDFLAGS) -o suprapack 
-
 build:
 	meson build --prefix=$(PWD)/ --bindir=. -Db_sanitize=address
 
 suprapack_dev: build
 	ninja install -C build
 
-suprapack:
+suprapack: $(SRC)
 ifeq ($(shell command -v valac 2> /dev/null),)
 	@$(MAKE) --no-print-directory bootstrap;
 else
-	@$(MAKE) --no-print-directory valac;
+	valac $(SRC) $(LDFLAGS) -o suprapack 
 endif
 
 install: suprapack 

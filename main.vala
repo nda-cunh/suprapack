@@ -7,110 +7,116 @@ public string CONST_BLANK;
 public Config config;
 
 public class Main : Object {
-	public bool all_cmd(string []args) throws Error {
-		string []cmd = {"suprapack"};
+	public static string? prefix = null;
+	public static bool refresh = false;
+	public static bool force = false;
+	public static bool yes = false;
+	public static bool supraforce = false;
+	public static string? strap = null;
 
-		foreach (var av in args[1:]) {
-			if (!av.has_prefix("-")) {
-				cmd += av;
-				continue;
-			}
-			if (av.has_prefix ("--prefix")) {
-				config.change_prefix(av[9:]);
-			}
-			else if (av.has_prefix ("--refresh")) {
-				Sync.refresh_list();
-			}
-			else if (av.has_prefix ("--force")) {
-				config.force = true;
-			}
-			else if (av.has_prefix ("--yes")) {
-				config.allays_yes = true;
-			}
-			else if (av.has_prefix ("--supraforce")) {
-				config.supraforce = true;
-			}
-			else
-				cmd += av;
+	const OptionEntry[] options = {
+		{ "prefix", 'p', OptionFlags.NONE, OptionArg.STRING, ref prefix, "", "Path to the folder" },
+		{ "refresh", 'r', OptionFlags.NONE, OptionArg.NONE, ref refresh, "refresh the list of packages", null },
+		{ "force", 'f', OptionFlags.NONE, OptionArg.NONE, ref force, "force the operation", null },
+		{ "yes", 'y', OptionFlags.NONE, OptionArg.NONE, ref yes, "answer yes to all questions", null },
+		{ "supraforce", 's', OptionFlags.NONE, OptionArg.NONE, ref supraforce, "force the operation", null },
+		{ "strap", '\0', OptionFlags.NONE, OptionArg.STRING, ref strap, "like pacstrap", null },
+		{ null }
+	};
+	public bool all_cmd(string []args) throws Error {
+
+		var opt_context = new OptionContext ("- Suprapack -");
+		opt_context.add_main_entries (options, null);
+		opt_context.set_help_enabled(false);
+		opt_context.parse(ref args);
+
+
+		string []commands = {"suprapack"};
+		foreach (unowned var arg in args[1:]) {
+			if (arg[0] != '-')
+				commands += arg;
 		}
-		
-		if (cmd.length < 2) {
+
+		if (refresh)
+			Sync.refresh_list();
+		if (prefix != null)
+			config.change_prefix(prefix);
+		if (strap != null)
+			config.change_strap(strap);
+		config.force = force;
+		config.allays_yes = yes;
+		config.supraforce = supraforce;
+
+		if (commands.length < 2) {
 			cmd_help();
 			return true;
 		}
 
 
-		string av1 = cmd[1];
-		config.cmd = cmd;
+		unowned string av1 = commands[1];
+		config.cmd = commands;
 		
 		if (av1.has_suffix(".suprapack")) {
-			prepare_install(cmd[1]);
+			prepare_install(commands[1]);
 			install();
 			return true;
 		}
 
-		if (av1.has_prefix("-Sy")) {
-			Sync.refresh_list();
-			av1 = "-S" + av1[av1.last_index_of_char('y')+1:];
-			print("[%s]\n", av1);
-		}
-
 		switch (av1) {
-
 			case "query_get_comp":
-				return cmd_query_get_comp(cmd);
+				return cmd_query_get_comp(commands);
 			case "sync_get_comp":
-				return cmd_sync_get_comp(cmd);
+				return cmd_sync_get_comp(commands);
 			case "shell":
-				return cmd_shell(cmd);
+				return cmd_shell(commands);
 			case "list_files":
 			case "-Ql":
-				return cmd_list_files(cmd);
+				return cmd_list_files(commands);
 			case "loading":
-				cmd_loading(cmd);
+				cmd_loading(commands);
 			case "run":
 			case "Qr":
-				return cmd_run(cmd);
+				return cmd_run(commands);
 			case "-Q":
 			case "list":
-				return cmd_list(cmd);
+				return cmd_list(commands);
 			case "search":
 			case "-Ss":
-				return cmd_search(cmd);
+				return cmd_search(commands);
 			case "-B":
 			case "build":
-				return cmd_build(cmd);
+				return cmd_build(commands);
 			case "help":
 				return cmd_help();
 			case "install":
 			case "add":
 			case "-S":
-				return cmd_install(cmd);
+				return cmd_install(commands);
 			case "uninstall":
 			case "remove":
 			case "-r":
-				return cmd_uninstall(cmd);
+				return cmd_uninstall(commands);
 			case "have_update":
-				return cmd_have_update(cmd);
+				return cmd_have_update(commands);
 			case "update":
 			case "-Su":
-				return cmd_update(cmd);
+				return cmd_update(commands);
 			case "info":
 			case "-Qi":
-				return cmd_info(cmd);
+				return cmd_info(commands);
 			case "prepare":
 			case "-P":
 				return cmd_prepare();
 			case "config":
-				return cmd_config(cmd);
+				return cmd_config(commands);
 			case "search_supravim_plugin":
-				return cmd_search_supravim_plugin(cmd);
+				return cmd_search_supravim_plugin(commands);
 			case "-G":
 			case "download":
-				return cmd_download(cmd);
-                        case "update_list":
-                        case "refresh":
-                                return cmd_refresh();
+				return cmd_download(commands);
+			case "update_list":
+			case "refresh":
+				return cmd_refresh();
 		}
 		error("La commande \"%s\" n'existe pas.", av1);
 	}
