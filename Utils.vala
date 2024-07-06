@@ -201,16 +201,22 @@ void modify_percent_bar (uint8[] buffer, double percent) {
 
 void print_download(string name_file, double actual, double max) {
 	const double MIB = 1048576.0;
-	uint8[] progress_bar = "[                    ] \0\0\0\0\0".data;
-	if (max == 0.0)
-		stdout.printf("%-50s %8s\r", name_file, "%.2f Mib / ??? Mib     ".printf(actual / MIB));
-	else {
-		double percent = (100 * actual) / max;
-		modify_percent_bar(progress_bar, percent);
-		stdout.printf("%-50s %8s\r", name_file, "%.2f Mib / %.2f Mib %s %.1f%%     ".printf(actual / MIB, max / MIB, (string)progress_bar, percent));
-		if (percent == 100.0)
-			print("\r\n");
-	}
+	double percent = (100 * actual) / max;
+	uint8[] progress_bar = "[                    ] \0".data;
+
+	if (max <= 0.0) {
+        stdout.printf("%-50s %8s\r", name_file, "%.2f Mib / ??? Mib     ".printf(actual / MIB));
+        return;
+    }
+
+    // Vérifier si actual est supérieur à max
+    if (actual > max) {
+        actual = max;
+    }
+	modify_percent_bar(progress_bar, percent);
+	stdout.printf("%-50s %8s\r", name_file, "%.2f Mib / %.2f Mib %s %.1f%%     ".printf(actual / MIB, max / MIB, (string)progress_bar, percent));
+	if (percent == 100.0)
+		print("\r\n");
 }
 
 public void download (string url, string? output = null, bool no_print = false, bool rec = false, Cancellable? cancel = null)throws Error {
@@ -298,6 +304,7 @@ public async void _download (string url, string? output = null, bool no_print = 
 
 	string name_file;
 	name_file = Uri.unescape_string(target[target.last_index_of_char ('/') + 1:]);
+	name_file = name_file.to_ascii ();
 	if (name_file.length >= 25)
 		name_file = name_file[0:25] + "..";
 	
