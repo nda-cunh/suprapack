@@ -24,7 +24,8 @@ export LIBRARY_PATH="$LIBRARY_PATH:%1$s/lib"
 export C_INCLUDE_PATH="$C_INCLUDE_PATH:%1$s/include"
 export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:%1$s/include"
 export GSETTINGS_SCHEMA_DIR=%1$s/share/glib-2.0/schemas/
-export fpath=(/nfs/homes/nda-cunh/.local/bin $fpath)
+export PYTHONPATH="$PYTHONPATH:%1$s/lib/python3/dist-packages"
+export fpath=(%1$s/bin $fpath)
 """.printf(this.prefix);
 			FileUtils.set_contents(profile, str);
 		}
