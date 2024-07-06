@@ -4,6 +4,11 @@ LDFLAGS=-X -O2 --pkg=gio-2.0 -X -w --enable-experimental
 
 all: install 
 
+make_bootstrap:
+	rm -rf bootstrap.tar.gz
+	valac $(SRC) $(LDFLAGS) -C 
+	tar -cf bootstrap.tar.gz *.c
+
 bootstrap:
 	tar -xf bootstrap.tar.gz -C . 
 	cc $(SRC:.vala=.c) -O2 `pkg-config --cflags --libs gio-2.0` -w -o suprapack
@@ -11,23 +16,20 @@ bootstrap:
 valac: $(SRC)
 	valac $(SRC) $(LDFLAGS) -o suprapack 
 
-debug:
-	valac $(SRC) $(LDFLAGS) --debug -X -fsanitize=address -o suprapack 
-
 build:
 	meson build --prefix=$(PWD)/ --bindir=. -Db_sanitize=address
 
 suprapack_dev: build
 	ninja install -C build
 
-prod:
-ifeq ($(shell command -v valac 2> /dev/null),)
+suprapack:
+ifeq ($(shell command -v vailac 2> /dev/null),)
 	@$(MAKE) --no-print-directory bootstrap;
 else
 	@$(MAKE) --no-print-directory valac;
 endif
 
-install: prod 
+install: suprapack 
 	mkdir -p usr/bin
 	cp ./suprapack usr/bin/suprapack
 	tar --zstd -cf suprapack.suprapack -C usr .
@@ -40,4 +42,4 @@ run: $(NAME)
 	@# ./$(NAME) update suprapatate 
 	@# ./$(NAME) 
 
-.PHONY: bootstrap
+.PHONY: bootstrap valac install run make_bootstrap all
