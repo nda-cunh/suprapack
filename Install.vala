@@ -1,6 +1,6 @@
-const int SIZE_TMP_DIR = 22;
+private const int SIZE_TMP_DIR = 22;
 
-void list_file_dir(string emp_dir, ref List<string> list) {
+private void list_file_dir(string emp_dir, ref List<string> list) {
 	try {
 		var dir = Dir.open(emp_dir);
 		unowned string it;
@@ -10,7 +10,7 @@ void list_file_dir(string emp_dir, ref List<string> list) {
 					continue;
 			}
 			string name = @"$emp_dir/$it";
-			if (FileUtils.test(name, FileTest.IS_DIR))
+			if (FileUtils.test(name, FileTest.IS_DIR) && !FileUtils.test(name, FileTest.IS_SYMLINK))
 				list_file_dir(name, ref list);
 			else 
 				list.append(name);
@@ -20,26 +20,8 @@ void list_file_dir(string emp_dir, ref List<string> list) {
 	}
 }
 
-void post_install(List<string> list, int len, ref Package pkg) {
-	string packinfo = @"$(config.cache)/$(pkg.name)";
-	string info_file = @"$packinfo/info";
-	
-	DirUtils.create_with_parents(packinfo, 0755);
-	pkg.create_info_file(info_file);
-
-	var fs = FileStream.open(info_file, "a");
-	if (fs == null)
-		error("Cant open %s", info_file);
-	fs.printf("[FILES]\n");
-	foreach(var i in list) {
-		unowned string basename = i.offset(len);
-		if (basename != "/info")
-			fs.printf("%s%s\n", config.prefix, basename);
-	}
-}
-
 // copy files to PREFIX ~/.local 
-void install_files(List<string> list, int len) {
+private void install_files(List<string> list, int len) {
 	uint nb = 0;
 	unowned string basename;
 	uint list_length = list.length();
@@ -73,6 +55,25 @@ void install_files(List<string> list, int len) {
 		error("FATAL ERROR >>> %s", e.message);
 	}
 	print("\n");
+}
+
+
+private void post_install(List<string> list, int len, ref Package pkg) {
+	string packinfo = @"$(config.cache)/$(pkg.name)";
+	string info_file = @"$packinfo/info";
+	
+	DirUtils.create_with_parents(packinfo, 0755);
+	pkg.create_info_file(info_file);
+
+	var fs = FileStream.open(info_file, "a");
+	if (fs == null)
+		error("Cant open %s", info_file);
+	fs.printf("[FILES]\n");
+	foreach(var i in list) {
+		unowned string basename = i.offset(len);
+		if (basename != "/info")
+			fs.printf("%s%s\n", config.prefix, basename);
+	}
 }
 
 private void script_pre_install(string dir) throws Error {
