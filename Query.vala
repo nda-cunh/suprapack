@@ -7,12 +7,12 @@ namespace Query{
 
 	/* remove package with all files installed remove ~/suprastore/name_pkg */
 	public void uninstall(string name_pkg) {
-		unowned uint8[] blank = CONST_BLANK.data;
 		int g_last_size = 0;
 
 		if (Query.is_exist(name_pkg) == false)
 			error("the package %s doesn't exist", name_pkg);
 
+		const string remove = BOLD + YELLOW + "[Remove]" + NONE + " ";
 		int prefix_len = config.prefix.length;
 		var lst = Query.get_from_pkg(name_pkg).get_installed_files();
 		for (int i = 0; i != lst.length; ++i) {
@@ -22,9 +22,7 @@ namespace Query{
 
 				if (calc <= 0)
 					calc = 1;
-				blank[calc] = '\0';
-				stdout.printf("%s%s[Remove]%s [%u/%u] %s%s\r", BOLD, YELLOW, NONE, i+1, lst.length, lst[i][prefix_len:], (string)blank);
-				blank[calc] = ' ';
+				stdout.printf("%s[%u/%u] %s%*c\r", remove, i+1, lst.length, lst[i][prefix_len:], calc, ' ');
 				g_last_size = file_len;
 			}
 			FileUtils.unlink(lst[i]);
