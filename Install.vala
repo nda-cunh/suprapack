@@ -70,7 +70,7 @@ private void post_install(List<string> list, int len, ref Package pkg) {
 	foreach(var i in list) {
 		unowned string basename = i.offset(len);
 		if (basename != "/info")
-			fs.printf("%s%s\n", config.prefix, basename);
+			fs.printf("%s\n", basename);
 	}
 }
 
@@ -87,7 +87,7 @@ private void script_pre_install(string dir) throws Error {
 		print_info(null, "Pre Install");
 		var envp = Environ.get();
 		envp = Environ.set_variable(envp, "SRCDIR", dir, true);
-		envp = Environ.set_variable(envp, "PKGDIR", config.prefix, true);
+		envp = Environ.set_variable(envp, "PKGDIR", config.strap, true);
 		envp = Environ.set_variable(envp, "PATH", @"$(config.prefix)/bin:" + Environ.get_variable(envp, "PATH"), true);
 		if (Utils.run({filename}, envp) != 0)
 			throw new ErrorSP.FAILED("non zero exit code of pre installation script");
@@ -106,7 +106,7 @@ private void script_post_install(string dir) throws Error {
 		}
 		var envp = Environ.get();
 		envp = Environ.set_variable(envp, "SRCDIR", dir, true);
-		envp = Environ.set_variable(envp, "PKGDIR", config.prefix, true);
+		envp = Environ.set_variable(envp, "PKGDIR", config.strap, true);
 		envp = Environ.set_variable(envp, "PATH", @"$(config.prefix)/bin:" + Environ.get_variable(envp, "PATH"), true);
 		print_info(null, "Post Install");
 		if (Utils.run({filename}, envp) != 0)

@@ -13,19 +13,19 @@ namespace Query{
 			error("the package %s doesn't exist", name_pkg);
 
 		const string remove = BOLD + YELLOW + "[Remove]" + NONE + " ";
-		int prefix_len = config.prefix.length;
 		var lst = Query.get_from_pkg(name_pkg).get_installed_files();
 		for (int i = 0; i != lst.length; ++i) {
-			{
-				int file_len = lst[i].length;
-				int calc = g_last_size - file_len;
+			int file_len = lst[i].length;
+			int calc = g_last_size - file_len;
 
-				if (calc <= 0)
-					calc = 1;
-				stdout.printf("%s[%u/%u] %s%*c\r", remove, i+1, lst.length, lst[i][prefix_len:], calc, ' ');
-				g_last_size = file_len;
-			}
-			FileUtils.unlink(lst[i]);
+			if (calc <= 0)
+				calc = 1;
+			stdout.printf("%s[%u/%u] %s%*c\r", remove, i+1, lst.length, lst[i], calc, ' ');
+			g_last_size = file_len;
+			if (lst[i].has_prefix(config.prefix))
+				FileUtils.unlink(lst[i]);
+			else
+				FileUtils.unlink(config.prefix + lst[i]);
 		}
 		Query.remove_pkg(name_pkg);
 		print("\n");

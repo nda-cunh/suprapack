@@ -66,6 +66,7 @@ export fpath=(%1$s/bin $fpath)
 		this.cache = (owned)new_cache;
 		this.config = (owned)new_config;
 		this.repo_list = (owned)new_repo_list;
+		this.strap = this.prefix;
 	}
 
 	private void load_config() throws Error{
