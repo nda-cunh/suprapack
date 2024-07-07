@@ -1,9 +1,6 @@
 public unowned string HOME;
 public unowned string PWD;
 public unowned string USERNAME;
-public string? CONFIG = null;
-public string CONST_BLANK;
-
 public Config config;
 
 public class Main : Object {
@@ -23,19 +20,13 @@ public class Main : Object {
 		{ "strap", '\0', OptionFlags.NONE, OptionArg.STRING, ref strap, "like pacstrap", null },
 		{ null }
 	};
-	public bool all_cmd(string []args) throws Error {
+	bool all_cmd(string []commands) throws Error {
 
-		var opt_context = new OptionContext ("- Suprapack -");
+		var opt_context = new OptionContext ();
 		opt_context.add_main_entries (options, null);
 			opt_context.set_help_enabled(false);
-		opt_context.parse(ref args);
+		opt_context.parse(ref commands);
 
-
-		string []commands = {"suprapack"};
-		foreach (unowned var arg in args[1:]) {
-			if (arg[0] != '-')
-				commands += arg;
-		}
 
 		if (refresh)
 			Sync.refresh_list();
@@ -136,12 +127,15 @@ public class Main : Object {
 				}
 			}
 		}
+		// set locale for utf8 support
+		Intl.setlocale();
+		// warning, error, message function
 		init_message();
+		// load environment variables
 		HOME = Environment.get_variable("HOME");
 		PWD = Environment.get_variable("PWD");
 		USERNAME = Environment.get_user_name();
-		CONST_BLANK = string.nfill(255, ' ');
-		Intl.setlocale();
+
 		try {
 			config = new Config();
 			if (all_cmd(args) == true)

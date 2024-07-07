@@ -22,12 +22,12 @@ private void list_file_dir(string emp_dir, ref List<string> list) {
 
 // copy files to PREFIX ~/.local
 private void install_files(List<string> list, int len) {
-	uint nb = 0;
+	const string install = BOLD + YELLOW + "[Install]" + NONE + " ";
 	unowned string basename;
+	uint nb = 0;
 	uint list_length = list.length();
-
 	int g_last_size = 0;
-	unowned uint8[] blank = CONST_BLANK.data;
+
 	try {
 		foreach (unowned var e in list) {
 			basename = e.offset(len);
@@ -35,7 +35,7 @@ private void install_files(List<string> list, int len) {
 			var last_dest = config.prefix + basename;
 			FileUtils.unlink(last_dest);
 			var fileDest = File.new_for_path(last_dest);
-			string path = fileDest.get_path();
+			var path = fileDest.get_path();
 			path = Path.get_dirname(path);
 			DirUtils.create_with_parents(path, 0755);
 			fileSrc.move(fileDest, FileCopyFlags.OVERWRITE);
@@ -45,9 +45,7 @@ private void install_files(List<string> list, int len) {
 
 				if (calc <= 0)
 					calc = 1;
-				blank[calc] = '\0';
-				stdout.printf("%s%s[Install]%s [%u/%u] %s%s\r", BOLD, YELLOW, NONE, ++nb, list_length, basename, (string)blank);
-				blank[calc] = ' ';
+				stdout.printf("%s[%u/%u] %s%*c\r", install, ++nb, list_length, basename, calc, ' ');
 				g_last_size = file_len;
 			}
 		}
