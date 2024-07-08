@@ -105,7 +105,7 @@ namespace Build {
 			var regex = new Regex("""^prefix.*?$""", RegexCompileFlags.MULTILINE);
 			contents = regex.replace (contents, contents.length, 0, "prefix=$PREFIX");
 			FileUtils.set_contents (output, contents);
-			result.append ("sed -i \"s|\\$PREFIX|$(echo $PKGDIR)|g\" ${SRCDIR}/");
+			result.append ("sed -i \"s|\\$PREFIX|$(echo $prefix)|g\" ${SRCDIR}/");
 			var index = 0;
 			index = file_directory.last_index_of ("include/");
 			if (index == -1)
