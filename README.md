@@ -1,18 +1,37 @@
 # Suprapack the package manager without root
 
-## Dependency
 
-- valac
-- C compiler (gcc or clang ...)
-- Glib-2.0
+## Installation
+#### Dependency
 
-# Compiling - install
+- valac Or C compiler (gcc or clang ...)
+- Glib-2.0  (2.10) >    
+
+#### Compiling and install
 
 ```bash
 git clone https://gitlab.com/nda-cunh/suprapack
 cd suprapack
 make install
 ```
+
+# For simple user :
+
+| Commands | definition |
+| ------ | ------ |
+|add / install	|Add a package to the repository or install a package from the |repository|
+|remove / uninstall	|Remove an installed package|
+|update	|Update all installed packages or a specific package|
+|search	|Search for a package in the repository using patterns|
+|list_files	|List all files installed by a specific package|
+|list	| List all installed packages |
+|info	| Print information about a specific package |
+|config	| Update a configuration value in your user.conf file |
+|help	| Display help information for SupraPack commands |
+| download | for dev you can get the suprapack file of the package without install |
+
+
+
 
 # Config
 
