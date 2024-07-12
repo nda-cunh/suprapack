@@ -68,7 +68,26 @@ Example: suprapack search '^supra.*'
 suprapack search <pkg>
 ```
 
+## Listing files installed by a package
+List all files installed by a specific package.
+```
+suprapack list_files <pkg>
+```
 
+## Listing installed packages
+
+List all installed packages.
+```
+suprapack list <pkg>
+```
+
+## Displaying package information
+Print information about a specific package
+```
+suprapack info [package name]
+```
+
+<br>
 <br>
 
 ----------------------------------------
@@ -78,13 +97,20 @@ suprapack search <pkg>
 
 # Config
 
+## Updating config
+Update a configuration value in your user.conf file.
+```
+suprapack config [config name] [config value]
+```
+
 ## RepositoryList '~/.config/suprapack/repo.list'
+an example of RepoListL
 ```
 Cosmos https://gitlab.com/supraproject/suprastore_repository/-/raw/master/
 Elixir https://raw.githubusercontent.com/Strong214356/suprapack-list/master/
 Supravim https://gitlab.com/supraproject/suprastore_repository/-/raw/plugin-supravim/
 ```
-you can add a repository with NAME url
+you can add a repository with NAME and the url/directory of the repo
 
 
 ## `~/.config/suprapack/user.conf`
