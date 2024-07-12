@@ -1,12 +1,27 @@
-SRC= main.vala Uninstall.vala Run.vala Makepkg.vala Build.vala Repository.vala Utils.vala Command.vala Query.vala Log.vala Sync.vala Install.vala Package.vala Config.vala
-NAME=suprapack_dev
+NAME =	suprapack_dev
 LDFLAGS=-X -O2 --pkg=gio-2.0 -X -w --enable-experimental
+
+SRC =	src/main.vala \
+		src/Uninstall.vala \
+		src/Run.vala \
+		src/Makepkg.vala \
+		src/Build.vala \
+		src/Repository.vala \
+		src/Utils.vala \
+		src/Command.vala \
+		src/Query.vala \
+		src/Log.vala \
+		src/Sync.vala \
+		src/Install.vala \
+		src/Package.vala \
+		src/Config.vala
 
 all: install 
 
 make_bootstrap:
 	rm -rf bootstrap.tar.gz
 	valac $(SRC) $(LDFLAGS) -C 
+	mv src/*.c .
 	tar -cf bootstrap.tar.gz *.c
 
 bootstrap:
