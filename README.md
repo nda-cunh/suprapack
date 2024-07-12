@@ -19,15 +19,15 @@ make install
 
 | Commands | definition |
 | ------ | ------ |
-| add / install	|Add a package to the repository or install a package from the |repository|
+| add / install	| install a package from the repository|
 | remove / uninstall	|Remove an installed package|
-| update	|Update all installed packages or a specific package|
-| search	|Search for a package in the repository using patterns|
-| list_files	|List all files installed by a specific package|
+| update	| Update all installed packages or a specific package|
+| search	| Search for a package in the repository using patterns |
 | list	| List all installed packages |
+| list_files	| List all files installed by a specific package |
 | info	| Print information about a specific package |
-| config	| Update a configuration value in your user.conf file |
 | help	| Display help information for SupraPack commands |
+| config | Update a configuration value in your user.conf file |
 | download | for dev you can get the suprapack file of the package without install |
 
 <img src="readme_suprapack.png">
