@@ -30,6 +30,49 @@ make install
 | config | Update a configuration value in your user.conf file |
 | download | for dev you can get the suprapack file of the package without install |
 
+## Installing a package
+
+Install a package from the repository.
+```
+suprapack install [package name]
+```
+
+Install a package from a SupraPack file.
+```
+suprapack install [file.suprapack]
+```
+## Removing a package
+
+Remove an installed package.
+```
+suprapack remove [package name]
+```
+
+## Updating packages
+
+Update all installed packages.
+```
+suprapack update
+```
+
+Update a specific package.
+```
+suprapack update [package name]
+```
+
+## Searching for a package
+Search for a package in the repository. You can use patterns for searching.
+
+Example: suprapack search '^supra.*'
+```
+suprapack search <pkg>
+```
+
+
+<br>
+
+----------------------------------------
+# Exemple with simple installation of SFML package
 <img src="readme_suprapack.png">
 
 
