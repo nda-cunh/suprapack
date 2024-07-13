@@ -168,13 +168,6 @@ bool cmd_info(string []av) {
 	return true;
 }
 
-bool cmd_config(string []av) throws Error{
-	if(av.length <= 3)
-		error("`suprapack config [Config] [Value]`");
-	config.add(av[2], av[3]);
-	return true;
-}
-
 bool cmd_have_update(string []av) throws Error{
 	if (av.length == 2)
 		error("`suprapack have_update [...]`");
