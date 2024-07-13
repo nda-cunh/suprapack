@@ -91,19 +91,64 @@ export fpath=(%1$s/bin $fpath)
 
 	}
 
-	public void add(string key, string value) throws Error {
+	
+	inline string parse_bool (string str) {
+		string tmp;
+		bool res;
+		tmp = str._strip ().ascii_down ();
+		if (bool.try_parse (tmp, out res) == false)
+			warning ("Error: %s is not a boolean", str);
+		return res.to_string ();
+	}
+
+	public void parse (ref unowned string []argv) throws Error {
+		string? _prefix_ = null;
+		string? _show_script_ = null;
+		string? _is_cached_ = null;
+
+		OptionEntry options[4];
+		options[0] = { "prefix", 'p', OptionFlags.NONE, OptionArg.STRING, ref _prefix_, "Path to the folder", "PATH"};
+		options[1] = { "is_cached", 'c', OptionFlags.NONE, OptionArg.STRING, ref _is_cached_, "Keep the package in the cache", "bool"};
+		options[2] = { "show_script", 's', OptionFlags.NONE, OptionArg.STRING, ref _show_script_, "Show the script before installing", "bool"};
+		options[3] = {null};
+		
+		var opt_context = new OptionContext ("Config");
+		opt_context.add_main_entries (options, null);
+		opt_context.set_summary ("Set the configuration of the package manager");
+		opt_context.set_help_enabled(true);
+
+		if (argv.length == 2)  {
+			opt_context.parse(ref argv);
+			print (opt_context.get_help (true, null));
+			return ;
+		}
+		
+		// Parse the command line
+		opt_context.parse(ref argv);
+
+		if (_prefix_ != null)
+			this.add ("prefix", _prefix_);
+		if (_is_cached_ != null)
+			this.add("is_cached", parse_bool (_is_cached_));
+		if (_show_script_ != null)
+			this.add("show_script", parse_bool (_show_script_));
 		string contents;
+		FileUtils.get_contents (this.config, out contents);
+		print ("[NewFile]:\n  %s\n", contents.replace("\n", "\n  "));
+	}
+
+	private void add(string key, string value) throws Error {
 		var new_contents = new StringBuilder();
+		string contents;
 		FileUtils.get_contents (this.config, out contents);
 
-		var lines = contents.split("\n");
-		if (value != "")
-			new_contents.append_printf("%s:%s\n", key, value);
-		foreach (var line in lines) {
-			if (!line.has_prefix (key))
+		foreach (var line in contents.split("\n")) {
+			if (!line.has_prefix (key)) {
 				new_contents.append(line);
+				new_contents.append_c ('\n');
+			}
 		}
-		print("NewFile:\n%s", new_contents.str);
+		new_contents.append_printf ("%s:%s", key, value);
 		FileUtils.set_contents(this.config, new_contents.str);
 	}
 

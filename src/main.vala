@@ -21,10 +21,20 @@ public class Main : Object {
 		{ null }
 	};
 	bool all_cmd(string []commands) throws Error {
+		
+		if (commands.length < 2) {
+			cmd_help();
+			return true;
+		}
+
+		if (commands[1] == "config") {
+			config.parse(ref commands);	
+			return true;
+		}
 
 		var opt_context = new OptionContext ();
 		opt_context.add_main_entries (options, null);
-			opt_context.set_help_enabled(false);
+		opt_context.set_help_enabled(false);
 		opt_context.parse(ref commands);
 
 
@@ -37,11 +47,6 @@ public class Main : Object {
 		config.force = force;
 		config.allays_yes = yes;
 		config.supraforce = supraforce;
-
-		if (commands.length < 2) {
-			cmd_help();
-			return true;
-		}
 
 
 		unowned string av1 = commands[1];
@@ -98,8 +103,6 @@ public class Main : Object {
 			case "prepare":
 			case "-P":
 				return cmd_prepare();
-			case "config":
-				return cmd_config(commands);
 			case "search_supravim_plugin":
 				return cmd_search_supravim_plugin(commands);
 			case "-G":
