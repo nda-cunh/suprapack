@@ -31,8 +31,8 @@ public struct SupraList {
 // name  (Cosmos)
 // url (http://gitlab/../../)
 public class RepoInfo : Object{
-	public RepoInfo(string name, string url) {
-		this.local = false;
+	public RepoInfo(string name, string url, bool local) {
+		this.local = local;
 		this.name = name;
 		this.url = url;
 		this._list = null;
@@ -142,19 +142,21 @@ class Sync {
 				count++;
 				string name = match_info.fetch_named("name");
 				string url = match_info.fetch_named("url");
-				if (url.has_suffix ("/"))
-					_repo += new RepoInfo(name, url);
-				else {
+				if (!url.has_suffix ("/")) {
 					warning ("Bad Format in %s/repo.list", config.prefix);
 					printerr(" \033[33;1m%d\033[0m | %s\033[91m/\033[0m\n", count, line);
 					printerr(" %*s | \033[91m%*s %s\033[0m\n\n", count.to_string().length, "", line.length + 1, "^", "~~ need terminate by  '/'");
 				}
+				if (url.has_prefix ("http"))
+					_repo += new RepoInfo(name, url, false);
+				else
+					_repo += new RepoInfo(name, url, true);
 			}
 			else
 				warning ("Can't read [%s] in %s/repo.list", line, config.prefix);
 		}
 
-		/* init List Property */
+		/* init List Property package-1.0.suprapack*/
 		var regex = /[a-zA-Z0-9]+[-][a-zA-Z0-9.]+[.]suprapack/;
 		foreach (var repo in _repo) {
 			FileUtils.get_contents(repo.list, out contents);
