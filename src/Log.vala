@@ -70,6 +70,7 @@ errordomain ErrorSP {
 
 }
 
+[Diagnostics]
 public void debug(string type, string msg, ...) {
 	logv(type, LogLevelFlags.LEVEL_DEBUG, msg, va_list());
 }
