@@ -50,7 +50,10 @@ bool cmd_shell(string []av) throws Error {
 	var env = Environ.get();
 	var shell = Environ.get_variable(env, "SHELL") ?? "/bin/bash";
 	config.force = true;
-	cmd_run({"suprapack", "run", shell, "-f"});
+	if (shell.has_suffix("bash"))
+		cmd_run({"suprapack", "run", shell, "--noprofile", "--norc"}, true);
+	else if (shell.has_suffix("zsh"))
+		cmd_run({"suprapack", "run", shell, "-f"}, true);
 	return true;
 }
 
@@ -291,7 +294,7 @@ bool cmd_search(string []av) throws Error {
 	return true;
 }
 
-bool cmd_run(string []av) throws Error {
+bool cmd_run(string []av, bool is_shell = false) throws Error {
 	if (av.length == 2)
 		error("`suprapack run [...]`");
 	if (Query.is_exist(av[2]) == false && config.force == false) {
@@ -320,7 +323,10 @@ bool cmd_run(string []av) throws Error {
 		foreach (var i in av[3: av.length])
 			av_binary += i;
 	}
-	run(av_binary);
+	if (is_shell)
+		run_shell(av_binary);
+	else 
+		run(av_binary);
 }
 
 bool cmd_update(string []av) throws Error {
