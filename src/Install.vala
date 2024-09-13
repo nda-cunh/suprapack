@@ -6,7 +6,7 @@ private void list_file_dir(string emp_dir, ref List<string> list) {
 		unowned string it;
 		while ((it = dir.read_name()) != null) {
 			if (emp_dir.length == SIZE_TMP_DIR) {
-				if (it == "info" || it == "pre_install.sh" || it == "post_install.sh")
+				if (it == "info" || it == "pre_install.sh" || it == "post_install.sh" || it == "uninstall")
 					continue;
 			}
 			string name = @"$emp_dir/$it";
@@ -85,14 +85,7 @@ private void script_pre_install(string dir) throws Error {
 				throw new ErrorSP.ACCESS("you refused to execute the script.");
 		}
 		print_info(null, "Pre Install");
-		var envp = Environ.get();
-		envp = Environ.set_variable(envp, "SRCDIR", dir, true);
-		envp = Environ.set_variable(envp, "PKGDIR", config.prefix, true);
-		envp = Environ.set_variable(envp, "PREFIX", config.strap, true);
-		envp = Environ.set_variable(envp, "srcdir", dir, true);
-		envp = Environ.set_variable(envp, "pkgdir", config.prefix, true);
-		envp = Environ.set_variable(envp, "prefix", config.strap, true);
-		envp = Environ.set_variable(envp, "PATH", @"$(config.prefix)/bin:" + Environ.get_variable(envp, "PATH"), true);
+		var envp = Utils.prepare_envp(dir);
 		if (Utils.run({filename}, envp) != 0)
 			throw new ErrorSP.FAILED("non zero exit code of pre installation script");
 	}
@@ -108,14 +101,7 @@ private void script_post_install(string dir) throws Error {
 			if (Utils.stdin_bool_choose_true("Continue ? [Y/n]") == false)
 				throw new ErrorSP.ACCESS("you refused to execute the script.");
 		}
-		var envp = Environ.get();
-		envp = Environ.set_variable(envp, "SRCDIR", dir, true);
-		envp = Environ.set_variable(envp, "PKGDIR", config.prefix, true);
-		envp = Environ.set_variable(envp, "PREFIX", config.strap, true);
-		envp = Environ.set_variable(envp, "srcdir", dir, true);
-		envp = Environ.set_variable(envp, "pkgdir", config.prefix, true);
-		envp = Environ.set_variable(envp, "prefix", config.strap, true);
-		envp = Environ.set_variable(envp, "PATH", @"$(config.prefix)/bin:" + Environ.get_variable(envp, "PATH"), true);
+		var envp = Utils.prepare_envp(dir);
 		print_info(null, "Post Install");
 		if (Utils.run({filename}, envp) != 0)
 			throw new ErrorSP.FAILED("non zero exit code of pre installation script");
@@ -151,9 +137,21 @@ public void install_suprapackage(string suprapack) throws Error {
 	list_file_dir(tmp_dir, ref list);
 	install_files(list, tmp_dir.length);
 
+	/* Post Install script launch */
 	script_post_install(tmp_dir);
 
+	// create info file
 	post_install(list, tmp_dir.length, ref pkg);
+
+
+	// Uninstall script
+	if (FileUtils.test(@"$tmp_dir/uninstall", FileTest.EXISTS)) {
+		var fileSrc = File.new_for_path(@"$tmp_dir/uninstall");
+		var fileDest = File.new_for_path(@"$(config.cache)/$(pkg.name)/uninstall");
+		fileSrc.move(fileDest, FileCopyFlags.OVERWRITE);
+	}
+
+	// remove useless tmp dir
 	if(Utils.run_silent({"rm", "-rf", tmp_dir}) != 0)
 		new OptionError.FAILED(@"unable to remove directory\ndirectory => $(tmp_dir)");
 }
