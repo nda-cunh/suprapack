@@ -61,6 +61,8 @@ namespace Build {
 
 		if (FileUtils.test(@"$usr_dir/pre_install.sh", FileTest.EXISTS))
 			FileUtils.chmod(@"$usr_dir/pre_install.sh", 0777);
+		if (FileUtils.test(@"$usr_dir/uninstall", FileTest.EXISTS))
+			FileUtils.chmod(@"$usr_dir/uninstall", 0777);
 		if (FileUtils.test(@"$usr_dir/post_install.sh", FileTest.EXISTS))
 			FileUtils.chmod(@"$usr_dir/post_install.sh", 0777);
 		// compress the package
