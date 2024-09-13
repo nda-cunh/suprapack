@@ -146,6 +146,8 @@ and make ``suprapack build usr``
 you will enter the package creation mode
 if you need a script pre and/or post install you can add at usr/post_install or usr/pre_install
 
+in 2.5.2 you can add uninstall script in usr/uninstall 
+
 
 ## With Script
 
