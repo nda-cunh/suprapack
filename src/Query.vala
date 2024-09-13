@@ -82,6 +82,13 @@ namespace Query{
 		var pkg = @"$(config.cache)/$name_pkg/";
 		FileUtils.unlink(pkg + "info");
 		FileUtils.unlink(pkg + "required_by");
+		var uninstall_dir = @"$pkg/uninstall";
+		if (config.want_remove == true && FileUtils.test(uninstall_dir, FileTest.EXISTS)) {
+			const string _remove = BOLD + YELLOW + "[Uninstall script]" + NONE + " ";
+			print("%s[%s]\n", _remove, name_pkg);
+			Utils.run({uninstall_dir}, Utils.prepare_envp(config.prefix));
+			FileUtils.remove(uninstall_dir);
+		}
 		DirUtils.remove(pkg);
 	}
 

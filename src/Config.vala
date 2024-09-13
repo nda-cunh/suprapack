@@ -91,7 +91,7 @@ export fpath=(%1$s/bin $fpath)
 
 	}
 
-	
+
 	inline string parse_bool (string str) {
 		string tmp;
 		bool res;
@@ -111,7 +111,7 @@ export fpath=(%1$s/bin $fpath)
 		options[1] = { "is_cached", 'c', OptionFlags.NONE, OptionArg.STRING, ref _is_cached_, "Keep the package in the cache", "bool"};
 		options[2] = { "show_script", 's', OptionFlags.NONE, OptionArg.STRING, ref _show_script_, "Show the script before installing", "bool"};
 		options[3] = {null};
-		
+
 		var opt_context = new OptionContext ("Config");
 		opt_context.add_main_entries (options, null);
 		opt_context.set_summary ("Set the configuration of the package manager");
@@ -122,7 +122,7 @@ export fpath=(%1$s/bin $fpath)
 			print (opt_context.get_help (true, null));
 			return ;
 		}
-		
+
 		// Parse the command line
 		opt_context.parse(ref argv);
 
@@ -161,14 +161,16 @@ export fpath=(%1$s/bin $fpath)
 
 	public List<Package?>	queue_pkg;
 	public unowned string[] cmd;
-	public bool allays_yes {get;set;default=false;}
+
+	public bool allays_yes	{get;set;default=false;}
 	public bool force		{get; set; default=false;}
 	public bool supraforce	{get; set; default=false;}
 	public string prefix	{get; private set; default=@"$HOME/.local";}
 	public string cache		{get; private set;}
 	public string config	{get; private set;}
 	public string repo_list {get; private set;}
-	public string strap {get; private set;}
+	public string strap		{get; private set;}
 	public bool is_cached	{get; private set; default=false;}
 	public bool show_script {get; private set; default=false;}
+	public bool want_remove {get; set; default=false;}
 }

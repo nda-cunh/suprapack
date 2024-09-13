@@ -186,6 +186,7 @@ bool cmd_have_update(string []av) throws Error{
 bool cmd_uninstall(string []av) throws Error {
 	if (av.length == 2)
 		error("`suprapack uninstall [...]`");
+	config.want_remove = true;
 
 	Uninstall.uninstall(av);
 	return true;
@@ -325,7 +326,7 @@ bool cmd_run(string []av, bool is_shell = false) throws Error {
 	}
 	if (is_shell)
 		run_shell(av_binary);
-	else 
+	else
 		run(av_binary);
 }
 

@@ -21,14 +21,14 @@ public class Main : Object {
 		{ null }
 	};
 	bool all_cmd(string []commands) throws Error {
-		
+
 		if (commands.length < 2) {
 			cmd_help();
 			return true;
 		}
 
 		if (commands[1] == "config") {
-			config.parse(ref commands);	
+			config.parse(ref commands);
 			return true;
 		}
 

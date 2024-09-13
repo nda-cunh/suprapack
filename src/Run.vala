@@ -40,7 +40,7 @@ public void run (string []args) throws Error {
 	Process.exit(simple_run(args, env));
 }
 
-inline int simple_run (string []args, string []env) throws Error 
+inline int simple_run (string []args, string []env) throws Error
 {
 	int status;
 	Process.spawn_sync(null, args, env, SpawnFlags.SEARCH_PATH | SpawnFlags.CHILD_INHERITS_STDIN, null, null, null, out status);

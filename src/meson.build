@@ -1,21 +1,27 @@
+sources = [
+  files('Build.vala'),
+  files('Config.vala'),
+  files('Log.vala'),
+  files('Makepkg.vala'),
+  files('Query.vala'),
+  files('Run.vala'),
+  files('Uninstall.vala'),
+  files('Command.vala'),
+  files('Install.vala'),
+  files('main.vala'),
+  files('Package.vala'),
+  files('Repository.vala'),
+  files('Sync.vala'),
+  files('Utils.vala'),
+]
+
 executable('suprapack',
-           'Log.vala',
-           'Uninstall.vala',
-           'Utils.vala',
-           'Repository.vala',
-           'Command.vala',
-           'main.vala',
-           'Query.vala',
-           'Package.vala',
-           'Install.vala',
-           'Build.vala',
-           'Config.vala',
-           'Sync.vala',
-           'Run.vala',
-           'Makepkg.vala',
-           c_args: '-w',
-           dependencies : [
-              dependency('glib-2.0'),
-              dependency('gobject-2.0'),
-              dependency('gio-2.0')],
-           install : true)
+  sources,
+  c_args: '-w',
+  vala_args: '--enable-experimental',
+  dependencies : [
+    dependency('glib-2.0'),
+    dependency('gobject-2.0'),
+    dependency('gio-2.0')
+  ],
+  install : true)

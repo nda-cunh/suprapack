@@ -366,4 +366,16 @@ namespace Utils {
 			}
 		}
 	}
+	
+	public string []prepare_envp(string dir) {
+		var envp = Environ.get();
+		envp = Environ.set_variable(envp, "SRCDIR", dir, true);
+		envp = Environ.set_variable(envp, "PKGDIR", config.prefix, true);
+		envp = Environ.set_variable(envp, "PREFIX", config.strap, true);
+		envp = Environ.set_variable(envp, "srcdir", dir, true);
+		envp = Environ.set_variable(envp, "pkgdir", config.prefix, true);
+		envp = Environ.set_variable(envp, "prefix", config.strap, true);
+		envp = Environ.set_variable(envp, "PATH", @"$(config.prefix)/bin:" + Environ.get_variable(envp, "PATH"), true);
+		return envp;
+	}
 }
