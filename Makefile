@@ -49,6 +49,7 @@ install: suprapack
 
 run: $(NAME) 
 	cp -f suprapack ~/.local/bin/suprapack
+	suprapack search 
 	@# ./suprapack add suprapack --force 
 	@#./$(NAME) uninstall nodejs 
 	@# ./$(NAME) update suprapatate 
