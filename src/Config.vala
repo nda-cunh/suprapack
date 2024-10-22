@@ -159,6 +159,27 @@ export fpath=(%1$s/bin $fpath)
 		return false;
 	}
 
+	public static bool is_my_arch (string arch) throws Error {
+		string contents;
+		Process.spawn_command_line_sync ("uname -s -p", out contents);
+		if ("any" in arch)
+			return true;
+		if (contents.has_prefix ("Linux x86_64"))
+			contents = "amd64-Linux";
+		else if (contents.has_prefix ("Linux i686"))
+			contents = "i386-Linux";
+		else if (contents.has_prefix ("Linux aarch64"))
+			contents = "arm64-Linux";
+		else if (contents.has_prefix ("Darwin x86_64"))
+			contents = "amd64-Darwin";
+		else if (contents.has_prefix ("Darwin arm64"))
+			contents = "arm64-Darwin";
+		if (contents == arch)
+			return true;
+		return false;
+	}
+
+
 	public List<Package?>	queue_pkg;
 	public unowned string[] cmd;
 

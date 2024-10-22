@@ -16,6 +16,7 @@ public struct Package {
 	string exclude_package;
 	string output;
 	string repo;
+	string arch;
 
 
 	public void init() {
@@ -30,6 +31,7 @@ public struct Package {
 		this.exclude_package = "";
 		this.size_tar = "";
 		this.size_installed = "";
+		this.arch = "";
 	}
 
 	// constructor
@@ -37,6 +39,7 @@ public struct Package {
 		try {
 			this.name = Utils.get_input("Name: ");
 			this.name = /\f\r\n\t\v /.replace(name, -1, 0, "");
+			this.name = name.replace("_", "-");
 			this.version = Utils.get_input("Version: ");
 			this.version = /[^0-9.]/.replace(this.version, -1, 0, "");
 			this.version = this.version.replace("-", ".");
@@ -47,6 +50,33 @@ public struct Package {
 			this.exclude_package = Utils.get_input("Exclude Package: ");
 			print("Can be empty if %s is the binary name\n", this.name);
 			this.binary = Utils.get_input("Binary: ", false);
+			this.arch = Utils.get_input("Arch ((default)auto, any, amd64): ");
+			if (this.arch == "" || this.arch == "auto") {
+				string content;
+				Process.spawn_command_line_sync("uname -s -p", out content);
+				if (content == "Linux x86_64")
+					this.arch = "amd64-Linux";
+				else if (content == "Linux i686")
+					this.arch = "i686-Linux";
+				else if (content == "Linux armv7l")
+					this.arch = "armhf-Linux";
+				else if (content == "Linux aarch64")
+					this.arch = "arm64-Linux";
+				else if (content == "Linux armv6l")
+					this.arch = "armel-Linux";
+				else if (content == "Linux armv5tel")
+					this.arch = "armel-Linux";
+				else if (content == "Linux armv5tejl")
+					this.arch = "armel-Linux";
+				else if (content == "Darwin x86_64")
+					this.arch = "amd64-Darwin";
+				else if (content == "Darwin i686")
+					this.arch = "i686-Darwin";
+				else if (content == "Darwin arm64")
+					this.arch = "arm64-Darwin";
+				else
+					this.arch = "any";
+			}
 			this.size_tar = "";
 			this.size_installed = "";
 			this.installed_files = "";
@@ -76,6 +106,8 @@ public struct Package {
 					this.version = value.strip();
 					this.version = /[^0-9.]/.replace(this.version, -1, 0, "");
 				}
+				else if (line.has_prefix("arch"))
+					this.arch = value.strip();
 				else if (line.has_prefix("author"))
 					this.author = value.strip();
 				else if (line.has_prefix("description"))
@@ -127,6 +159,7 @@ public struct Package {
 		fs.printf("binary: %s\n", this.binary);
 		fs.printf("description: %s\n", this.description);
 		fs.printf("dependency: %s\n", this.dependency);
+		fs.printf("arch: %s\n", this.arch);
 		fs.printf("exclude_package: %s\n", this.exclude_package);
 		fs.printf("optional_dependency: %s\n", this.optional_dependency);
 		fs.printf("size_tar: %s\n", this.size_tar);
