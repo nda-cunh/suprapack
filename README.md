@@ -6,6 +6,7 @@
 
 - valac Or C compiler (gcc or clang ...)
 - Glib-2.0  (2.10) >    
+- glib-networking
 
 #### Compiling and install
 
