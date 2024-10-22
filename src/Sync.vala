@@ -2,27 +2,42 @@
 // repo_name (Cosmos)
 // name (suprabear)
 // version (1.2)
+public errordomain SupraListError {
+	FAILED,
+}
+
 public struct SupraList {
-	public SupraList (string repo_name, string line, bool is_local) {
+	private static Regex? _regex = null;
+	public static Regex regex {get {
+		if (_regex == null)
+			_regex = /^(?P<pkgname>(?P<name>[^_]+)[_](?P<version>.*?)([_](?P<arch>.*?))?[.]suprapack)\s*(?P<desc>(.*))/;
+		return _regex;
+	}}
+
+	//42cformatter-v1.0_amd64-Linux.suprapack c formatter for 42 norm
+	public SupraList (string repo_name, string line, bool is_local) throws SupraListError {
 		this.is_local = is_local;
-		//42cformatter-v1.0.suprapack c formatter for 42 norm
-		MatchInfo match_info;
-		var regex = /(?P<pkgname>.*?)[.]suprapack/;
+		MatchInfo info;
 
-		if (regex.match(line, 0, out match_info)) {
+
+		if (regex.match(line, 0, out info)) {
 			this.repo_name = repo_name;
-			pkg_name = match_info.fetch_named("pkgname") + ".suprapack";
 
-			name = pkg_name[0:pkg_name.last_index_of_char ('-')];
-			version = pkg_name[pkg_name.last_index_of_char ('-') + 1 : pkg_name.last_index_of_char ('.')];
-			description = line.offset(pkg_name.length).strip();
+			pkg_name = info.fetch_named("pkgname");
+			name = info.fetch_named("name");
+			version = info.fetch_named("version");
+			arch = info.fetch_named("arch");
+			description = info.fetch_named("desc");
 		}
+		else
+			throw new SupraListError.FAILED("Can't parse line %s", line);
 	}
 	unowned string repo_name;
 	string pkg_name;
 	string name;
 	string version;
 	string description;
+	string arch;
 	bool is_local;
 }
 
@@ -157,13 +172,14 @@ class Sync {
 		}
 
 		/* init List Property package-1.0.suprapack*/
-		var regex = /[a-zA-Z0-9]+[-][a-zA-Z0-9.]+[.]suprapack/;
+		// var regex = /[a-zA-Z0-9]+[-][a-zA-Z0-9.]+[.]suprapack/;
 		foreach (var repo in _repo) {
 			FileUtils.get_contents(repo.list, out contents);
 			foreach (var pkg in contents.split("\n")) {
-				if (regex.match(pkg)) {
-					// print(@"$(pkg) -> $(repo.local)\n");
-					_list += SupraList(repo.name, pkg, repo.local);
+				if (SupraList.regex.match(pkg)) {
+					var lst = SupraList(repo.name, pkg, repo.local);
+					if (Config.is_my_arch(lst.arch))
+						_list += (owned)lst;
 				}
 				else if (pkg != "")
 					warning(pkg);
@@ -219,7 +235,9 @@ class Sync {
 			return list;
 		foreach (var i in list) {
 			if (i.repo_name == repo_name)
+			{
 				result += i;
+			}
 		}
 		return result;
 	}
@@ -252,8 +270,8 @@ class Sync {
 
 	// download a package and return this location
 	string _download (SupraList pkg, Cancellable? cancel = null) {
+		unowned string pkgname = pkg.pkg_name;
 		string pkgdir = @"$(config.cache)/pkg";
-		string pkgname = @"$(pkg.name)-$(pkg.version).suprapack";
 		string output = @"$pkgdir/$pkgname";
 		DirUtils.create_with_parents(pkgdir, 0755);
 

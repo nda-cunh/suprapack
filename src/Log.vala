@@ -16,7 +16,6 @@ public const string ENDCURSOR= "\033[?25h";
 [CCode (cname = "printf", cheader_filename="stdio.h")]
 extern int printf(string str, ...);
 
-
 public void init_message () {
 	Log.set_default_handler((type, level, message)=> {
 		unowned string real_message;
