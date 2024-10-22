@@ -30,7 +30,7 @@ public struct SupraList {
 			description = info.fetch_named("desc");
 		}
 		else
-			throw new SupraListError.FAILED("Can't parse line %s", line);
+			throw new SupraListError.FAILED("Can't parse line %s (%s:%d)", line, Log.FILE, Log.LINE);
 	}
 	unowned string repo_name;
 	string pkg_name;
@@ -145,7 +145,7 @@ class Sync {
 		list = null;
 		/* init Repo property */
 		string contents;
-		var regex_repo = /#\s*(?P<name>[^\s]+)\s*(?P<url>[^\s]+)/;
+		var regex_repo = /(?P<name>[^\s]+)\s*(?P<url>[^\s]+)/;
 		MatchInfo match_info;
 		FileUtils.get_contents(config.repo_list, out contents);
 
@@ -153,14 +153,14 @@ class Sync {
 		foreach (var line in contents.split("\n")) {
 			if (line == "")
 				continue;
-			if (regex_repo.match(line, 0, out match_info)) {
+			if (line.has_prefix("#")) {
+				// is a comment
+			}
+			else if (regex_repo.match(line, 0, out match_info)) {
 				count++;
 				string name = match_info.fetch_named("name");
 				string url = match_info.fetch_named("url");
-				if (url.has_prefix("#")) {
-					// is a comment
-				}
-				else if (!url.has_suffix ("/")) {
+				if (!url.has_suffix ("/")) {
 					warning ("Bad Format in %s/repo.list", config.prefix);
 					printerr(" \033[33;1m%d\033[0m | %s\033[91m/\033[0m\n", count, line);
 					printerr(" %*s | \033[91m%*s %s\033[0m\n\n", count.to_string().length, "", line.length + 1, "^", "~~ need terminate by  '/'");
