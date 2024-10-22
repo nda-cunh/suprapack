@@ -56,7 +56,7 @@ public class RepoInfo : Object{
 	/* fetch the 'list' file  LOCAL or HTTP */
 	public void fetch_list (string url, string output) throws Error {
 		string url_list = url;
-		// message("URL %s", url_list);
+		debug("URL %s %s", url_list, output);
 		if (url.has_prefix ("http")) {
 			url_list += "list";
 			debug("Repository", "FETCH HTTP repository %s", url_list);
@@ -145,7 +145,7 @@ class Sync {
 		list = null;
 		/* init Repo property */
 		string contents;
-		var regex_repo = /(?P<name>[^\s]+)\s*(?P<url>[^\s]+)/;
+		var regex_repo = /#\s*(?P<name>[^\s]+)\s*(?P<url>[^\s]+)/;
 		MatchInfo match_info;
 		FileUtils.get_contents(config.repo_list, out contents);
 
@@ -157,7 +157,10 @@ class Sync {
 				count++;
 				string name = match_info.fetch_named("name");
 				string url = match_info.fetch_named("url");
-				if (!url.has_suffix ("/")) {
+				if (url.has_prefix("#")) {
+					// is a comment
+				}
+				else if (!url.has_suffix ("/")) {
 					warning ("Bad Format in %s/repo.list", config.prefix);
 					printerr(" \033[33;1m%d\033[0m | %s\033[91m/\033[0m\n", count, line);
 					printerr(" %*s | \033[91m%*s %s\033[0m\n\n", count.to_string().length, "", line.length + 1, "^", "~~ need terminate by  '/'");
