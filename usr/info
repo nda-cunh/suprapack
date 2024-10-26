@@ -1,10 +1,11 @@
 name: suprapack
-version: 2.5.3
+version: 2.6.0
 author: nda-cunh
 binary: suprapack
 description: package-manager without root
 dependency: 
+arch: amd64-Linux
 exclude_package: 
 optional_dependency: 
 size_tar: 
-size_installed: 203930
+size_installed: 204781
