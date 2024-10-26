@@ -39,5 +39,6 @@ namespace Repository {
 			}
 			fs.printf("%s %s\n", file, lore);
 		}
+		FileUtils.remove("./info");
 	}
 }

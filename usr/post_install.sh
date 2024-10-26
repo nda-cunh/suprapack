@@ -1,7 +1,7 @@
 #!/bin/sh
 
-SUPRAVIM_REPO='Supravim https://gitlab.com/supraproject/suprastore_repository/-/raw/plugin-supravim/'
-COSMOS_x86_64='Cosmos https://gitlab.com/supraproject/suprastore_repository/-/raw/master/'
+SUPRAVIM_REPO='Supravim https://gitlab.com/supraproject/suprastore_repository/-/raw/master/supravim/'
+COSMOS_x86_64='Cosmos https://gitlab.com/supraproject/suprastore_repository/-/raw/master/cosmos/'
 
 REPO_LIST=$HOME/.local/.suprapack/repo.list
 if [ -f "$REPO_LIST" ]; then

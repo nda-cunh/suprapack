@@ -42,10 +42,11 @@ else
 endif
 
 install: suprapack 
-	mkdir -p usr/bin
-	cp ./suprapack usr/bin/suprapack
-	tar --zstd -cf suprapack.suprapack -C usr .
-	./suprapack install suprapack.suprapack
+	@rm -rf *.suprapack
+	@mkdir -p usr/bin
+	@cp ./suprapack usr/bin/suprapack
+	@./suprapack build usr
+	@./suprapack install suprapack*.suprapack
 
 run: $(NAME) 
 	cp -f suprapack ~/.local/bin/suprapack

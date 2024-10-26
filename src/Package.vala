@@ -52,30 +52,7 @@ public struct Package {
 			this.binary = Utils.get_input("Binary: ", false);
 			this.arch = Utils.get_input("Arch ((default)auto, any, amd64): ");
 			if (this.arch == "" || this.arch == "auto") {
-				string content;
-				Process.spawn_command_line_sync("uname -s -p", out content);
-				if (content == "Linux x86_64")
-					this.arch = "amd64-Linux";
-				else if (content == "Linux i686")
-					this.arch = "i686-Linux";
-				else if (content == "Linux armv7l")
-					this.arch = "armhf-Linux";
-				else if (content == "Linux aarch64")
-					this.arch = "arm64-Linux";
-				else if (content == "Linux armv6l")
-					this.arch = "armel-Linux";
-				else if (content == "Linux armv5tel")
-					this.arch = "armel-Linux";
-				else if (content == "Linux armv5tejl")
-					this.arch = "armel-Linux";
-				else if (content == "Darwin x86_64")
-					this.arch = "amd64-Darwin";
-				else if (content == "Darwin i686")
-					this.arch = "i686-Darwin";
-				else if (content == "Darwin arm64")
-					this.arch = "arm64-Darwin";
-				else
-					this.arch = "any";
+				this.arch = Utils.get_arch();
 			}
 			this.size_tar = "";
 			this.size_installed = "";
@@ -128,6 +105,9 @@ public struct Package {
 			if ("[FILES]" in contents) {
 				value = contents.offset(contents.index_of("[FILES]") + 8);
 				installed_files = value;
+			}
+			if (this.arch == "") {
+				this.arch = Utils.get_arch();
 			}
 			if (this.binary == "")
 				this.binary = this.name;
