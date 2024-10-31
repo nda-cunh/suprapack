@@ -379,32 +379,28 @@ namespace Utils {
 		return envp;
 	}
 
-	public unowned string get_arch () throws Error {
-		string content;
-		Process.spawn_command_line_sync("uname -s -p", out content);
-		content = content.strip();
-		if (content == "Linux x86_64")
-			return "amd64-Linux";
-		else if (content == "Linux i686")
-			return "i686-Linux";
-		else if (content == "Linux armv7l")
-			return "armhf-Linux";
-		else if (content == "Linux aarch64")
-			return "arm64-Linux";
-		else if (content == "Linux armv6l")
-			return "armel-Linux";
-		else if (content == "Linux armv5tel")
-			return "armel-Linux";
-		else if (content == "Linux armv5tejl")
-			return "armel-Linux";
-		else if (content == "Darwin x86_64")
-			return "amd64-Darwin";
-		else if (content == "Darwin i686")
-			return "i686-Darwin";
-		else if (content == "Darwin arm64")
-			return "arm64-Darwin";
-		else
-			return "any";
-	}
+	public unowned string get_arch () {
+		utsname name;
+		utsname.uname(out name);
 
+		// Linux
+		if (name.sysname == "Linux") {
+			if (name.machine == "x86_64")
+				return "amd64-Linux";
+			if (name.machine == "x86")
+				return "x86-Linux";
+			if (name.machine == "i686")
+				return "i686-Linux";
+		}
+		// Apple Darwin
+		if (name.sysname == "Darwin") {
+			if (name.machine == "arm")
+				return "arm64-Darwin";
+			if (name.machine == "i386")
+				return "i386-Darwin";
+			if (name.machine == "x86_64")
+				return "amd64-Darwin";
+		}
+		return "any";
+	}
 }

@@ -13,6 +13,7 @@ sources = [
   files('Repository.vala'),
   files('Sync.vala'),
   files('Utils.vala'),
+  files('uname.vapi')
 ]
 
 executable('suprapack',
