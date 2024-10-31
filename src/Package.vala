@@ -135,13 +135,13 @@ public struct Package {
 			error(@"cant open $info_file");
 		fs.printf("name: %s\n", this.name);
 		fs.printf("version: %s\n", this.version);
+		fs.printf("arch: %s\n", this.arch);
 		fs.printf("author: %s\n", this.author);
-		fs.printf("binary: %s\n", this.binary);
 		fs.printf("description: %s\n", this.description);
 		fs.printf("dependency: %s\n", this.dependency);
-		fs.printf("arch: %s\n", this.arch);
-		fs.printf("exclude_package: %s\n", this.exclude_package);
 		fs.printf("optional_dependency: %s\n", this.optional_dependency);
+		fs.printf("exclude_package: %s\n", this.exclude_package);
+		fs.printf("binary: %s\n", this.binary);
 		fs.printf("size_tar: %s\n", this.size_tar);
 		fs.printf("size_installed: %s\n", this.size_installed);
 	}
