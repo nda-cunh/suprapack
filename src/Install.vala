@@ -1,5 +1,6 @@
 private const int SIZE_TMP_DIR = 22;
 
+// List all files in a directory (like `ls -R`)
 private void list_file_dir(string emp_dir, ref List<string> list) {
 	try {
 		var dir = Dir.open(emp_dir);
@@ -20,7 +21,7 @@ private void list_file_dir(string emp_dir, ref List<string> list) {
 	}
 }
 
-// copy files to PREFIX ~/.local
+// copy files to PREFIX (~/.local)
 private void install_files(List<string> list, int len) {
 	const string install = BOLD + YELLOW + "[Install]" + NONE + " ";
 	unowned string basename;
@@ -56,6 +57,7 @@ private void install_files(List<string> list, int len) {
 }
 
 
+// Create the package information in .suprapack/name_pkg/info
 private void post_install(List<string> list, int len, ref Package pkg) {
 	string packinfo = @"$(config.cache)/$(pkg.name)";
 	string info_file = @"$packinfo/info";
