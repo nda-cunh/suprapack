@@ -172,6 +172,8 @@ private void force_suprapack_update () throws Error {
 	}
 }
 
+
+
 public void install() throws Error {
 	force_suprapack_update();
 
@@ -186,10 +188,10 @@ public void install() throws Error {
 
 	int name_max = 0;
 	int version_max = 0;
-	foreach (var i in config.queue_pkg) {
+	foreach (unowned var i in config.queue_pkg) {
 
-		foreach (var exclude in i.exclude_package.split(" ")) {
-			exclude = exclude.strip();
+		foreach (unowned var exclude in i.exclude_package.split(" ")) {
+			exclude = exclude._strip();
 			if (Query.is_exist(exclude)) {
 				print_info(@"Impossible to install '$(i.name)' because '$(exclude)' is in conflict with him", "Conflict", "\033[31;1m");
 				print_info(@"please choose if you want to uninstall '$(exclude)' [y/N]", "Conflict", "\033[31;1m");
@@ -214,7 +216,7 @@ public void install() throws Error {
 	int64 size_installed = 0;
 	print("Package (%u)\n\n", config.queue_pkg.length());
 
-	foreach (var i in config.queue_pkg) {
+	foreach (unowned var i in config.queue_pkg) {
 		string version = i.version;
 		if (Query.is_exist(i.name)) {
 			version = Query.get_from_pkg(i.name).version;
@@ -255,26 +257,26 @@ public void install() throws Error {
 			}
 		}
 		/* add dependency in  .required_by file */
-		foreach (var i in config.queue_pkg) {
-			//i == sfml
-			foreach (var deps in i.dependency.split(" ")) {
+		foreach (unowned var i in config.queue_pkg) {
+			// Dependency of the package
+			foreach (unowned var deps in i.dependency.split(" ")) {
 				Query.add_package_to_required_by(i.name, deps);
 			}
 		}
-
-
 	}
 	else {
 		throw new ErrorSP.CANCEL("Cancelling...");
 	}
 }
 
-//* Add a package in Config.queue *//
-void prepare_install(string name_search, string name_repo = "") throws Error{
+//* Add one package in Config.queue *//
+private void prepare_install(string name_search, string name_repo = "") throws Error{
 	if (name_search == "")
 		return;
+	// Check and update if 'Suprapack' have the last version
 	force_suprapack_update();
 
+	// Check if the package is a local file (file.suprapack)
 	if (name_search.has_suffix(".suprapack")) {
 		if (!FileUtils.test(name_search, FileTest.EXISTS))
 			throw new ErrorSP.ACCESS (@"$name_search not found");
@@ -284,24 +286,29 @@ void prepare_install(string name_search, string name_repo = "") throws Error{
 	}
 
 
+	// get all package with the same name in all repo or in a specific repo
 	SupraList[] queue = {};
 	var list = Sync.get_list_package (name_repo);
-	foreach (var pkg in list) {
+	foreach (unowned var pkg in list) {
 		if (pkg.name == name_search) {
 			queue += pkg;
 		}
 	}
 
 	SupraList pkg;
+
+	// if no package found
 	if (queue.length == 0) {
 		if (Query.is_exist(name_search) == true) {
 			throw new ErrorSP.ACCESS(@"Can't found $name_search but exist in local");
 		}
 		throw new ErrorSP.ACCESS(@"$(name_search) not found");
 	}
+	// if only one package found
 	else if (queue.length == 1){
 		pkg = queue[0];
 	}
+	// if multiple package found
 	else {
 		// if Force search auto best package
 		if (config.force == true) {
@@ -324,33 +331,73 @@ void prepare_install(string name_search, string name_repo = "") throws Error{
 		}
 	}
 
+	// Download the package
 	var output = Sync.download(pkg);
+	// Add the package in the queue	
 	add_queue_list(pkg, output);
 }
 
-void add_queue_list(SupraList pkg, string output) throws Error {
+// Add package in the queue
+// output is the path of the file package (/tmp/lua_5.4.7_amd64-Linux.suprapack)
+// pkg is the package object with all the info of the package
+private void add_queue_list(SupraList pkg, string output) throws Error {
 
+	// get the info file of the package
 	Process.spawn_command_line_sync(@"tar -xf $(output) ./info");
+	// Create the package object with the info file
 	Package pkgtmp = Package.from_file("./info");
 	FileUtils.unlink("./info");
 	pkgtmp.output = output;
 	pkgtmp.repo = pkg.repo_name;
 
+	// Add the package in the queue
 	config.queue_pkg.append(pkgtmp);
+
+	// Add alls dependencies of the package in the queue
 	try {
+		// Add Dependency in QUEUE
 		foreach (var i in pkgtmp.dependency.split(" ")) {
+			// skip if the package is already in the queue
 			if (config.check_if_in_queue(i)) {
 				continue;
 			}
+			
+			// if the package is ever installed don't add it in the queue
+			// if the force option is not set, add only if the package have an update 
 			if (Query.is_exist(i) && config.force == false) {
 				if (Sync.check_update(i))
 					prepare_install(i);
 				continue;
 			}
+			// if `force` option is set, add it
 			else
 				prepare_install(i);
 		}
-	} catch (Error e) {
+		// Add Optional Dependency in QUEUE
+		foreach (var i in pkgtmp.optional_dependency.split(" ")) {
+			// skip if the package is already in the queue
+			if (config.check_if_in_queue(i)) {
+				continue;
+			}
+			// if the package is not found in repository skip it because it's optional
+			if (Sync.exist(i) == false) {
+				print_info(@"\033[95m Optional Dependency $i not found\033[0m", "Skip");
+				continue;
+			}
+			// if the package is ever installed don't add it in the queue
+			// if the force option is not set, add only if the package have an update
+			if (Query.is_exist(i) && config.force == false) {
+				if (Sync.check_update(i))
+					prepare_install(i);
+				continue;
+			}
+			// if `force` option is set, add it
+			else
+				prepare_install(i);
+		}
+	}
+	catch (Error e)
+	{
 		throw new ErrorSP.FAILED("Dependency of %s -> %s", pkg.name, e.message);
 	}
 }
