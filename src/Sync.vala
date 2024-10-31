@@ -200,6 +200,17 @@ class Sync {
 		throw new ErrorSP.FAILED(@"Cant found $name_pkg");
 	}
 
+	public static bool exist(string package_name) {
+		var pkg_list = Sync.default()._get_list_package();
+		foreach (unowned var pkg in pkg_list) {
+			if (pkg.name == package_name) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+
 	// return true if need update else return false
 	public static bool check_update(string package_name) throws Error{
 		try {
