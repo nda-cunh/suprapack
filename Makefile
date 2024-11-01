@@ -14,7 +14,8 @@ SRC =	src/main.vala \
 		src/Sync.vala \
 		src/Install.vala \
 		src/Package.vala \
-		src/Config.vala
+		src/Config.vala \
+		src/uname.vapi
 
 all: install 
 
