@@ -283,7 +283,7 @@ bool cmd_search(string []av) throws Error {
 		try {
 			var regex = new Regex(av[2], RegexCompileFlags.OPTIMIZE);
 			foreach(var i in list) {
-				if (regex.match(i.name) || regex.match(i.version))
+				if (regex.match(i.name) || regex.match(i.version) || regex.match(i.description))
 					print_search(ref i, (i.name in installed));
 			}
 		}
@@ -307,6 +307,7 @@ bool cmd_run(string []av, bool is_shell = false) throws Error {
 	}
 
 	string []av_binary;
+
 	if (config.force == false) {
 		var pkg = Query.get_from_pkg(av[2]);
 		if (pkg.binary.index_of_char('/') == -1)
