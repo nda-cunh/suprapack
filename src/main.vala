@@ -124,9 +124,9 @@ public class Main : Object {
 				Environment.set_variable ("GIO_MODULE_DIR", "/usr/lib/x86_64-linux-gnu/gio/modules", true);
 			else {
 				if (Environment.get_variable("GIO_MODULE_DIR") == null) {
-					warning ("gio module not found\n");
-					warning ("try install glib-networking\n");
-					warning ("set GIO_MODULE_DIR to modules directory\n");
+					warning ("gio module not found");
+					warning ("try install glib-networking");
+					warning ("set GIO_MODULE_DIR to modules directory");
 				}
 			}
 		}
