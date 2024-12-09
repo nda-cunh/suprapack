@@ -78,6 +78,7 @@ private void post_install(List<string> list, int len, ref Package pkg) {
 
 private void script_pre_install(string dir) throws Error {
 	var filename = @"$dir/pre_install.sh";
+	FileUtils.chmod(filename, 0777);
 	if (FileUtils.test(filename, FileTest.EXISTS | FileTest.IS_EXECUTABLE)) {
 		if (config.show_script == true && config.allays_yes == false) {
 			string contents;
@@ -95,6 +96,7 @@ private void script_pre_install(string dir) throws Error {
 
 private void script_post_install(string dir) throws Error {
 	var filename = @"$dir/post_install.sh";
+	FileUtils.chmod(filename, 0777);
 	if (FileUtils.test(filename, FileTest.EXISTS | FileTest.IS_EXECUTABLE)) {
 		if (config.show_script == true && config.allays_yes == false) {
 			string contents;
