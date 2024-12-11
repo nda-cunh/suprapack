@@ -1,6 +1,6 @@
 name: suprapack
-version: 2.7.1
-arch: amd64-Linux
+version: 2.7.2
+arch: 
 author: nda-cunh
 description: package-manager without root
 dependency: 
@@ -8,4 +8,4 @@ optional_dependency:
 exclude_package: 
 binary: suprapack
 size_tar: 
-size_installed: 208965
+size_installed: 2675422

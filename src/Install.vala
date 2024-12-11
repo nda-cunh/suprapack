@@ -7,7 +7,7 @@ private void list_file_dir(string emp_dir, ref List<string> list) {
 		unowned string it;
 		while ((it = dir.read_name()) != null) {
 			if (emp_dir.length == SIZE_TMP_DIR) {
-				if (it == "info" || it == "pre_install.sh" || it == "post_install.sh" || it == "uninstall")
+				if (it == "info" || it == "pre_install.sh" || it == "post_install.sh" || it == "uninstall" || it == "pre_install" || it == "post_install")
 					continue;
 			}
 			string name = @"$emp_dir/$it";
@@ -76,40 +76,33 @@ private void post_install(List<string> list, int len, ref Package pkg) {
 	}
 }
 
-private void script_pre_install(string dir) throws Error {
-	var filename = @"$dir/pre_install.sh";
+private bool run_post_pre_script (string dir, string filename, string print_name) throws Error {
 	FileUtils.chmod(filename, 0777);
 	if (FileUtils.test(filename, FileTest.EXISTS | FileTest.IS_EXECUTABLE)) {
 		if (config.show_script == true && config.allays_yes == false) {
 			string contents;
 			FileUtils.get_contents(filename, out contents);
-			print("[PreInstall] {\n%s\n}\n", contents);
+			print("[%s] {\n%s\n}\n", print_name, contents);
 			if (Utils.stdin_bool_choose_true("Continue ? [Y/n]") == false)
 				throw new ErrorSP.ACCESS("you refused to execute the script.");
 		}
-		print_info(null, "Pre Install");
+		print_info(null, print_name);
 		var envp = Utils.prepare_envp(dir);
 		if (Utils.run({filename}, envp) != 0)
 			throw new ErrorSP.FAILED("non zero exit code of pre installation script");
+		return true;
 	}
+	return false;
+}
+
+private void script_pre_install(string dir) throws Error {
+	if (run_post_pre_script(dir, @"$dir/pre_install", "Pre Install") == false)
+		run_post_pre_script(dir, @"$dir/pre_install.sh", "Pre Install");
 }
 
 private void script_post_install(string dir) throws Error {
-	var filename = @"$dir/post_install.sh";
-	FileUtils.chmod(filename, 0777);
-	if (FileUtils.test(filename, FileTest.EXISTS | FileTest.IS_EXECUTABLE)) {
-		if (config.show_script == true && config.allays_yes == false) {
-			string contents;
-			FileUtils.get_contents(filename, out contents);
-			print("[PostInstall] {\n%s\n}\n", contents);
-			if (Utils.stdin_bool_choose_true("Continue ? [Y/n]") == false)
-				throw new ErrorSP.ACCESS("you refused to execute the script.");
-		}
-		var envp = Utils.prepare_envp(dir);
-		print_info(null, "Post Install");
-		if (Utils.run({filename}, envp) != 0)
-			throw new ErrorSP.FAILED("non zero exit code of pre installation script");
-	}
+	if (run_post_pre_script(dir, @"$dir/post_install", "Post Install") == false)
+		run_post_pre_script(dir, @"$dir/post_install.sh", "Post Install");
 }
 
 // install package suprapack
