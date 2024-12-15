@@ -120,6 +120,7 @@ public void install_suprapackage(string suprapack) throws Error {
 	if (Utils.run_silent({"tar", "-xf", suprapack, "-C", tmp_dir}) != 0)
 		throw new ErrorSP.FAILED(@"unable to decompress package\npackage => $(suprapack)");
 
+	debug ("Extracted in %s/info (%s)", tmp_dir, suprapack);
 	var pkg = Package.from_file(@"$tmp_dir/info");
 
 	/* Pre Install script launch */
@@ -339,6 +340,7 @@ private void prepare_install(string name_search, string name_repo = "") throws E
 // pkg is the package object with all the info of the package
 private void add_queue_list(SupraList pkg, string output) throws Error {
 
+	debug ("Add in queue: %s", pkg.name);
 	// get the info file of the package
 	Process.spawn_command_line_sync(@"tar -xf $(output) ./info");
 	// Create the package object with the info file
