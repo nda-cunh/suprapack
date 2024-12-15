@@ -112,7 +112,7 @@ public struct Package {
 			if (this.binary == "")
 				this.binary = this.name;
 		} catch (Error e) {
-			error(e.message);
+			error("%s (%s)", e.message, info_file);
 		}
 	}
 
