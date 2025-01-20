@@ -1,3 +1,4 @@
+# VERSION = sed -s "s/version:.*$/version: $VERSION/" usr/info -i
 NAME =	suprapack_dev
 LDFLAGS=-X -O2 --pkg=gio-2.0 -X -w --enable-experimental
 
@@ -15,15 +16,14 @@ SRC =	src/main.vala \
 		src/Install.vala \
 		src/Package.vala \
 		src/Config.vala \
-		src/uname.vapi
 
 all: install 
 
-make_bootstrap:
+make_bootstrap: src/uname.vapi
 	rm -rf bootstrap.tar.gz
-	valac $(SRC) $(LDFLAGS) -C 
-	mv src/*.c .
-	tar -cf bootstrap.tar.gz *.c
+	valac $(SRC) src/uname.vapi $(LDFLAGS) -C 
+	# mv src/*.c .
+	tar -cf bootstrap.tar.gz src/*.c
 
 bootstrap:
 	tar -xf bootstrap.tar.gz -C . 
@@ -39,7 +39,7 @@ suprapack: $(SRC)
 ifeq ($(shell command -v valac 2> /dev/null),)
 	@$(MAKE) --no-print-directory bootstrap;
 else
-	valac $(SRC) $(LDFLAGS) -o suprapack 
+	valac $(SRC) src/uname.vapi $(LDFLAGS) -o suprapack 
 endif
 
 install: suprapack 
