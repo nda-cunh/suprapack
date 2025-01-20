@@ -172,15 +172,16 @@ export fpath=(%1$s/bin $fpath)
 	public List<Package?>	queue_pkg;
 	public unowned string[] cmd;
 
-	public bool allays_yes	{get;set;default=false;}
-	public bool force		{get; set; default=false;}
-	public bool supraforce	{get; set; default=false;}
-	public string prefix	{get; private set; default=@"$HOME/.local";}
-	public string cache		{get; private set;}
-	public string config	{get; private set;}
-	public string repo_list {get; private set;}
-	public string strap		{get; private set;}
-	public bool is_cached	{get; private set; default=false;}
-	public bool show_script {get; private set; default=false;}
-	public bool want_remove {get; set; default=false;}
+	public bool allays_yes		{get;set;default=false;}
+	public bool force			{get; set; default=false;}
+	public bool supraforce		{get; set; default=false;}
+	public bool use_fakeroot	{get; set; default=true;}
+	public string prefix		{get; private set; default=@"$HOME/.local";}
+	public string cache			{get; private set;}
+	public string config		{get; private set;}
+	public string repo_list 	{get; private set;}
+	public string strap			{get; private set;}
+	public bool is_cached		{get; private set; default=false;}
+	public bool show_script 	{get; private set; default=false;}
+	public bool want_remove 	{get; set; default=false;}
 }

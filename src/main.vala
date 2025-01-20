@@ -7,6 +7,7 @@ public class Main : Object {
 	public static string? prefix = null;
 	public static bool refresh = false;
 	public static bool force = false;
+	public static bool no_fakeroot = false;
 	public static bool yes = false;
 	public static bool supraforce = false;
 	public static string? strap = null;
@@ -17,6 +18,7 @@ public class Main : Object {
 		{ "force", 'f', OptionFlags.NONE, OptionArg.NONE, ref force, "force the operation", null },
 		{ "yes", 'y', OptionFlags.NONE, OptionArg.NONE, ref yes, "answer yes to all questions", null },
 		{ "supraforce", 's', OptionFlags.NONE, OptionArg.NONE, ref supraforce, "force the operation", null },
+		{ "no_fakeroot", '\0', OptionFlags.NONE, OptionArg.NONE, ref no_fakeroot, "don't build package with fakeroot", null },
 		{ "strap", '\0', OptionFlags.NONE, OptionArg.STRING, ref strap, "like pacstrap", null },
 		{ null }
 	};
@@ -47,6 +49,7 @@ public class Main : Object {
 		config.force = force;
 		config.allays_yes = yes;
 		config.supraforce = supraforce;
+		config.use_fakeroot = !no_fakeroot;
 
 
 		unowned string av1 = commands[1];
