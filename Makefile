@@ -2,6 +2,7 @@
 NAME =	suprapack_dev
 LDFLAGS=-X -O2 --pkg=gio-2.0 -X -w --enable-experimental
 
+VAPI =	src/uname.vapi
 SRC =	src/main.vala \
 		src/Uninstall.vala \
 		src/Run.vala \
@@ -21,8 +22,7 @@ all: install
 
 make_bootstrap: src/uname.vapi
 	rm -rf bootstrap.tar.gz
-	valac $(SRC) src/uname.vapi $(LDFLAGS) -C 
-	# mv src/*.c .
+	valac $(SRC) $(VAPI) $(LDFLAGS) -C 
 	tar -cf bootstrap.tar.gz src/*.c
 
 bootstrap:
@@ -52,9 +52,5 @@ install: suprapack
 run: $(NAME) 
 	cp -f suprapack ~/.local/bin/suprapack
 	suprapack search 
-	@# ./suprapack add suprapack --force 
-	@#./$(NAME) uninstall nodejs 
-	@# ./$(NAME) update suprapatate 
-	@# ./$(NAME) 
 
 .PHONY: bootstrap valac install run make_bootstrap all
