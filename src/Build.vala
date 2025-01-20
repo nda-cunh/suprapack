@@ -65,12 +65,18 @@ namespace Build {
 			FileUtils.chmod(@"$usr_dir/uninstall", 0777);
 		if (FileUtils.test(@"$usr_dir/post_install.sh", FileTest.EXISTS))
 			FileUtils.chmod(@"$usr_dir/post_install.sh", 0777);
-		// compress the package
 		var name_pkg = @"$(pkg.name)_$(pkg.version)_$(pkg.arch)";
 		var loop = new MainLoop();
-		var thread = new Thread<void>(null, ()=> {
-			if (Utils.run_silent({"fakeroot", "tar", "--zstd", "-cf", @"$(name_pkg).suprapack", "-C", usr_dir, "."}) != 0)
-				error(@"unable to create package\npackage => $(name_pkg)");
+		var thread = new Thread<void> (null, () => {
+			// compress the package with fakeroot or not
+			if (config.use_fakeroot == true) {
+				if (Utils.run_silent({"fakeroot", "tar", "--zstd", "-cf", @"$(name_pkg).suprapack", "-C", usr_dir, "."}) != 0)
+					error(@"unable to create package\npackage => $(name_pkg)");
+			}
+			else {
+				if (Utils.run_silent({"tar", "--zstd", "-cf", @"$(name_pkg).suprapack", "-C", usr_dir, "."}) != 0)
+					error(@"unable to create package\npackage => $(name_pkg)");
+			}
 			loop.quit();
 		});
 		loading.begin();

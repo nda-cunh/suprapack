@@ -46,7 +46,7 @@ install: suprapack
 	@rm -rf *.suprapack
 	@mkdir -p usr/bin
 	@cp ./suprapack usr/bin/suprapack
-	@./suprapack build usr
+	@./suprapack build usr --no_fakeroot
 	@./suprapack install suprapack*.suprapack
 
 run: $(NAME) 
