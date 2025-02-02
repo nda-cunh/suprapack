@@ -9,6 +9,7 @@ public class Main : Object {
 	public static bool force = false;
 	public static bool no_fakeroot = false;
 	public static bool yes = false;
+	public static bool simple_print = false;
 	public static bool supraforce = false;
 	public static string? strap = null;
 
@@ -17,6 +18,7 @@ public class Main : Object {
 		{ "refresh", 'r', OptionFlags.NONE, OptionArg.NONE, ref refresh, "refresh the list of packages", null },
 		{ "force", 'f', OptionFlags.NONE, OptionArg.NONE, ref force, "force the operation", null },
 		{ "yes", 'y', OptionFlags.NONE, OptionArg.NONE, ref yes, "answer yes to all questions", null },
+		{ "simple-print", '\0', OptionFlags.NONE, OptionArg.NONE, ref simple_print, "simple print", null },
 		{ "supraforce", 's', OptionFlags.NONE, OptionArg.NONE, ref supraforce, "force the operation", null },
 		{ "no_fakeroot", '\0', OptionFlags.NONE, OptionArg.NONE, ref no_fakeroot, "don't build package with fakeroot", null },
 		{ "strap", '\0', OptionFlags.NONE, OptionArg.STRING, ref strap, "like pacstrap", null },
@@ -49,6 +51,7 @@ public class Main : Object {
 		config.force = force;
 		config.allays_yes = yes;
 		config.supraforce = supraforce;
+		config.simple_print = simple_print;
 		config.use_fakeroot = !no_fakeroot;
 
 
