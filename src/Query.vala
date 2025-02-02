@@ -20,7 +20,12 @@ namespace Query{
 
 			if (calc <= 0)
 				calc = 1;
-			stdout.printf("%s[%u/%u] %s%*c\r", remove, i+1, lst.length, lst[i], calc, ' ');
+			if (config.simple_print) {
+				uint percent = ((i+1) * 100) / lst.length;
+				stdout.printf("remove: [%u] %s\n", percent, lst[i]);
+			}
+			else
+				stdout.printf("%s[%u/%u] %s%*c\r", remove, i+1, lst.length, lst[i], calc, ' ');
 			g_last_size = file_len;
 			if (lst[i].has_prefix(config.prefix))
 				FileUtils.unlink(lst[i]);

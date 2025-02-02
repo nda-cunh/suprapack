@@ -176,6 +176,7 @@ export fpath=(%1$s/bin $fpath)
 	public bool force			{get; set; default=false;}
 	public bool supraforce		{get; set; default=false;}
 	public bool use_fakeroot	{get; set; default=true;}
+	public bool simple_print	{get; set; default=false;}
 	public string prefix		{get; private set; default=@"$HOME/.local";}
 	public string cache			{get; private set;}
 	public string config		{get; private set;}

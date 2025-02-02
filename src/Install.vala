@@ -46,7 +46,13 @@ private void install_files(List<string> list, int len) {
 
 				if (calc <= 0)
 					calc = 1;
-				stdout.printf("%s[%u/%u] %s%*c\r", install, ++nb, list_length, basename, calc, ' ');
+				++nb;
+				if (config.simple_print) {
+					uint percent = (nb * 100) / list_length;
+					stdout.printf("install: [%u] %s\n", percent, basename);
+				}
+				else
+					stdout.printf("%s[%u/%u] %s%*c\r", install, nb, list_length, basename, calc, ' ');
 				g_last_size = file_len;
 			}
 		}
@@ -150,7 +156,7 @@ public void install_suprapackage(string suprapack) throws Error {
 	}
 
 	// remove useless tmp dir
-	if(Utils.run_silent({"rm", "-rf", tmp_dir}) != 0)
+	if (Utils.run_silent({"rm", "-rf", tmp_dir}) != 0)
 		new OptionError.FAILED(@"unable to remove directory\ndirectory => $(tmp_dir)");
 }
 
@@ -355,7 +361,7 @@ private void add_queue_list(SupraList pkg, string output) throws Error {
 	// Add alls dependencies of the package in the queue
 	try {
 		// Add Dependency in QUEUE
-		foreach (var i in pkgtmp.dependency.split(" ")) {
+		foreach (unowned var i in pkgtmp.dependency.split(" ")) {
 			// skip if the package is already in the queue
 			if (config.check_if_in_queue(i)) {
 				continue;

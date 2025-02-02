@@ -206,6 +206,10 @@ namespace Utils {
 	void print_download(string name_file, double actual, double max) {
 		const double MIB = 1048576.0;
 		double percent = (100 * actual) / max;
+		if (config.simple_print) {
+			print ("download: [%u]\n", (uint)percent);
+			return ;
+		}
 		uint8[] progress_bar = "[                    ] \0".data;
 
 		if (max <= 0.0) {
@@ -222,30 +226,30 @@ namespace Utils {
 			print("\r\n");
 	}
 
-	public void download (string url, string? output = null, bool no_print = false, bool rec = false, Cancellable? cancel = null)throws Error {
+	public void download (string url, string? output = null, bool no_print = false, bool rec = false, Cancellable? cancel = null) throws Error {
 		var loop = new MainLoop ();
 
 		var s = new Unix.SignalSource(2);
-		s.set_callback(()=> {
-				print("\n");
-				warning("Cancel by Ctrl + C (SIGINT) signal");
-				cancel.cancel ();
-				return false;
-				});
+		s.set_callback( () => {
+			print("\n");
+			warning("Cancel by Ctrl + C (SIGINT) signal");
+			cancel.cancel ();
+			return false;
+		});
 		s.attach(GLib.MainContext.default());
 
-		_download.begin(url, output, no_print, rec, cancel, ()=> {
-				if (cancel.is_cancelled ())
+		_download.begin(url, output, no_print, rec, cancel, () => {
+			if (cancel.is_cancelled ())
 				FileUtils.remove (output);
-				loop.quit ();
-				});
+			loop.quit ();
+		});
 		loop.run ();
 		s.destroy ();
 		if (cancel.is_cancelled ())
 			throw new HttpError.CANCEL("the download is cancel");
 	}
 
-	public async void _download (string url, string? output = null, bool no_print = false, bool rec = false, Cancellable? cancel = null)throws Error {
+	public async void _download (string url, string? output = null, bool no_print = false, bool rec = false, Cancellable? cancel = null) throws Error {
 		const size_t SIZE_BUFFER = 16777216;
 		unowned string	host;
 		unowned string	query;
@@ -253,7 +257,7 @@ namespace Utils {
 		int				port;
 
 		/* Parse Url */
-		Uri uri = Uri.parse(url, UriFlags.SCHEME_NORMALIZE | UriFlags.ENCODED);
+		Uri uri = Uri.parse (url, UriFlags.SCHEME_NORMALIZE | UriFlags.ENCODED);
 		host = uri.get_host ();
 		query = uri.get_query ();
 		path = uri.get_path ();
