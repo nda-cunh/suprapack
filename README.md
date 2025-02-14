@@ -116,13 +116,17 @@ you can add a repository with NAME and the url/directory of the repo
 ## `~/.config/suprapack/user.conf`
 
 is_cached:true          # if true suprapack keep suprapack at `~/.config/suprapack/pkg`
+
 show_script:false       # show script pre and post install before installing
+
 prefix:~/.local         # change your prefix installation like '/' or other
 
 ## Arguments
 
 --yes           # say yes everytime ! dont tell this ([Y/n])
+
 --force         # force reinstall ([Y/n])
+
 --prefix        # change the prefix temporary ([Y/n])
 
 
