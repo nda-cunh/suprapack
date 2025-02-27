@@ -193,11 +193,11 @@ bool cmd_uninstall(string []av) throws Error {
 }
 
 bool cmd_list_files(string []av) {
-	foreach (var i in av[2:av.length]) {
+	foreach (unowned var i in av[2:av.length]) {
 		var pkg = Query.get_from_pkg(i);
 		print_info(@"$(pkg.name) $(pkg.version)", "List");
 		var lst = pkg.get_installed_files();
-		foreach (var file in lst) {
+		foreach (unowned var file in lst) {
 			print("%s\n", file);
 		}
 	}
@@ -211,7 +211,7 @@ bool cmd_list(string []av) {
 	int width_version = 0;
 	try {
 		var regex = new Regex(av[2] ?? "", RegexCompileFlags.EXTENDED);
-		foreach (var i in installed) {
+		foreach (unowned var i in installed) {
 			if (regex.match(i.name) || regex.match(i.version) || regex.match(i.description) || regex.match(i.author)) {
 				if (i.name.length > width)
 					width = i.name.length;
@@ -221,10 +221,13 @@ bool cmd_list(string []av) {
 		}
 		++width_version;
 		++width;
-		foreach (var i in installed) {
+		foreach (unowned var i in installed) {
 			if (regex.match(i.name) || regex.match(i.version) || regex.match(i.description) || regex.match(i.author)) {
-				print(@"%s%s%-*s %s%-*s%s", BOLD, WHITE, width, i.name, GREEN, width_version, i.version, NONE);
-				print("%s%s%s\n", COM, i.description, NONE);
+				uint8 buffer[32];
+				unowned var size = Utils.convertBytePrint(uint64.parse(i.size_installed), buffer);
+				const string format = BOLD + WHITE + "%-*s " + GREEN + " %-*s" + NONE; 
+				print(format, width, i.name, width_version, i.version, size);
+				print("%9s" + COM + " %s" + NONE + "\n", size, i.description);
 			}
 		}
 	} catch (Error e) {

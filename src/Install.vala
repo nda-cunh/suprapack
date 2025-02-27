@@ -135,7 +135,8 @@ public void install_suprapackage(string suprapack) throws Error {
 		Query.uninstall(pkg.name);
 	}
 
-	print_info(@"Installation de $(CYAN)$(pkg.name) $(pkg.version)$(NONE) par $(pkg.author)");
+	//TODO optimisation of the print
+	print_info("Installation de" + CYAN + @" $(pkg.name) $(pkg.version)" + NONE + @" par $(pkg.author)");
 
 	var list = new List<string>();
 	list_file_dir(tmp_dir, ref list);
@@ -226,22 +227,24 @@ public void install() throws Error {
 			version = Query.get_from_pkg(i.name).version;
 		}
 		int n = 0;
-		n += printf("  %s%s%s%s/%-*s %s%s", BOLD, PURPLE, i.repo, NONE, name_max - i.repo.length, i.name, BOLD, GREEN);
-		n += printf("%-*s%s", version_max, version, NONE);
+		n += printf("  " + BOLD + PURPLE +"%s" + NONE + "/%-*s " + BOLD + GREEN, i.repo, name_max - i.repo.length, i.name);
+		n += printf("%-*s" + NONE, version_max, version);
 		if (version != i.version)
-			n += printf(" --> %s%s%s", BOLD, YELLOW, i.version);
-		n+= printf("%s\n", NONE);
+			n += printf(" --> " + BOLD + YELLOW + "%s", i.version);
+		n += printf(NONE + "\n");
 		size_installed += int64.parse(i.size_installed);
 	}
 
-	print(@"\nTotal Installed Size:  $(BOLD)%.2f MiB$(NONE)\n", (double)size_installed / (1 << 20));
+	uint8 buffer[32];
+	Utils.convertBytePrint   (size_installed, buffer);
+	print(@"\nTotal Installed Size:  " + BOLD + "%s" + NONE + "\n", (string)buffer);
 
 
 	unowned var first_package = config.queue_pkg.nth_data(0).name;
 	config.queue_pkg.reverse();
 	if (config.allays_yes || Utils.stdin_bool_choose_true(":: Proceed with installation [Y/n] ")) {
 		print("\n");
-		foreach (var i in config.queue_pkg) {
+		foreach (unowned var i in config.queue_pkg) {
 			if (config.force == true || i.name == first_package) {
 				install_suprapackage(i.output);
 			}

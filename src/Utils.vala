@@ -407,4 +407,24 @@ namespace Utils {
 		}
 		return "any";
 	}
+
+	[CCode (cheader_filename = "stdio.h", cname="sprintf")]
+	[PrintfFormat]
+	private extern int sprintf(uint8* str, string format, ...);
+
+	public unowned string convertBytePrint(uint64 b, uint8* resultat) {
+		double ko = b / 1024.0;
+		double mo = ko / 1024.0;
+		double go = mo / 1024.0;
+
+		if (ko < 1000) {
+			sprintf(resultat, "%.2f Ko", ko);
+		} else if (mo < 1000) {
+			sprintf(resultat, "%.2f Mo", mo);
+		} else {
+			sprintf(resultat, "%.2f Go", go);
+		}
+		return (string)resultat;
+	}
+
 }
