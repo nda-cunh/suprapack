@@ -25,6 +25,7 @@ export C_INCLUDE_PATH="$C_INCLUDE_PATH:%1$s/include"
 export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:%1$s/include"
 export GSETTINGS_SCHEMA_DIR=%1$s/share/glib-2.0/schemas/
 export PYTHONPATH="$PYTHONPATH:%1$s/lib/python3/dist-packages"
+export DOTNET_ROOT=%1$s/share/dotnet
 export fpath=(%1$s/bin $fpath)
 """.printf(this.prefix);
 			FileUtils.set_contents(profile, str);
