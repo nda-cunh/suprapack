@@ -150,23 +150,24 @@ bool cmd_info(string []av) {
 	if (av.length == 2)
 		error("`suprapack info [...]`");
 	var info = Query.get_from_pkg(av[2]);
-	print(@"$(BOLD)Nom                      : $(NONE)%s\n", info.name);
-	print(@"$(BOLD)Version                  : $(NONE)%s\n", info.version);
-	print(@"$(BOLD)Description              : $(NONE)%s\n", info.description);
-	print(@"$(BOLD)Author                   : $(NONE)%s\n", info.author);
+	print(BOLD + "Nom                      : " + NONE + "%s\n", info.name);
+	print(BOLD + "Version                  : " + NONE + "%s\n", info.version);
+	print(BOLD + "Description              : " + NONE + "%s\n", info.description);
+	print(BOLD + "Author                   : " + NONE + "%s\n", info.author);
+	uint8 buffer[32];
 	if (info.size_installed != "") {
-		var size = @"$(int64.parse(info.size_installed) / 1024)";
-		print(@"$(BOLD)Installed Size           : $(NONE)%sK\n", size);
+		Utils.convertBytePrint(uint64.parse(info.size_installed), buffer);
+		print(BOLD + "Installed Size           : " + NONE + "%s\n", buffer);
 	}
 	var dep_list = info.dependency.split(" ");
 	if (dep_list.length >= 1) {
-		print(@"$(BOLD)Depends                  : $(NONE)");
-		foreach (var dep in dep_list)
+		print(BOLD + "Depends                  : " + NONE);
+		foreach (unowned var dep in dep_list)
 			print("%s ", dep);
 		print("\n");
 	}
 	if (info.binary != info.name)
-		print(@"$(BOLD)Binary                   : $(NONE)%s\n", info.binary);
+		print(BOLD + "Binary                   : " + NONE + "%s\n", info.binary);
 
 	return true;
 }

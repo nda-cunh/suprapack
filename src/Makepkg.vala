@@ -79,7 +79,7 @@ public class Makepkg : Object {
 		regex_attribut = new Regex("""^([^\s]+?)[=](([(].*?[)])|(.*?$))""", MULTILINE | DOTALL);
 		regex_function = new Regex("""^(.+?)[(].*?[)].*?[{]""", MULTILINE);
 		regex_url = /^https?[:][\/][\/]/;
-		regex_git_url = /^git[+](?P<name_url>(https?[:][\/][\/][^\s#]*))([#]branch[=](?P<branch>([^\s]*)))?/;
+		regex_git_url = /^git[+](?P<name_url>(https?[:][\/][\/][^\s#]*))([#](branch|tag)[=](?P<branch>([^\s]*)))?/;
 		regex_variable = /[$][{(]?([0-9a-zA-Z_]+)[)}]?/;
 
 
