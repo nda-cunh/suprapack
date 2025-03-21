@@ -123,7 +123,7 @@ public class Makepkg : Object {
 		}
 
 		/* Replace all ${VARIABLE} in attributs */
-		foreach (var attr in attributs) {
+		foreach (unowned var attr in attributs) {
 			string value = get_data<string> (attr);
 			value = replace_variable_in_string (value);
 			set_data<string> (attr, value);
@@ -140,7 +140,7 @@ public class Makepkg : Object {
 			foreach (var i in makedependency?.replace("\n", " ")?.split(" ")) {
 				dependency += Utils.strip (i);
 			}
-			foreach (var i in dependency) {
+			foreach (unowned var i in dependency) {
 				if (Query.is_exist (i) == false) {
 					print_info(@"$i is not installed cancelling...");
 					foreach (var pkg in dependency) {
@@ -153,8 +153,6 @@ public class Makepkg : Object {
 			}
 
 		}
-
-
 
 
 		print("\n");
