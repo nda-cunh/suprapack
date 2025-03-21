@@ -268,7 +268,7 @@ private void print_search(ref SupraList repo, bool installed) {
 		print(CYAN + " [installed]");
 	print(NONE);
 	if (repo.description != "")
-		print(COM + "\t%s\n", repo.description);
+		print("\n\t" + COM + "%s\n", repo.description);
 }
 
 bool cmd_search(string []av) throws Error {
