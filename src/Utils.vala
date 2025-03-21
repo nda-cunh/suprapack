@@ -1,15 +1,27 @@
 public errordomain HttpError {
 	ERR,
-		CANCEL
+	CANCEL
 }
 
 namespace Utils {
 
-	async void sleep(uint ms) {
+	/**
+	 * Sleep for a number of milliseconds (async)
+	 *
+	 * @param ms the number of milliseconds to sleep
+	 */
+	public async void sleep(uint ms) {
 		Timeout.add(ms, sleep.callback);
 		yield;
 	}
 
+	/**
+	 * Strip the string and return a new string
+	 *
+	 * @param str the string to strip
+	 * @param character the character to strip
+	 * @return the new string
+	 */
 	public string strip (string str, string character = "\f\r\n\t\v [(\'\")]") {
 		int end = str.length;
 		int start = 0;
@@ -30,39 +42,42 @@ namespace Utils {
 		return str[start:end];
 	}
 
-	// Teste stdin request @default is false
+	/**
+	 * Teste stdin request (the default value is false)
+	 *
+	 * @param str the message to print
+	 * @return true if the user choose true (No value is false)
+	 */
 	bool stdin_bool_choose (string str = "") {
 		print(str);
-		var result = stdin.read_line()?.strip() ?? "".ascii_down();
+		var result = (stdin.read_line()?._strip() ?? "").ascii_down();
 		if ("y" in result || "o" in result || result == "1")
 			return true;
 		return false;
 	}
 
-	// Teste stdin request @default is true
+	/**
+	 * Teste stdin request (the default value is true)
+		*
+	 * @param str the message to print
+	 * @return true if the user choose true (No value is true)
+	 */
 	bool stdin_bool_choose_true (string str = "") {
 		print(str);
-		var result = stdin.read_line()?.strip() ?? "".ascii_down();
+		var result = (stdin.read_line()?._strip() ?? "").ascii_down();
 		if ("n" in result || result == "0")
 			return false;
 		return true;
 	}
 
-	int run_silent(string []av) {
-		SpawnFlags flags = 0;
-		string PWD = Environment.get_current_dir();
-
-		flags = STDOUT_TO_DEV_NULL | STDERR_TO_DEV_NULL | SEARCH_PATH | CHILD_INHERITS_STDIN;
-		try {
-			int status;
-			Process.spawn_sync(PWD, av, Environ.get(), flags, null, null, null, out status);
-			return status;
-		} catch (Error e) {
-			error(e.message);
-		}
-	}
-
-	int run(string[] av, string[] envp = {}){
+	/**
+	 * Run a command and return the status
+	 *
+	 * @param av the command to run
+	 * @param envp the environment to use
+	 * @return the status of the command
+	 */
+	int run (string[] av, string[] envp = {}) {
 		string PWD = Environment.get_current_dir();
 		string []_envp;
 
@@ -78,7 +93,35 @@ namespace Utils {
 			error(e.message);
 		}
 	}
+	
+	
+	/**
+	 * Like run() but with silent output
+	 *
+	 * @param av the command to run
+	 * @return the status of the command
+	 */
+	int run_silent (string []av) {
+		SpawnFlags flags = 0;
+		string PWD = Environment.get_current_dir();
 
+		flags = STDOUT_TO_DEV_NULL | STDERR_TO_DEV_NULL | SEARCH_PATH | CHILD_INHERITS_STDIN;
+		try {
+			int status;
+			Process.spawn_sync(PWD, av, Environ.get(), flags, null, null, null, out status);
+			return status;
+		} catch (Error e) {
+			error(e.message);
+		}
+	}
+
+
+	/**
+	 * Take a SupraList[] and sort it by version
+	 *
+	 * @param lst the SupraList[] to sort
+	 * @return the sorted SupraList[]
+	 */
 	SupraList[] sort_supralist_version(SupraList []lst) {
 		var list = lst.copy();
 
@@ -94,49 +137,56 @@ namespace Utils {
 		return list;
 	}
 
-	unowned SupraList max_version_supralist(SupraList s1, SupraList s2) {
-		var res = Utils.max_version(s1.version, s2.version);
-		if (res == s1.version)
+	/**
+	 * Like max_version but with SupraList instead of string
+	 *
+	 * @param s1 the first SupraList
+	 * @param s2 the second SupraList
+	 * @return the SupraList with the max version
+	 */
+	public unowned SupraList max_version_supralist(SupraList s1, SupraList s2) {
+		if (Utils.compare_versions (s1.version, s2.version))
 			return s1;
 		return s2;
 	}
 
-	// return max version
-	unowned string max_version(string v1, string v2) {
-		var reg = /[^0-9]+/;
-		var sp1 = reg.split(v1);
-		var sp2 = reg.split(v2);
-		for (var i = 0; i != sp1.length && i != sp2.length; ++i) {
-			int i1 = int.parse(sp1[i]);
-			int i2 = int.parse(sp2[i]);
-			if (i1 == i2)
-				continue;
-			if (i1 > i2)
-				return v1;
-			else
-				return v2;
-		}
-		return v1;
-	}
 
-
-	// return a stdin line with downcase and strip space
-	string get_input(string msg, bool down_force = true) {
+	/**
+	 * Get a line from stdin and downcase it and strip space
+	 *
+	 * @param msg the message to print
+	 * @param down_force if true, force the downcase
+	 * @return the line
+	 */
+	public string get_input(string msg, bool down_force = true) {
 		print(msg);
 		string? str = stdin.read_line();
 		if (str != null) {
 			if (down_force)
-				str = str?.down();
-			str = str?.strip();
-			return str;
+				str = str.down();
+			str._strip();
+			return (owned)str;
 		}
 		return "";
 	}
+
+	/**
+	 * Get the size of a folder
+	 *
+	 * @param folder_name the folder path name
+	 * @return the size of the folder
+	 */
 	public int64 size_folder (string folder_name) {
 		File file = File.new_for_commandline_arg (folder_name);
 		return size_folder_it(file);
 	}
 
+	/**
+	 * Get the size of a folder (recursive)
+	 *
+	 * @param file the folder file
+	 * @return the size of the folder
+	 */
 	private int64 size_folder_it (File file) {
 		int64 result = 0;
 		try {
@@ -158,17 +208,14 @@ namespace Utils {
 		return result;
 	}
 
-	private bool have_only_zero (string []sp, int index) {
-		var regex = /^[0]+$/;
-		while (index < sp.length) {
-			if (!regex.match (sp[index]))
-				return true;
-			++index;
-		}
-		return false;
-	}
 
-	/* returns true if V1 is greater than V2 */
+	/**
+	 * Compare two versions
+	 *
+	 * @param v1 the first version
+	 * @param v2 the second version
+	 * @return true if v1 is greater than v2
+	 */
 	public bool compare_versions (string v1, string v2) {
 		if (v1 == v2)
 			return false;
@@ -190,7 +237,30 @@ namespace Utils {
 		return false;
 	}
 
-	void modify_percent_bar (uint8[] buffer, double percent) {
+	/**
+	 * Check if the array have only zero
+	 *
+	 * @param sp the array to check
+	 * @param index the index to start
+	 * @return true if the array have only zero
+	 */
+	private bool have_only_zero (string []sp, int index) {
+		var regex = /^[0]+$/;
+		while (index < sp.length) {
+			if (!regex.match (sp[index]))
+				return true;
+			++index;
+		}
+		return false;
+	}
+
+	/**
+	 * Create a buffer (string) with the progress of the download
+	 *
+	 * @param buffer the buffer to modify with the progress bar
+	 * @param percent the percent of the download (0-100)
+	 */
+	private void modify_percent_bar (uint8[] buffer, double percent) {
 		int calc = (int)(percent * 20 / 100);
 		for (int i = 0; i < 20; i++) {
 			if (i < calc) {
@@ -203,6 +273,13 @@ namespace Utils {
 		buffer[22] = '\0';
 	}
 
+	/**
+	 * Print the download progress
+	 *
+	 * @param name_file the name of the file
+	 * @param actual the actual size of the file
+	 * @param max the max size of the file
+	 */
 	void print_download(string name_file, double actual, double max) {
 		const double MIB = 1048576.0;
 		double percent = (100 * actual) / max;
@@ -226,6 +303,14 @@ namespace Utils {
 			print("\r\n");
 	}
 
+	/**
+	 * Download a file from the internet
+	 * @param url the url of the file
+	 * @param output the output file
+	 * @param no_print if true, don't print the download progress
+	 * @param rec if true, retry the download ( set only by download function d'ont use it ) 
+	 * @param cancel a cancellable object
+	 */
 	public void download (string url, string? output = null, bool no_print = false, bool rec = false, Cancellable? cancel = null) throws Error {
 		var loop = new MainLoop ();
 
@@ -371,6 +456,13 @@ namespace Utils {
 		}
 	}
 	
+	/**
+	 * Prepare the environment for the command 
+	 *
+	 * Add the SRCDIR, PKGDIR, PREFIX, srcdir, pkgdir, prefix and PATH
+	 * @param dir the directory to use
+	 * @return the environment
+	 */
 	public string []prepare_envp(string dir) {
 		var envp = Environ.get();
 		envp = Environ.set_variable(envp, "SRCDIR", dir, true);
@@ -383,6 +475,12 @@ namespace Utils {
 		return envp;
 	}
 
+	/**
+	 * Get the architecture of the system
+	 *
+	 * like x86-Linux, amd64-Linux, i686-Linux, i386-Darwin, amd64-Darwin, arm64-Darwin 
+	 * @return the architecture
+	 */
 	public unowned string get_arch () {
 		utsname name;
 		utsname.uname(out name);
@@ -408,10 +506,14 @@ namespace Utils {
 		return "any";
 	}
 
-	[CCode (cheader_filename = "stdio.h", cname="sprintf")]
-	[PrintfFormat]
-	private extern int sprintf(uint8* str, string format, ...);
 
+	/**
+	 * Convert a byte to a human readable string
+	 * example : 1024 -> 1 Ko  or  10240245 -> 9.76 Mo
+	 *
+	 * @param b the byte to convert
+	 * @return the human readable string
+	 */
 	public unowned string convertBytePrint(uint64 b, uint8* resultat) {
 		double ko = b / 1024.0;
 		double mo = ko / 1024.0;
@@ -427,4 +529,7 @@ namespace Utils {
 		return (string)resultat;
 	}
 
+	[CCode (cheader_filename = "stdio.h", cname="sprintf")]
+	[PrintfFormat]
+	internal extern int sprintf(uint8* str, string format, ...);
 }
