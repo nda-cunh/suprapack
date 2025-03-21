@@ -172,12 +172,12 @@ bool cmd_info(string []av) {
 	return true;
 }
 
-bool cmd_have_update(string []av) throws Error{
+bool cmd_have_update(string []av) throws Error {
 	if (av.length == 2)
 		error("`suprapack have_update [...]`");
 	var Qpkg = Query.get_from_pkg(av[2]);
 	var Spkg = Sync.get_from_pkg(av[2]);
-	if (Spkg.version != Qpkg.version) {
+	if (Utils.compare_versions(Spkg.version, Qpkg.version)) {
 		print("Update %s --> %s", Qpkg.version, Spkg.version);
 	}
 	return true;
@@ -262,14 +262,13 @@ bool cmd_search_supravim_plugin(string []av) throws Error {
 }
 
 private void print_search(ref SupraList repo, bool installed) {
-	print("%s%s ", BOLD, PURPLE);
-	print("%s/%s", repo.repo_name, WHITE);
-	print("%s %s%s", repo.name, GREEN, repo.version);
+	print(BOLD + PURPLE + " %s/" + WHITE, repo.repo_name);
+	print("%s " + GREEN + "%s", repo.name, repo.version);
 	if (installed)
-		print(" %s[installed]", CYAN);
-	print("%s\n", NONE);
+		print(CYAN + " [installed]");
+	print(NONE);
 	if (repo.description != "")
-		print("\t%s%s\n", COM, repo.description);
+		print(COM + "\t%s\n", repo.description);
 }
 
 bool cmd_search(string []av) throws Error {
@@ -278,8 +277,8 @@ bool cmd_search(string []av) throws Error {
 	var installed = Query.get_all_installed_pkg();
 	// search without input
 	if (av.length == 2) {
-		foreach(var i in list) {
-			print_search(ref i, (i.name in installed));
+		for (var i = 0; i != list.length; ++i) {
+			print_search(ref list[i], (list[i].name in installed));
 		}
 	}
 	// search with regex pattern

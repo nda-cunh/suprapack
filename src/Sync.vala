@@ -125,7 +125,7 @@ public class RepoInfo : Object{
 // he can download list
 // he can download package
 // have to the management of all repository online
-class Sync {
+class Sync : Object {
 	//   SINGLETON
 	private static Sync? singleton = null;
 	private static unowned Sync default() {
@@ -150,7 +150,7 @@ class Sync {
 		FileUtils.get_contents(config.repo_list, out contents);
 
 		int count = 0;
-		foreach (var line in contents.split("\n")) {
+		foreach (unowned var line in contents.split("\n")) {
 			if (line == "")
 				continue;
 			if (line.has_prefix("#")) {
@@ -192,7 +192,7 @@ class Sync {
 
 	public static SupraList get_from_pkg(string name_pkg) throws Error{
 		var pkg_list = Sync.default()._get_list_package();
-		foreach (var pkg in pkg_list) {
+		foreach (unowned var pkg in pkg_list) {
 			if (pkg.name == name_pkg) {
 				return pkg;
 			}
