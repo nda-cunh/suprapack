@@ -1,5 +1,13 @@
 namespace Build {
 
+	/**
+	 * Create a package from a directory and create the info file
+	 * a good directory is a directory with bin, lib, share, etc
+	 * if the directory is not good the user can cancel the operation
+	 * and the package will not be created
+	 *
+	 * @param usr_dir the directory to create the package
+	 */
 	public void create_package(string usr_dir) throws Error {
 		if (!FileUtils.test(usr_dir, FileTest.IS_DIR)) {
 			new Makepkg (usr_dir);
@@ -18,8 +26,8 @@ namespace Build {
 				Process.exit(0);
 			}
 		}
-		// Modify the build_package
 
+		// Modify the build_package
 		string stderr;
 		try {
 			// modify /etc
@@ -32,15 +40,16 @@ namespace Build {
 			if (FileUtils.test(@"$path/", FileTest.EXISTS)) {
 				print_info("Change lib/x86_64-linux-gnu");
 				Process.spawn_command_line_sync(@"find $path/ -mindepth 1 -exec mv {} $usr_dir/lib/ \\;", null, out stderr);
-				DirUtils.remove(@"$path");
+				DirUtils.remove(path);
 			}
 			path = @"$usr_dir/include/x86_64-linux-gnu";
 			if (FileUtils.test(@"$path/", FileTest.EXISTS)) {
 				print_info("Change include/x86_64-linux-gnu");
 				Process.spawn_command_line_sync(@"find $path/ -mindepth 1 -exec mv {} $usr_dir/include/ \\;", null, out stderr);
-				DirUtils.remove(@"$path");
+				DirUtils.remove(path);
 			}
-		}catch(Error e) {
+		}
+		catch(Error e) {
 			error(e.message);
 		}
 
@@ -71,11 +80,11 @@ namespace Build {
 			// compress the package with fakeroot or not
 			if (config.use_fakeroot == true) {
 				if (Utils.run_silent({"fakeroot", "tar", "--zstd", "-cf", @"$(name_pkg).suprapack", "-C", usr_dir, "."}) != 0)
-					error(@"unable to create package\npackage => $(name_pkg)");
+					error("unable to create package\npackage => %s", name_pkg);
 			}
 			else {
 				if (Utils.run_silent({"tar", "--zstd", "-cf", @"$(name_pkg).suprapack", "-C", usr_dir, "."}) != 0)
-					error(@"unable to create package\npackage => $(name_pkg)");
+					error("unable to create package\npackage =>  %s", name_pkg);
 			}
 			loop.quit();
 		});
@@ -85,6 +94,13 @@ namespace Build {
 		print_info(@"$(name_pkg).suprapack is created\n");
 	}
 
+	/**
+	 * check if the directory is a good directory
+	 * a good directory is a directory with bin, lib, share, etc
+	 *
+	 * @param usr_dir the directory to check
+	 * @return true if the directory is good
+	 */
 	private bool check(string usr_dir) {
 		int n = 0;
 		if (FileUtils.test(@"$usr_dir/bin", FileTest.EXISTS))
@@ -96,11 +112,38 @@ namespace Build {
 		return (n != 0);
 	}
 
+
+	/**
+	 * autoconfig the package
+	 * autoconfig is a script that will be executed before the installation
+	 * it will replace the $PREFIX in the pkg-config files
+	 * and add the sed command to replace the $PREFIX in the pkg-config files
+	 * in the pre_install.sh script
+	 *
+	 * @param pkgdir the directory of the package
+	 */
+	private void autoconfig (string pkgdir) throws Error {
+		var result = new StringBuilder();
+		string contents;
+		autoconfig_iter_dir (result, @"$pkgdir/lib/pkgconfig/");
+		autoconfig_iter_dir (result, @"$pkgdir/share/pkgconfig/");
+		autoconfig_iter_dir (result, @"$pkgdir/include/pkgconfig/");
+		if (result.str != "") {
+			if (FileUtils.test (@"$pkgdir/pre_install.sh", FileTest.EXISTS)) {
+				FileUtils.get_contents (@"$pkgdir/pre_install.sh", out contents);
+				FileUtils.set_contents (@"$pkgdir/pre_install.sh", contents + result.str);
+			}
+			else {
+				FileUtils.set_contents (@"$pkgdir/pre_install.sh", "#!/bin/bash\n" + result.str);
+			}
+		}
+	}
+
 	private void autoconfig_iter_dir (StringBuilder result, string file_directory) throws Error {
 		Dir dir;
 		try {
 			dir = Dir.open(file_directory);
-		} catch (Error e){
+		} catch (Error e) {
 			return ;
 		}
 		string filename;
@@ -124,23 +167,6 @@ namespace Build {
 				warning ("index == -1 error in pkg-config transform");
 			result.append (file_directory.offset(index) + filename);
 			result.append_c ('\n');
-		}
-	}
-
-	private void autoconfig (string pkgdir) throws Error {
-		var result = new StringBuilder();
-		string contents;
-		autoconfig_iter_dir (result, @"$pkgdir/lib/pkgconfig/");
-		autoconfig_iter_dir (result, @"$pkgdir/share/pkgconfig/");
-		autoconfig_iter_dir (result, @"$pkgdir/include/pkgconfig/");
-		if (result.str != "") {
-			if (FileUtils.test (@"$pkgdir/pre_install.sh", FileTest.EXISTS)) {
-				FileUtils.get_contents (@"$pkgdir/pre_install.sh", out contents);
-				FileUtils.set_contents (@"$pkgdir/pre_install.sh", contents + result.str);
-			}
-			else {
-				FileUtils.set_contents (@"$pkgdir/pre_install.sh", "#!/bin/bash\n" + result.str);
-			}
 		}
 	}
 }

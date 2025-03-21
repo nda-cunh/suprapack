@@ -2,6 +2,26 @@
 // can build package
 // can extract package
 
+/**
+ * A Package is a struct that contains all the information about a package.
+ * It can be created from a file or from user input.
+ * it's like the SupraList package but with more information
+ *
+ * @name: the name of the package
+ * @author: the author of the package
+ * @version: the version of the package
+ * @description: the description of the package
+ * @binary: the binary name of the package (for suprapack run command)
+ * @dependency: the dependency of the package
+ * @optional_dependency: the optional dependency of the package
+ * @size_tar: the size of the tar file
+ * @size_installed: the size of the installed package
+ * @installed_files: the list of installed files
+ * @exclude_package: the list of files to exclude from the package
+ * @output: the output of the package
+ * @repo: the repository of the package
+ * @arch: the architecture of the package
+ **/
 public struct Package {
 	string name;
 	string author;
@@ -19,7 +39,7 @@ public struct Package {
 	string arch;
 
 
-	public void init() {
+	public void init () {
 		this.name = "";
 		this.author = "";
 		this.version = "";
@@ -62,7 +82,7 @@ public struct Package {
 		}
 	}
 
-	public Package.from_file(string info_file) {
+	public Package.from_file (string info_file) {
 		string contents;
 		unowned string @value;
 
@@ -116,6 +136,12 @@ public struct Package {
 		}
 	}
 
+	/**
+	 * return all installed files
+	 * ex: suprapack return $prefix/bin/suprapack ...
+	 *
+	 * @return: the list of installed files
+	 */
 	public string []get_installed_files() {
 		string []sp = this.installed_files?.split("\n");
 
@@ -125,7 +151,7 @@ public struct Package {
 			sp[sp.length -1] = null;
 			sp.resize(sp.length - 1);
 		}
-		return (sp);
+		return ((owned)sp);
 	}
 
 	// public func
