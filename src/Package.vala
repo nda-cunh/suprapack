@@ -1,11 +1,8 @@
-// Package struct
-// can build package
-// can extract package
-
 /**
  * A Package is a struct that contains all the information about a package.
  * It can be created from a file or from user input.
  * it's like the SupraList package but with more information
+ * A Package have always a info file
  *
  * @name: the name of the package
  * @author: the author of the package

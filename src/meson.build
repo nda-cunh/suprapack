@@ -14,6 +14,8 @@ sources = [
     'Sync.vala',
     'Utils.vala',
     'Http.vala',
+    'SupraList.vala',
+    'RepoInfo.vala',
     'uname.vapi')
 ]
 

@@ -1,7 +1,13 @@
+/**
+ * This is a simple binding for the uname system call.
+ * It is based on the C header file sys/utsname.h.
+ */
 [CCode (cname = "struct utsname", cheader_filename = "sys/utsname.h")]
 public struct utsname {
+
 	[CCode (cname="uname")]
 	public static int uname(out utsname name);
+
 	unowned string sysname;    /* Operating system name (e.g., "Linux") */
 	unowned string nodename;   /* Name within "some implementation-defined network" */
 	unowned string release;    /* Operating system release */

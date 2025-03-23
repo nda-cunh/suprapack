@@ -1,6 +1,13 @@
+/**
+ * Only used by `suprapack prepare`
+ *
+ * This file is used to prepare the repository.  It will list all the
+ * suprapack files in the current directory and write them in a file
+ * named `list` in the current directory.
+ */
 namespace Repository {
 
-	private List<string> list_file_in_dir(string dir_name) {
+	private List<string> list_file_in_dir (string dir_name) {
 		try {
 			var result = new List<string>();
 			var dir = Dir.open(dir_name);
@@ -17,13 +24,13 @@ namespace Repository {
 	}
 
 	// Only for dev.  This function prepare the repository
-	public void prepare() {
+	public void prepare () {
 		var pwd = Environment.get_current_dir();
 		var lst = list_file_in_dir(pwd);
 		lst.sort(strcmp);
 		var fs = FileStream.open(@"$pwd/list", "w");
 		if (fs == null)
-			error(@"Cant create $pwd/list");
+			error("Cant create %s/list", pwd);
 		foreach (var file in lst) {
 			string lore = "";
 			try {
