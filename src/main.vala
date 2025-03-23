@@ -12,6 +12,8 @@ public class Main : Object {
 	public static bool simple_print = false;
 	public static bool supraforce = false;
 	public static string? strap = null;
+	public static bool build_and_install = false;
+	public static string? build_output = null;
 
 	const OptionEntry[] options = {
 		{ "prefix", 'p', OptionFlags.NONE, OptionArg.STRING, ref prefix, "", "Path to the folder" },
@@ -22,12 +24,14 @@ public class Main : Object {
 		{ "supraforce", 's', OptionFlags.NONE, OptionArg.NONE, ref supraforce, "force the operation", null },
 		{ "no_fakeroot", '\0', OptionFlags.NONE, OptionArg.NONE, ref no_fakeroot, "don't build package with fakeroot", null },
 		{ "strap", '\0', OptionFlags.NONE, OptionArg.STRING, ref strap, "like pacstrap", null },
+		{ "install", '\0', OptionFlags.NONE, OptionArg.NONE, ref build_and_install, "build and install the package", null },
+		{ "build_output", '\0', OptionFlags.NONE, OptionArg.STRING, ref build_output, "build output", null },
 		{ null }
 	};
 	bool all_cmd(string []commands) throws Error {
 
 		if (commands.length < 2) {
-			cmd_help();
+			Cmd.help();
 			return true;
 		}
 
@@ -53,6 +57,8 @@ public class Main : Object {
 		config.supraforce = supraforce;
 		config.simple_print = simple_print;
 		config.use_fakeroot = !no_fakeroot;
+		config.build_and_install = build_and_install;
+		config.build_output = build_output ?? ".";
 
 
 		unowned string av1 = commands[1];
@@ -66,57 +72,57 @@ public class Main : Object {
 
 		switch (av1) {
 			case "query_get_comp":
-				return cmd_query_get_comp(commands);
+				return Cmd.query_get_comp(commands);
 			case "sync_get_comp":
-				return cmd_sync_get_comp(commands);
+				return Cmd.sync_get_comp(commands);
 			case "shell":
-				return cmd_shell(commands);
+				return Cmd.shell(commands);
 			case "list_files":
 			case "-Ql":
-				return cmd_list_files(commands);
+				return Cmd.list_files(commands);
 			case "loading":
-				cmd_loading(commands);
+				Cmd.loading(commands);
 			case "run":
 			case "Qr":
-				return cmd_run(commands);
+				return Cmd.run(commands);
 			case "-Q":
 			case "list":
-				return cmd_list(commands);
+				return Cmd.list(commands);
 			case "search":
 			case "-Ss":
-				return cmd_search(commands);
+				return Cmd.search(commands);
 			case "-B":
 			case "build":
-				return cmd_build(commands);
+				return Cmd.build(commands);
 			case "help":
-				return cmd_help();
+				return Cmd.help();
 			case "install":
 			case "add":
 			case "-S":
-				return cmd_install(commands);
+				return Cmd.install(commands);
 			case "uninstall":
 			case "remove":
 			case "-r":
-				return cmd_uninstall(commands);
+				return Cmd.uninstall(commands);
 			case "have_update":
-				return cmd_have_update(commands);
+				return Cmd.have_update(commands);
 			case "update":
 			case "-Su":
-				return cmd_update(commands);
+				return Cmd.update(commands);
 			case "info":
 			case "-Qi":
-				return cmd_info(commands);
+				return Cmd.info(commands);
 			case "prepare":
 			case "-P":
-				return cmd_prepare();
+				return Cmd.prepare();
 			case "search_supravim_plugin":
-				return cmd_search_supravim_plugin(commands);
+				return Cmd.search_supravim_plugin(commands);
 			case "-G":
 			case "download":
-				return cmd_download(commands);
+				return Cmd.download(commands);
 			case "update_list":
 			case "refresh":
-				return cmd_refresh();
+				return Cmd.refresh();
 		}
 		error("La commande \"%s\" n'existe pas.", av1);
 	}

@@ -1,9 +1,12 @@
-public class Config : Object{
+/**
+ * This class contains all the configuration of the package manager
+ * It's used to store the configuration of the user and the package
+ **/
+public class Config : Object {
 	public Config () throws Error {
-		var env = Environ.get();
 		this.change_prefix (@"$HOME/.local");
 		this.load_config();
-		var prefix_tmp = Environ.get_variable(env, "PREFIX");
+		var prefix_tmp = Environ.get_variable(Environ.get(), "PREFIX");
 		if (prefix_tmp != null)
 			this.change_prefix(prefix_tmp);
 		queue_pkg = new List<Package?>();
@@ -40,15 +43,15 @@ export fpath=(%1$s/bin $fpath)
 	public void change_prefix (string prefix) throws Error {
 		string contents;
 		var new_prefix = prefix;
-		var new_cache = prefix + "/.suprapack";
-		var new_config = new_cache + "/user.conf";
-		var new_repo_list = new_cache + "/repo.list";
+		var new_suprapack_cache = prefix + "/.suprapack";
+		var new_config = new_suprapack_cache + "/user.conf";
+		var new_repo_list = new_suprapack_cache + "/repo.list";
 		FileUtils.symlink(@"$HOME/.local/.suprapack", @"$HOME/.config/suprapack");
 
 		DirUtils.create_with_parents(new_prefix, 0755);
-		DirUtils.create_with_parents(new_cache, 0755);
-		if (FileUtils.test (new_cache, FileTest.EXISTS) == false) {
-			DirUtils.create(new_cache, 0755);
+		DirUtils.create_with_parents(new_suprapack_cache, 0755);
+		if (FileUtils.test (new_suprapack_cache, FileTest.EXISTS) == false) {
+			DirUtils.create(new_suprapack_cache, 0755);
 		}
 		if (FileUtils.test (new_config, FileTest.EXISTS) == false) {
 			FileUtils.set_contents (new_config, "is_cached:false");
@@ -64,7 +67,7 @@ export fpath=(%1$s/bin $fpath)
 		}
 
 		this.prefix = (owned)new_prefix;
-		this.cache = (owned)new_cache;
+		this.path_suprapack_cache = (owned)new_suprapack_cache;
 		this.config = (owned)new_config;
 		this.repo_list = (owned)new_repo_list;
 		this.strap = this.prefix;
@@ -154,9 +157,13 @@ export fpath=(%1$s/bin $fpath)
 	}
 
 	public bool check_if_in_queue(string name) {
-		foreach (var i in queue_pkg)
-			if (i.name == name)
+		unowned List<Package?> it = queue_pkg;
+		while (it != null)
+		{
+			if (it.data.name == name)
 				return true;
+			it = it.next;
+		}
 		return false;
 	}
 
@@ -172,18 +179,39 @@ export fpath=(%1$s/bin $fpath)
 
 	public List<Package?>	queue_pkg;
 	public unowned string[] cmd;
-
-	public bool allays_yes		{get;set;default=false;}
-	public bool force			{get; set; default=false;}
-	public bool supraforce		{get; set; default=false;}
-	public bool use_fakeroot	{get; set; default=true;}
-	public bool simple_print	{get; set; default=false;}
-	public string prefix		{get; private set; default=@"$HOME/.local";}
-	public string cache			{get; private set;}
-	public string config		{get; private set;}
-	public string repo_list 	{get; private set;}
-	public string strap			{get; private set;}
-	public bool is_cached		{get; private set; default=false;}
-	public bool show_script 	{get; private set; default=false;}
 	public bool want_remove 	{get; set; default=false;}
+
+	// If the user want to show the script before installing (pre_install and post_install)
+	public bool show_script 	{get; private set; default=false;}
+	// If suprapack need keep the package in the cache ($HOME/.local/.suprapack/pkg)
+	public bool is_cached		{get; private set; default=false;}
+	// The path of the repolist ($HOME/.local/.suprapack/repo.list)
+	public string repo_list 	{get; private set;}
+	// The path of the config ($HOME/.local/.suprapack/user.conf)
+	public string config		{get; private set;}
+	// The path of the cache ($HOME/.local/.suprapack/)
+	public string path_suprapack_cache			{get; private set;}
+
+	/*********
+	 * Options
+	 ***********/
+
+	// The prefix where the package will be installed
+	public string prefix		{get; private set; default=@"$HOME/.local";}
+	// The strap is the prefix where the package will be installed like pacstrap
+	public string strap			{get; private set;}
+	// Force the installation of the package with all dependencies
+	public bool force			{get; set; default=false;}
+	// Force the installation of the package without check an update
+	public bool supraforce		{get; set; default=false;}
+	// Used by other program, it print 0,1,2,3,4,5 instead % for download and install
+	public bool simple_print	{get; set; default=false;}
+	// if the user want to use fakeroot when building the package
+	public bool use_fakeroot	{get; set; default=true;}
+	// if the user want to answer yes to all the question
+	public bool allays_yes		{get;set;default=false;}
+	// if the package need to be install after the build
+	public bool build_and_install {get; set; default=false;}
+	// where the package will be moved after the build
+	public string? build_output 		{get; set;default=null;}
 }

@@ -17,6 +17,7 @@ SRC =	src/main.vala \
 		src/Install.vala \
 		src/Package.vala \
 		src/Config.vala \
+		src/Http.vala \
 
 all: install 
 
