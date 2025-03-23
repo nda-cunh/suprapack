@@ -221,7 +221,7 @@ public class Makepkg : Object {
 					continue;
 				}
 				debug("Download %s to -> %s", url, output);
-				Utils.download (url, output, false);
+				Http.download (url, output, false);
 			}
 			/* Simple copy */
 			else {

@@ -65,7 +65,7 @@ private void install_files(List<string> list, int len) {
 
 // Create the package information in .suprapack/name_pkg/info
 private void post_install(List<string> list, int len, ref Package pkg) {
-	string packinfo = @"$(config.cache)/$(pkg.name)";
+	string packinfo = @"$(config.path_suprapack_cache)/$(pkg.name)";
 	string info_file = @"$packinfo/info";
 
 	DirUtils.create_with_parents(packinfo, 0755);
@@ -89,7 +89,7 @@ private bool run_post_pre_script (string dir, string filename, string print_name
 			string contents;
 			FileUtils.get_contents(filename, out contents);
 			print("[%s] {\n%s\n}\n", print_name, contents);
-			if (Utils.stdin_bool_choose_true("Continue ? [Y/n]") == false)
+			if (Utils.stdin_bool_choose("Continue ? [Y/n]", true) == false)
 				throw new ErrorSP.ACCESS("you refused to execute the script.");
 		}
 		print_info(null, print_name);
@@ -123,7 +123,7 @@ public void install_suprapackage(string suprapack) throws Error {
 		throw new ErrorSP.ACCESS(@"$suprapack n'existe pas");
 	var tmp_dir = DirUtils.make_tmp("suprastore_XXXXXX");
 	print_info(@"Extraction de $(CYAN)$(suprapack)$(NONE)");
-	if (Utils.run_silent({"tar", "-xf", suprapack, "-C", tmp_dir}) != 0)
+	if (Utils.run({"tar", "-xf", suprapack, "-C", tmp_dir}, {}, true) != 0)
 		throw new ErrorSP.FAILED(@"unable to decompress package\npackage => $(suprapack)");
 
 	debug ("Extracted in %s/info (%s)", tmp_dir, suprapack);
@@ -152,12 +152,12 @@ public void install_suprapackage(string suprapack) throws Error {
 	// Uninstall script
 	if (FileUtils.test(@"$tmp_dir/uninstall", FileTest.EXISTS)) {
 		var fileSrc = File.new_for_path(@"$tmp_dir/uninstall");
-		var fileDest = File.new_for_path(@"$(config.cache)/$(pkg.name)/uninstall");
+		var fileDest = File.new_for_path(@"$(config.path_suprapack_cache)/$(pkg.name)/uninstall");
 		fileSrc.move(fileDest, FileCopyFlags.OVERWRITE);
 	}
 
 	// remove useless tmp dir
-	if (Utils.run_silent({"rm", "-rf", tmp_dir}) != 0)
+	if (Utils.run({"rm", "-rf", tmp_dir}, {}, true) != 0)
 		new OptionError.FAILED(@"unable to remove directory\ndirectory => $(tmp_dir)");
 }
 
@@ -168,11 +168,8 @@ private void force_suprapack_update () throws Error {
 	if (config.supraforce == false && Sync.check_update("suprapack")) {
 		print_info(null, "Canceling... An update of suprapack is here", "\033[35;1m");
 		Process.spawn_command_line_sync(@"$(config.prefix)/bin/suprapack --force --supraforce add suprapack");
-		var cmd_str = "";
-		foreach (var i in config.cmd) {
-			cmd_str += @"$i ";
-		}
-		Process.spawn_command_line_sync(@"$cmd_str");
+		var cmd_str = string.joinv(" ", config.cmd);
+		Process.spawn_command_line_sync(cmd_str);
 		Process.exit(0);
 	}
 }
@@ -242,7 +239,7 @@ public void install() throws Error {
 
 	unowned var first_package = config.queue_pkg.nth_data(0).name;
 	config.queue_pkg.reverse();
-	if (config.allays_yes || Utils.stdin_bool_choose_true(":: Proceed with installation [Y/n] ")) {
+	if (config.allays_yes || Utils.stdin_bool_choose(":: Proceed with installation [Y/n] ", true)) {
 		print("\n");
 		foreach (unowned var i in config.queue_pkg) {
 			if (config.force == true || i.name == first_package) {

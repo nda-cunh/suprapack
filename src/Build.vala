@@ -1,6 +1,6 @@
 /**
  * Used by `suprapack build`
- * to create a package from a directory 
+ * to create a package from a directory
  * or from a MAKEPKG file (like ArchLinux ([pacman]))
  */
 namespace Build {
