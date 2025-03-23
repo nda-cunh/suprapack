@@ -13,6 +13,7 @@ namespace Cmd {
 		Process.exit(status);
 	}
 
+
 	bool shell (string []av) throws Error {
 		var env = Environ.get();
 		var shell = Environ.get_variable(env, "SHELL") ?? "/bin/bash";
@@ -24,7 +25,8 @@ namespace Cmd {
 		return true;
 	}
 
-	bool download(string []av) throws Error {
+
+	bool download (string []av) throws Error {
 		if (av.length == 2)
 			error("suprapack download <pkg>");
 		foreach (var pkg in av[2:av.length]) {
@@ -47,14 +49,16 @@ namespace Cmd {
 		return true;
 	}
 
-	bool refresh() throws Error {
+
+	bool refresh () throws Error {
 		print_info("Refreshing packages list");
 		Sync.refresh_list();
 		print_info("Packages list Refreshed");
 		return true;
 	}
 
-	bool query_get_comp(string []av) {
+
+	bool query_get_comp (string []av) {
 		var pkgs = Query.get_all_package();
 		for (var i = 0; i != pkgs.length; ++i) {
 			if (i == pkgs.length - 1)
@@ -65,7 +69,8 @@ namespace Cmd {
 		return true;
 	}
 
-	bool sync_get_comp(string []av) {
+
+	bool sync_get_comp (string []av) {
 		var pkgs = Sync.get_list_package();
 		for (var i = 0; i != pkgs.length; ++i) {
 			if (i == pkgs.length - 1)
@@ -76,7 +81,8 @@ namespace Cmd {
 		return true;
 	}
 
-	bool install(string []av) throws Error {
+
+	bool install (string []av) throws Error {
 		if (av.length == 2)
 			error("`suprapack install [...]`");
 
@@ -103,7 +109,8 @@ namespace Cmd {
 		return true;
 	}
 
-	bool build(string []av) throws Error {
+
+	bool build (string []av) throws Error {
 		if (av.length == 2)
 			error("`suprapack build [...]`");
 		foreach (var i in av[2:]) {
@@ -113,7 +120,8 @@ namespace Cmd {
 		return true;
 	}
 
-	bool info(string []av) {
+
+	bool info (string []av) {
 		if (av.length == 2)
 			error("`suprapack info [...]`");
 		var info = Query.get_from_pkg(av[2]);
@@ -139,7 +147,8 @@ namespace Cmd {
 		return true;
 	}
 
-	bool have_update(string []av) throws Error {
+
+	bool have_update (string []av) throws Error {
 		if (av.length == 2)
 			error("`suprapack have_update [...]`");
 		var Qpkg = Query.get_from_pkg(av[2]);
@@ -151,7 +160,7 @@ namespace Cmd {
 	}
 
 
-	bool uninstall(string []av) throws Error {
+	bool uninstall (string []av) throws Error {
 		if (av.length == 2)
 			error("`suprapack uninstall [...]`");
 		config.want_remove = true;
@@ -160,7 +169,8 @@ namespace Cmd {
 		return true;
 	}
 
-	bool list_files(string []av) {
+
+	bool list_files (string []av) {
 		if (av.length == 2) {
 			print_info ("`suprapack list_files <pkg>`");
 		}
@@ -176,7 +186,8 @@ namespace Cmd {
 		return true;
 	}
 
-	bool list(string []av) {
+
+	bool list (string []av) {
 		var installed = Query.get_all_package();
 		int width = 0;
 		int width_version = 0;
@@ -208,18 +219,21 @@ namespace Cmd {
 		return true;
 	}
 
-	bool prepare() {
+
+	bool prepare () {
 		Repository.prepare();
 		return true;
 	}
 
-	private void print_supravim_plugin(ref SupraList repo, bool installed) {
+
+	private void print_supravim_plugin (ref SupraList repo, bool installed) {
 		if (installed)
 			print("[installed] ");
 		print("%s %s [%s]\n", repo.name, repo.version, repo.description);
 	}
 
-	bool search_supravim_plugin(string []av) throws Error {
+
+	bool search_supravim_plugin (string []av) throws Error {
 		force_suprapack_update();
 		var list = Sync.get_list_package();
 		var installed = Query.get_all_installed_pkg();
@@ -231,7 +245,8 @@ namespace Cmd {
 		return true;
 	}
 
-	private void print_search(ref SupraList repo, bool installed) {
+
+	private void print_search (ref SupraList repo, bool installed) {
 		print(BOLD + PURPLE + " %s/" + WHITE, repo.repo_name);
 		print("%s " + GREEN + "%s", repo.name, repo.version);
 		if (installed)
@@ -268,7 +283,7 @@ namespace Cmd {
 		return true;
 	}
 
-	bool run(string []av, bool is_shell = false) throws Error {
+	bool run (string []av, bool is_shell = false) throws Error {
 		if (av.length == 2)
 			error("`suprapack run [...]`");
 		if (Query.is_exist(av[2]) == false && config.force == false) {
@@ -276,7 +291,7 @@ namespace Cmd {
 			Cmd.install({"", "install", av[2]});
 		}
 		if (Query.is_exist(av[2]) == false && config.force == false) {
-			error(@"$(av[2]) is not installed");
+			error("(%s) is not installed", av[2]);
 		}
 
 		string []av_binary;
@@ -305,7 +320,7 @@ namespace Cmd {
 		return true;
 	}
 
-	bool update(string []av) throws Error {
+	bool update (string []av) throws Error {
 		force_suprapack_update();
 		unowned string pkg_name;
 
@@ -332,7 +347,7 @@ namespace Cmd {
 		}
 	}
 
-	bool help() {
+	bool help () {
 		string suprapack = @"$(BOLD)suprapack$(NONE)";
 		print(@"$(BOLD)$(YELLOW)[SupraStore] ----- Help -----\n\n");
 		print(@"	$(suprapack) add [package name]\n");

@@ -176,7 +176,7 @@ private void force_suprapack_update () throws Error {
 
 
 
-public void install() throws Error {
+public void install () throws Error {
 	force_suprapack_update();
 
 	print("\nresolving dependencies...\n");
