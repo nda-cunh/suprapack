@@ -1,3 +1,8 @@
+/**
+ * Used by `suprapack build`
+ * to create a package from a directory 
+ * or from a MAKEPKG file (like ArchLinux ([pacman]))
+ */
 namespace Build {
 
 	/**
@@ -16,12 +21,11 @@ namespace Build {
 
 		// check if USR_DIR is a valid directory
 		if (!(FileUtils.test(usr_dir, FileTest.EXISTS)) || !(FileUtils.test(usr_dir, FileTest.IS_DIR)))
-			error(@"$usr_dir is not a dir or doesn't exist");
+			error("%s is not a dir or doesn't exist", usr_dir);
 
 		if (check(usr_dir) == false) {
 			print_info("Your usr_dir is not good are you sure ? [Y/n]\n");
-			var s = stdin.read_line()?.down();
-			if ("n" in (s ?? "")) {
+			if (Utils.stdin_bool_choose ("Your usr_dir is not good are you sure ? [Y/n]", true) == false){
 				print_info("Cancel...");
 				Process.exit(0);
 			}
@@ -57,14 +61,15 @@ namespace Build {
 		// Create the info_file or use it
 		Package pkg;
 
-		if (FileUtils.test(@"$usr_dir/info", FileTest.EXISTS)) {
-			pkg = Package.from_file(@"$usr_dir/info");
+		var usrdir_info = @"$usr_dir/info";
+		if (FileUtils.test(usrdir_info, FileTest.EXISTS)) {
+			pkg = Package.from_file(usrdir_info);
 		}
 		else {
 			pkg = Package.from_input();
 		}
 		pkg.size_installed = Utils.size_folder(usr_dir).to_string();
-		pkg.create_info_file(@"$usr_dir/info");
+		pkg.create_info_file(usrdir_info);
 		autoconfig (usr_dir);
 
 
@@ -75,23 +80,30 @@ namespace Build {
 		if (FileUtils.test(@"$usr_dir/post_install.sh", FileTest.EXISTS))
 			FileUtils.chmod(@"$usr_dir/post_install.sh", 0777);
 		var name_pkg = @"$(pkg.name)_$(pkg.version)_$(pkg.arch)";
+		var package_dest = @"$(config.build_output)/$(name_pkg).suprapack";
+		DirUtils.create_with_parents (config.build_output, 0755);
 		var loop = new MainLoop();
 		var thread = new Thread<void> (null, () => {
 			// compress the package with fakeroot or not
-			if (config.use_fakeroot == true) {
-				if (Utils.run_silent({"fakeroot", "tar", "--zstd", "-cf", @"$(name_pkg).suprapack", "-C", usr_dir, "."}) != 0)
+				if (config.use_fakeroot == true) {
+
+				if (Utils.run({"fakeroot", "tar", "--zstd", "-cf", package_dest, "-C", usr_dir, "."}, {}, true) != 0)
 					error("unable to create package\npackage => %s", name_pkg);
 			}
 			else {
-				if (Utils.run_silent({"tar", "--zstd", "-cf", @"$(name_pkg).suprapack", "-C", usr_dir, "."}) != 0)
+
+			if (Utils.run({"tar", "--zstd", "-cf", package_dest, "-C", usr_dir, "."}, {}, true) != 0)
 					error("unable to create package\npackage =>  %s", name_pkg);
 			}
 			loop.quit();
 		});
-		loading.begin();
+		Utils.loading.begin();
 		loop.run ();
 		thread.join ();
-		print_info(@"$(name_pkg).suprapack is created\n");
+		print_info(@"$(package_dest) is created");
+		if (config.build_and_install == true) {
+			install_suprapackage (package_dest);
+		}
 	}
 
 	/**
