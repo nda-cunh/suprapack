@@ -102,7 +102,8 @@ namespace Build {
 		thread.join ();
 		print_info(@"$(package_dest) is created");
 		if (config.build_and_install == true) {
-			install_suprapackage (package_dest);
+			prepare_install(package_dest);
+			install();
 		}
 	}
 
