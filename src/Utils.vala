@@ -1,15 +1,5 @@
 namespace Utils {
 
-	/**
-	 * Sleep for a number of milliseconds (async)
-	 *
-	 * @param ms the number of milliseconds to sleep
-	 */
-	public async void sleep(uint ms) {
-		Timeout.add(ms, sleep.callback);
-		yield;
-	}
-
 	public async void loading () {
 		const string animation[] = {
 			"⠋ Loading .  ",
@@ -25,7 +15,8 @@ namespace Utils {
 		};
 		int i = 0;
 		while (true) {
-			yield Utils.sleep(300);
+			Timeout.add(300, loading.callback);
+			yield;
 			print("%s\r", animation[i]);
 			++i;
 			if (i == animation.length)
@@ -34,8 +25,9 @@ namespace Utils {
 	}
 
 	public async int run_proc (string []av) {
+		string []av_cmd = av[2:];
 		try {
-			var proc = new Subprocess.newv(av[2:], STDERR_SILENCE | STDOUT_SILENCE | INHERIT_FDS);
+			var proc = new Subprocess.newv(av_cmd, STDERR_SILENCE | STDOUT_SILENCE | INHERIT_FDS);
 			yield proc.wait_async();
 			return proc.get_status();
 		} catch (Error e) {
