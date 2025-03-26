@@ -123,6 +123,8 @@ public class Main : Object {
 			case "update_list":
 			case "refresh":
 				return Cmd.refresh();
+			case "version":
+				return Cmd.version();
 		}
 		error("La commande \"%s\" n'existe pas.", av1);
 	}
