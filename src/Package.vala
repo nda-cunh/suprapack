@@ -155,7 +155,7 @@ public struct Package {
 	public void create_info_file(string info_file) {
 		var fs = FileStream.open(info_file, "w");
 		if (fs == null)
-			error(@"cant open $info_file");
+			error("cant open %s", info_file);
 		fs.printf("name: %s\n", this.name);
 		fs.printf("version: %s\n", this.version);
 		fs.printf("arch: %s\n", this.arch);

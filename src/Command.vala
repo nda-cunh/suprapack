@@ -347,6 +347,11 @@ namespace Cmd {
 		}
 	}
 
+	bool version () {
+		print("SupraPack version: %s\n", Query.get_from_pkg ("suprapack").version);
+		return true;
+	}
+
 	bool help () {
 		string suprapack = @"$(BOLD)suprapack$(NONE)";
 		print(@"$(BOLD)$(YELLOW)[SupraStore] ----- Help -----\n\n");
