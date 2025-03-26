@@ -269,7 +269,8 @@ namespace Cmd {
 		// search with regex pattern
 		else {
 			try {
-				var regex = new Regex(av[2], RegexCompileFlags.OPTIMIZE);
+				string regex_str = av[2].replace("*", ".*");
+				var regex = new Regex(regex_str, RegexCompileFlags.OPTIMIZE);
 				foreach(var i in list) {
 					if (regex.match(i.name) || regex.match(i.version) || regex.match(i.description))
 						print_search(ref i, (i.name in installed));
@@ -341,8 +342,6 @@ namespace Cmd {
 			if (Query.is_exist(pkg_name) == false) {
 				error("%s is not installed", pkg_name);
 			}
-			// if (update_package(pkg_name) == false)
-			// print_error(@"target not found: $pkg_name");
 			return true;
 		}
 	}
@@ -352,51 +351,65 @@ namespace Cmd {
 		return true;
 	}
 
+	private const string p_suprapack = BOLD + "suprapack" + NONE;
 	bool help () {
-		string suprapack = @"$(BOLD)suprapack$(NONE)";
-		print(@"$(BOLD)$(YELLOW)[SupraStore] ----- Help -----\n\n");
-		print(@"	$(suprapack) add [package name]\n");
-		print(@"	$(suprapack) install [package name]\n");
-		print(@"	  $(COM) install a package from a repository\n");
-		print(@"	$(suprapack) install [file.suprapack]\n");
-		print(@"	  $(COM) install a package from a file (suprapack)\n");
-		print(@"	$(suprapack) remove [package name]\n");
-		print(@"	$(suprapack) uninstall [package name]\n");
-		print(@"	  $(COM) remove a package\n");
-		print(@"	$(suprapack) your_file.suprapack\n");
-		print(@"	  $(COM) install a package from a file (suprapack)\n");
-		print(@"	$(suprapack) update\n");
-		print(@"	  $(COM) update all your package\n");
-		print(@"	$(suprapack) update [package name]\n");
-		print(@"	  $(COM) update a package\n");
-		print(@"	$(suprapack) search <pkg>\n");
-		print(@"	  $(COM) search a package in the repo you can use patern for search\n");
-		print(@"	  $(BOLD)$(GREY) Exemple:$(COM) suprapack search $(CYAN)'^supra.*' \n");
-		print(@"	$(suprapack) list_files <pkg>\n");
-		print(@"	  $(COM) list all file instaled by pkg\n");
-		print(@"	$(suprapack) list <pkg>\n");
-		print(@"	  $(COM) list your installed package\n");
-		print(@"	$(suprapack) info [package name]\n");
-		print(@"	  $(COM) print info of package name\n");
-		print(@"	$(suprapack) config [config name] [config value]\n");
-		print(@"	  $(COM) update a config in your user.conf\n");
-		print(@"	$(suprapack) <help>\n");
-		print(@"	  $(COM) you have RTFM... so you are a real\n");
-		print(@"\n");
-		print(@"$(BOLD)$(YELLOW)[Dev Only]$(NONE)\n");
-		print(@"	$(suprapack) build $(CYAN)[PREFIX]\n");
-		print(@"	  $(COM) build a suprapack you need a prefix look note part\n");
-		print(@"	  $(COM) you can add a post_install.sh or pre_install.sh\n");
-		print(@"	  $(COM) install script can use $$SRCDIR and $$PKGDIR\n");
-		print(@"	$(suprapack) prepare\n");
-		print(@"	  $(COM) prepare your repository\n");
-		print(@"	  $(COM) to run in your folder full of suprapack files\n");
-		print(@"	  $(COM) this command generate a list file\n");
-		print(@"\n");
-		print(@"$(BOLD)$(YELLOW)[Note]$(NONE)\n");
-		print(@"	$(WHITE)PREFIX is a folder with this directory like: $(NONE)\n");
-		print(@"	$(CYAN)'bin' 'share' 'lib'$(NONE)\n");
-		print(@"	$(BOLD)$(WHITE)Example: $(CYAN)suprapatate/bin/suprapatate$(NONE) `suprapack build suprapatate`$(NONE)\n");
+		stdout.printf(BOLD + YELLOW + "[SupraPack] ----- Help -----\n\n");
+		stdout.printf("\t" + p_suprapack + " (add | install) [package name]\n");
+		stdout.printf("\t  " + COM + " install a package from a repository\n");
+		stdout.printf("\t" + p_suprapack + " [(add | install)] [file.suprapack]\n");
+		stdout.printf("\t  " + COM + " install a package from a file (suprapack)\n");
+		stdout.printf("\t" + p_suprapack + " (remove | uninstall) [package name]\n");
+		stdout.printf("\t  " + COM + " remove a package\n");
+		stdout.printf("\t" + p_suprapack + " download [package name]\n");
+		stdout.printf("\t  " + COM + " download the suprapack file, but do not install\n");
+		stdout.printf("\t" + p_suprapack + " update\n");
+		stdout.printf("\t  " + COM + " update all your package\n");
+		stdout.printf("\t" + p_suprapack + " update [package name]\n");
+		stdout.printf("\t  " + COM + " update a package\n");
+		stdout.printf("\t" + p_suprapack + " search <pkg>\n");
+		stdout.printf("\t  " + COM + " search a package in the repo you can use patern for search\n");
+		stdout.printf("\t  " + BOLD + GREY + " Exemple:" + COM + " suprapack search " + CYAN + "'plugin*lsp' \n");
+		stdout.printf("\t" + p_suprapack + " list_files <pkg>\n");
+		stdout.printf("\t  " + COM + " list all file instaled by pkg\n");
+		stdout.printf("\t" + p_suprapack + " list <pkg>\n");
+		stdout.printf("\t  " + COM + " list your installed package\n");
+		stdout.printf("\t" + p_suprapack + " info [package name]\n");
+		stdout.printf("\t  " + COM + " print info of package name\n");
+		stdout.printf("\t" + p_suprapack + " config [config name] [config value]\n");
+		stdout.printf("\t  " + COM + " update a config in your user.conf\n");
+		stdout.printf("\t" + p_suprapack + " <help>\n");
+		stdout.printf("\t  " + COM + " you have RTFM... so you are a real\n");
+		stdout.printf("\n");
+		stdout.printf(BOLD + YELLOW + "[Special argument]\n" + NONE);
+		stdout.printf("\t" + p_suprapack + " --prefix " + CYAN + "(all commands)\n");
+		stdout.printf("\t  " + COM + " change the prefix for the install\n"); 
+		stdout.printf("\t" + p_suprapack + " --strap " + CYAN + "(all commands)\n");
+		stdout.printf("\t  " + COM + " change the strap for the install\n");
+		stdout.printf("\t" + p_suprapack + " --force " + CYAN + "(install, uninstall, download)\n");
+		stdout.printf("\t  " + COM + " force the install and reinstall all dependencies\n");
+		stdout.printf("\t" + p_suprapack + " --yes " + CYAN + "(all commands)\n");
+		stdout.printf("\t  " + COM + " say yes to all question\n");
+		stdout.printf("\t" + p_suprapack + " --no-fakeroot " + CYAN + "(build)\n");
+		stdout.printf("\t  " + COM + " disable fakeroot\n");
+		stdout.printf("\t" + p_suprapack + " --build-output " + CYAN + "(build)\n");
+		stdout.printf("\t  " + COM + " change the output for the build\n");
+		stdout.printf("\t" + p_suprapack + " --install " + CYAN + "(build)\n");
+		stdout.printf("\t  " + COM + " build and install a package\n");
+		stdout.printf("\n");
+		stdout.printf(BOLD + YELLOW + "[Dev Only]\n" + NONE);
+		stdout.printf(p_suprapack + " build " + CYAN + "[PREFIX]\n");
+		stdout.printf("\t" + COM + " build a suprapack you need a prefix look note part\n");
+		stdout.printf("\t" + COM + " you can add a post_install.sh or pre_install.sh\n");
+		stdout.printf("\t" + COM + " install script can use $$SRCDIR and $$PKGDIR\n");
+		stdout.printf(p_suprapack + " prepare\n");
+		stdout.printf("\t" + COM + " prepare your repository\n");
+		stdout.printf("\t" + COM + " to run in your folder full of suprapack files\n");
+		stdout.printf("\t" + COM + " this command generate a list file\n");
+		stdout.printf("\n");
+		stdout.printf(BOLD + YELLOW + "[Note]\n" + NONE);
+		stdout.printf(WHITE + "PREFIX is a folder with this directory like: \n" + NONE);
+		stdout.printf(CYAN + "'bin' 'share' 'lib'\n" + NONE);
+		stdout.printf(BOLD + WHITE + "Example: " + CYAN + "suprapatate/bin/suprapatate" + NONE + " `suprapack build suprapatate`\n");
 		return true;
 	}
 
