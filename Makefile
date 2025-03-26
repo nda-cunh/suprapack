@@ -49,7 +49,7 @@ install: suprapack
 	@rm -rf *.suprapack
 	@mkdir -p usr/bin
 	@cp ./suprapack usr/bin/suprapack
-	@./suprapack build usr --no_fakeroot --install --supraforce
+	@./suprapack build usr --no-fakeroot --install --supraforce
 
 run: $(NAME) 
 	cp -f suprapack ~/.local/bin/suprapack
