@@ -22,10 +22,10 @@ public class Main : Object {
 		{ "yes", 'y', OptionFlags.NONE, OptionArg.NONE, ref yes, "answer yes to all questions", null },
 		{ "simple-print", '\0', OptionFlags.NONE, OptionArg.NONE, ref simple_print, "simple print", null },
 		{ "supraforce", 's', OptionFlags.NONE, OptionArg.NONE, ref supraforce, "force the operation", null },
-		{ "no_fakeroot", '\0', OptionFlags.NONE, OptionArg.NONE, ref no_fakeroot, "don't build package with fakeroot", null },
+		{ "no-fakeroot", '\0', OptionFlags.NONE, OptionArg.NONE, ref no_fakeroot, "don't build package with fakeroot", null },
 		{ "strap", '\0', OptionFlags.NONE, OptionArg.STRING, ref strap, "like pacstrap", null },
 		{ "install", '\0', OptionFlags.NONE, OptionArg.NONE, ref build_and_install, "build and install the package", null },
-		{ "build_output", '\0', OptionFlags.NONE, OptionArg.STRING, ref build_output, "build output", null },
+		{ "build-output", '\0', OptionFlags.NONE, OptionArg.STRING, ref build_output, "build output", null },
 		{ null }
 	};
 	bool all_cmd(string []commands) throws Error {
