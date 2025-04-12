@@ -13,6 +13,14 @@ else
 	echo "Supravim https://gitlab.com/supraproject/suprastore_repository/-/raw/master/supravim/" >> $REPO_LIST
 fi
 
+if grep -q 'fpath+=($HOME/.local/share/zsh/site-functions)' ~/.zshrc;
+then
+	echo ''
+else
+	sed -i '1i\fpath+=($HOME/.local/share/zsh/site-functions)' ~/.zshrc
+fi
+
+
 which suprapack 2>/dev/null 1>/dev/null
 if test $? -eq 0 
 then
