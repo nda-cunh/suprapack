@@ -1,0 +1,61 @@
+#compdef suprapack
+
+_suprapack() {
+	local -a commands
+	
+	_arguments '1:commands:(add install uninstall download update search list list_files info config prepare remove build)'
+	case "$words[2]" in
+		add|install)
+			_arguments "*:commands:($(suprapack sync_get_comp))"
+			_arguments '*:options:_suprapack_options_install'
+			_files -g '*.suprapack'
+			;;
+		remove|uninstall)
+			_arguments "*:commands:($(suprapack query_get_comp))"
+			;;
+		download)
+			_arguments "*:commands:($(suprapack sync_get_comp))"
+			;;
+		build)
+			_arguments '*:options:_suprapack_options_build'
+			_files -/
+			;;
+		update)
+			_arguments "*:commands:($(suprapack query_get_comp))"
+			;;
+		list_files)
+			_arguments "*:commands:($(suprapack query_get_comp))"
+			;;
+		info)
+			_arguments "*:commands:($(suprapack query_get_comp))"
+			;;
+		config)
+			_arguments '1:config name' '2:config value'
+			;;
+	esac
+}
+
+_suprapack_options_install() {
+	local -a options
+	options=(
+		'--prefix:Change the prefix for the install'
+		'--strap:Change the strap for the install'
+		'--force:Force the install and reinstall all dependencies'
+		'--yes:Say yes to all questions'
+	)
+
+	_describe 'option' options
+}
+
+_suprapack_options_build() {
+	local -a options
+	options=(
+		'--no-fakeroot:Disable fakeroot'
+		'--build-output:Change the output for the build'
+		'--install:Build and install a package'
+	)
+
+	_describe 'option' options
+}
+
+_suprapack "$@"
