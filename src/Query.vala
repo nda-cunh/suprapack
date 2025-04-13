@@ -73,15 +73,21 @@ namespace Query{
 	* @param package_add: the package name to add in required_by
 	*/
 	public void add_package_to_required_by (string name_pkg, string package_add) throws Error {
-		var dest = @"$(config.path_suprapack_cache)/$package_add/required_by";
+		var folder = @"$(config.path_suprapack_cache)/$package_add/";
+		var dest = @"$(folder)/required_by";
 		var line = name_pkg + "\n";
+	
+		// Get the contents of the file if it exists or create it
 		string contents;
-		if (FileUtils.test(dest, FileTest.EXISTS)) {
+		if (FileUtils.test(dest, FileTest.EXISTS))
 			FileUtils.get_contents(dest, out contents);
-		}
 		else
 			contents = "";
+
+		// Check if the line already exists in the file
+		debug ("line: %s", line);
 		if ((line in contents) == false) {
+			DirUtils.create_with_parents (folder, 0755);
 			FileUtils.set_contents(dest, contents + line);
 		}
 	}
