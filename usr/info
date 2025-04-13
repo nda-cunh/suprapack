@@ -1,5 +1,5 @@
 name: suprapack
-version: 2.9.2
+version: 2.10.0
 arch: amd64-Linux
 author: nda-cunh
 description: package-manager without root
