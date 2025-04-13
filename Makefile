@@ -5,6 +5,7 @@ LDFLAGS=-X -O2 --pkg=gio-2.0 -X -w --enable-experimental --target-glib=auto
 VAPI =	src/uname.vapi
 SRC =	src/main.vala \
 		src/Uninstall.vala \
+		src/QueueSet.vala \
 		src/Run.vala \
 		src/Makepkg.vala \
 		src/Build.vala \
@@ -53,6 +54,6 @@ install: suprapack
 
 run: $(NAME) 
 	cp -f suprapack ~/.local/bin/suprapack
-	suprapack search 
+	suprapack remove supravim 
 
 .PHONY: bootstrap valac install run make_bootstrap all

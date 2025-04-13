@@ -2,9 +2,9 @@
 namespace Uninstall {
 
 	public bool uninstall (string []av) throws Error {
-		var queue = new GenericSet<string?>(str_hash , str_equal);
+		var queue = new QueueSet();
 
-		foreach (var i in av[2:av.length]) {
+		foreach (unowned var i in av[2:av.length]) {
 			add_queue (i, queue);
 		}
 
@@ -19,7 +19,7 @@ namespace Uninstall {
 		uint64 size_max = 0;
 		int padding_name = calc_padding_max (queue);
 
-		foreach (var i in queue) {
+		foreach (unowned var i in queue) {
 			var pkg = Query.get_from_pkg(i);
 			uint64 size = uint64.parse(pkg.size_installed);
 			size_max += size;
@@ -38,16 +38,22 @@ namespace Uninstall {
 		return true;
 	}
 
-	private void add_queue (string name, GenericSet<string> queue) throws Error {
+	private void add_queue (string name, QueueSet queue) throws Error {
+		if (name in queue) {
+			return ;
+		}
+
 		if (Query.is_exist (name) == false) {
 			warning("%s is not installed", name);
 			return ;
 		}
+
+		queue.add(name);
+
 		var all_required = Query.get_required_by(name);
-		foreach (var deps in all_required) {
+		foreach (unowned var deps in all_required) {
 			add_queue(deps, queue);
 		}
-		queue.add(name);
 	}
 
 

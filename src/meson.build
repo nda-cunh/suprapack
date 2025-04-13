@@ -1,5 +1,6 @@
 sources = [
   files('Build.vala',
+    'QueueSet.vala',
     'Config.vala',
     'Log.vala',
     'Makepkg.vala',
