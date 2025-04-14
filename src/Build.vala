@@ -24,9 +24,9 @@ namespace Build {
 			error("%s is not a dir or doesn't exist", usr_dir);
 
 		if (check(usr_dir) == false) {
-			print_info("Your usr_dir is not good are you sure ? [Y/n]\n");
+			Log.suprapack("Your usr_dir is not good are you sure ? [Y/n]\n");
 			if (Utils.stdin_bool_choose ("Your usr_dir is not good are you sure ? [Y/n]", true) == false){
-				print_info("Cancel...");
+				Log.suprapack("Cancel...");
 				Process.exit(0);
 			}
 		}
@@ -42,13 +42,13 @@ namespace Build {
 			// modify x86_64-linux
 			string path = @"$usr_dir/lib/x86_64-linux-gnu";
 			if (FileUtils.test(@"$path/", FileTest.EXISTS)) {
-				print_info("Change lib/x86_64-linux-gnu");
+				Log.suprapack("Change lib/x86_64-linux-gnu");
 				Process.spawn_command_line_sync(@"find $path/ -mindepth 1 -exec mv {} $usr_dir/lib/ \\;", null, out stderr);
 				DirUtils.remove(path);
 			}
 			path = @"$usr_dir/include/x86_64-linux-gnu";
 			if (FileUtils.test(@"$path/", FileTest.EXISTS)) {
-				print_info("Change include/x86_64-linux-gnu");
+				Log.suprapack("Change include/x86_64-linux-gnu");
 				Process.spawn_command_line_sync(@"find $path/ -mindepth 1 -exec mv {} $usr_dir/include/ \\;", null, out stderr);
 				DirUtils.remove(path);
 			}
@@ -73,12 +73,15 @@ namespace Build {
 		autoconfig (usr_dir);
 
 
-		if (FileUtils.test(@"$usr_dir/pre_install.sh", FileTest.EXISTS))
-			FileUtils.chmod(@"$usr_dir/pre_install.sh", 0777);
-		if (FileUtils.test(@"$usr_dir/uninstall", FileTest.EXISTS))
-			FileUtils.chmod(@"$usr_dir/uninstall", 0777);
-		if (FileUtils.test(@"$usr_dir/post_install.sh", FileTest.EXISTS))
-			FileUtils.chmod(@"$usr_dir/post_install.sh", 0777);
+		var usrdir_preinstall = @"$usr_dir/pre_install.sh";
+		if (FileUtils.test(usrdir_preinstall, FileTest.EXISTS))
+			FileUtils.chmod(usrdir_preinstall, 0777);
+		var usrdir_uninstall = @"$usr_dir/uninstall";
+		if (FileUtils.test(usrdir_uninstall, FileTest.EXISTS))
+			FileUtils.chmod(usrdir_uninstall, 0777);
+		var usrdir_postinstall = @"$usr_dir/post_install.sh";
+		if (FileUtils.test(usrdir_postinstall, FileTest.EXISTS))
+			FileUtils.chmod(usrdir_postinstall, 0777);
 		var name_pkg = @"$(pkg.name)_$(pkg.version)_$(pkg.arch)";
 		var package_dest = @"$(config.build_output)/$(name_pkg).suprapack";
 		DirUtils.create_with_parents (config.build_output, 0755);
@@ -100,7 +103,7 @@ namespace Build {
 		Utils.loading.begin();
 		loop.run ();
 		thread.join ();
-		print_info(@"$(package_dest) is created");
+		Log.suprapack("%s is created", package_dest);
 		if (config.build_and_install == true) {
 			prepare_install(package_dest);
 			install();
@@ -137,17 +140,19 @@ namespace Build {
 	 */
 	private void autoconfig (string pkgdir) throws Error {
 		var result = new StringBuilder();
+		var pkgdir_preinstall = pkgdir + "/pre_install.sh";
+
 		string contents;
 		autoconfig_iter_dir (result, @"$pkgdir/lib/pkgconfig/");
 		autoconfig_iter_dir (result, @"$pkgdir/share/pkgconfig/");
 		autoconfig_iter_dir (result, @"$pkgdir/include/pkgconfig/");
 		if (result.str != "") {
-			if (FileUtils.test (@"$pkgdir/pre_install.sh", FileTest.EXISTS)) {
-				FileUtils.get_contents (@"$pkgdir/pre_install.sh", out contents);
-				FileUtils.set_contents (@"$pkgdir/pre_install.sh", contents + result.str);
+			if (FileUtils.test (pkgdir_preinstall, FileTest.EXISTS)) {
+				FileUtils.get_contents (pkgdir_preinstall, out contents);
+				FileUtils.set_contents (pkgdir_preinstall, contents + result.str);
 			}
 			else {
-				FileUtils.set_contents (@"$pkgdir/pre_install.sh", "#!/bin/bash\n" + result.str);
+				FileUtils.set_contents (pkgdir_preinstall, "#!/bin/bash\n" + result.str);
 			}
 		}
 	}
@@ -159,14 +164,14 @@ namespace Build {
 		} catch (Error e) {
 			return ;
 		}
-		string filename;
+		var regex = new Regex("""^prefix.*?$""", RegexCompileFlags.MULTILINE);
+		unowned string filename;
 		string contents;
 
 		while ((filename = dir.read_name ()) != null) {
 			var output = @"$file_directory/$filename";
-			debug("pkg-config %s", output);
+			Log.debug("pkg-config %s", output);
 			FileUtils.get_contents (output, out contents);
-			var regex = new Regex("""^prefix.*?$""", RegexCompileFlags.MULTILINE);
 			contents = regex.replace (contents, contents.length, 0, "prefix=$PREFIX");
 			FileUtils.set_contents (output, contents);
 			result.append ("sed -i \"s|\\$PREFIX|$(echo $prefix)|g\" ${SRCDIR}/");
@@ -178,7 +183,9 @@ namespace Build {
 				index = file_directory.last_index_of ("lib/");
 			if (index == -1)
 				warning ("index == -1 error in pkg-config transform");
-			result.append (file_directory.offset(index) + filename);
+
+			result.append (file_directory.offset(index));
+			result.append (filename);
 			result.append_c ('\n');
 		}
 	}

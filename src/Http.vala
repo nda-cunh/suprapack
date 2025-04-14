@@ -39,7 +39,7 @@ namespace Http {
 		loop.run ();
 		s.destroy ();
 		if (cancel.is_cancelled ())
-			throw new HttpError.CANCEL("the download is cancel");
+			throw new HttpError.CANCEL("the download is cancel (%s)", Log.vala_line ());
 	}
 
 	private async void _download (string url, string? output = null, bool no_print = false, bool rec = false, Cancellable? cancel = null) throws Error {
@@ -73,7 +73,7 @@ namespace Http {
 
 		var output_stream = new DataOutputStream(conn.get_output_stream());
 		var input_stream = new DataInputStream(conn.get_input_stream());
-		debug("download", "Host [%s] PATH [%s] PORT [%d]", host, path, port);
+		Log.debug("download", "Host [%s] PATH [%s] PORT [%d]", host, path, port);
 
 
 		/* Send GET request with headers */
@@ -97,7 +97,7 @@ namespace Http {
 			int err =  int.parse(error);
 			if (err != 200) {
 				if (err != 302)
-					throw new HttpError.ERR(@"$(error) HTTP".replace("\r", ""));
+					throw new HttpError.ERR("%s HTTP (%s)", error.replace("\r", ""), Log.vala_line());
 			}
 		}
 
@@ -114,20 +114,20 @@ namespace Http {
 			/* Header Part */
 			{
 				uint8 buffer [2048];
-				debug("download", "HEADER: [%s]", line);
+				Log.debug("download", "HEADER: [%s]", line);
 				if (line.has_prefix("Content-Length: "))
 					line.scanf("Content-Length: %zu", out bytes);
 				else if (line.has_prefix ("Transfer-Encoding:")) {
 					line.scanf("Transfer-Encoding: %s", out buffer);
 					if (((string)buffer).ascii_down () == "chunked") {
-						debug("download", "Retry chunked not supported");
+						Log.debug("download", "Retry chunked not supported");
 						download(url, output, no_print, null, true);
 						return;
 					}
 				}
 				else if (line.has_prefix("Location: ")) {
 					line.scanf("Location: %s", out buffer);
-					debug("download", "redirect to %s", (string)buffer);
+					Log.debug("download", "redirect to %s", (string)buffer);
 					download((string)buffer, output, no_print, null, true);
 					return;
 				}

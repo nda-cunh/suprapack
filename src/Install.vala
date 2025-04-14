@@ -92,7 +92,7 @@ private bool run_post_pre_script (string dir, string filename, string print_name
 			if (Utils.stdin_bool_choose("Continue ? [Y/n]", true) == false)
 				throw new ErrorSP.ACCESS("you refused to execute the script.");
 		}
-		print_info(null, print_name);
+		Log.info("%s", print_name);
 		var envp = Utils.prepare_envp(dir);
 		if (Utils.run({filename}, envp) != 0)
 			throw new ErrorSP.FAILED("non zero exit code of pre installation script");
@@ -120,11 +120,11 @@ public void install_suprapackage(string suprapack) throws Error {
 			throw new ErrorSP.BADFILE("ce fichier n'est pas un suprapack");
 	}
 	else
-		throw new ErrorSP.ACCESS(@"$suprapack n'existe pas");
+		throw new ErrorSP.ACCESS("%s n'existe pas", suprapack);
 	var tmp_dir = DirUtils.make_tmp("suprastore_XXXXXX");
-	print_info(@"Extraction de $(CYAN)$(suprapack)$(NONE)");
+	Log.suprapack("Extraction de " + CYAN + "%s" + NONE, suprapack);
 	if (Utils.run({"tar", "-xf", suprapack, "-C", tmp_dir}, {}, true) != 0)
-		throw new ErrorSP.FAILED(@"unable to decompress package\npackage => $(suprapack)");
+		throw new ErrorSP.FAILED("unable to decompress package\npackage => %s", suprapack);
 
 	debug ("Extracted in %s/info (%s)", tmp_dir, suprapack);
 	var pkg = Package.from_file(@"$tmp_dir/info");
@@ -135,8 +135,7 @@ public void install_suprapackage(string suprapack) throws Error {
 		Query.uninstall(pkg.name);
 	}
 
-	//TODO optimisation of the print
-	print_info("Installation de" + CYAN + @" $(pkg.name) $(pkg.version)" + NONE + @" par $(pkg.author)");
+	Log.suprapack("Installation de" + CYAN + " %s %s" + NONE + " par %s", pkg.name, pkg.version, pkg.author);
 
 	var list = new List<string>();
 	list_file_dir(tmp_dir, ref list);
@@ -158,7 +157,7 @@ public void install_suprapackage(string suprapack) throws Error {
 
 	// remove useless tmp dir
 	if (Utils.run({"rm", "-rf", tmp_dir}, {}, true) != 0)
-		new OptionError.FAILED(@"unable to remove directory\ndirectory => $(tmp_dir)");
+		new OptionError.FAILED("unable to remove directory\ndirectory => %s", tmp_dir);
 }
 
 
@@ -166,7 +165,7 @@ private void force_suprapack_update () throws Error {
 	if (!Query.is_exist("suprapack"))
 		return ;
 	if (config.supraforce == false && Sync.check_update("suprapack")) {
-		print_info(null, "Canceling... An update of suprapack is here", "\033[35;1m");
+		Log.info("Canceling... An update of suprapack is here");
 		Process.spawn_command_line_sync(@"$(config.prefix)/bin/suprapack --force --supraforce add suprapack");
 		var cmd_str = string.joinv(" ", config.cmd);
 		Process.spawn_command_line_sync(cmd_str);
@@ -182,7 +181,7 @@ public void install () throws Error {
 	print("\nresolving dependencies...\n");
 
 	if (config.queue_pkg.length == 0){
-		print_info("there's nothing to be done");
+		Log.info("there's nothing to be done");
 		return;
 	}
 
@@ -195,8 +194,8 @@ public void install () throws Error {
 		foreach (unowned var exclude in i.exclude_package.split(" ")) {
 			exclude = exclude._strip();
 			if (Query.is_exist(exclude)) {
-				print_info(@"Impossible to install '$(i.name)' because '$(exclude)' is in conflict with him", "Conflict", "\033[31;1m");
-				print_info(@"please choose if you want to uninstall '$(exclude)' [y/N]", "Conflict", "\033[31;1m");
+				Log.conflict("Impossible to install '%s' because '%s' is in conflict with him", i.name, exclude);
+				Log.conflict("please choose if you want to uninstall '%s' [y/N]", exclude);
 				if (Utils.stdin_bool_choose(": ") == true) {
 					Query.uninstall(exclude);
 				}
@@ -234,7 +233,7 @@ public void install () throws Error {
 
 	uint8 buffer[32];
 	Utils.convertBytePrint   (size_installed, buffer);
-	print(@"\nTotal Installed Size:  " + BOLD + "%s" + NONE + "\n", (string)buffer);
+	print("\nTotal Installed Size:  " + BOLD + "%s" + NONE + "\n", (string)buffer);
 
 
 	unowned var first_package = config.queue_pkg.get_first().name;
@@ -252,7 +251,7 @@ public void install () throws Error {
 						install_suprapackage(i.output);
 					}
 					else
-						print_info(@"$(i.name) is already installed", "Info", "\033[37m");
+						Log.info("%s is already installed", i.name);
 				}
 				else
 					install_suprapackage(i.output);
@@ -305,9 +304,9 @@ private void prepare_install(string name_search, string name_repo = "") throws E
 	// if no package found
 	if (queue.length == 0) {
 		if (Query.is_exist(name_search) == true) {
-			throw new ErrorSP.ACCESS(@"Can't found $name_search but exist in local");
+			throw new ErrorSP.ACCESS("Can't found %s but exist in local", name_search);
 		}
-		throw new ErrorSP.ACCESS(@"$(name_search) not found");
+		throw new ErrorSP.ACCESS("%s not found", name_search);
 	}
 	// if only one package found
 	else if (queue.length == 1){
@@ -321,15 +320,15 @@ private void prepare_install(string name_search, string name_repo = "") throws E
 			pkg = lst[lst.length - 1];
 		}
 		else {
-			print_info("Similar package are found", "Conflict", "\033[31;1m");
+			Log.conflict("Similar package are found");
 			for (int i = 0; i < queue.length; i++) {
 				print("%s", BOLD);
-				print(@"%4d) $(PURPLE)%s/$(WHITE)%s [%s]$(NONE)\n", i, queue[i].repo_name, queue[i].name, queue[i].version);
+				print("%4d) " + PURPLE + "%s/" + WHITE + "%s [%s]" + NONE + "\n", i, queue[i].repo_name, queue[i].name, queue[i].version);
 			}
 			print("please choose one: ");
 			var nb = int.parse(stdin.read_line());
 			if (nb < 0 || nb > queue.length - 1) {
-				print_info("Cancelling...");
+				Log.info("Cancelling...");
 				return ;
 			}
 			pkg = queue[nb];
@@ -347,7 +346,7 @@ private void prepare_install(string name_search, string name_repo = "") throws E
 // pkg is the package object with all the info of the package
 private void add_queue_list(SupraList pkg, string output) throws Error {
 
-	debug ("Add in queue: %s", pkg.name);
+	Log.debug ("Add in queue: %s", pkg.name);
 	// get the info file of the package
 	Process.spawn_command_line_sync(@"tar -xf $(output) ./info");
 	// Create the package object with the info file
@@ -387,7 +386,7 @@ private void add_queue_list(SupraList pkg, string output) throws Error {
 			}
 			// if the package is not found in repository skip it because it's optional
 			if (Sync.exist(i) == false) {
-				print_info(@"\033[95m Optional Dependency $i not found\033[0m", "Skip");
+				Log.skip("\033[95m Optional Dependency %s not found" + NONE, i);
 				continue;
 			}
 			// if the package is ever installed don't add it in the queue

@@ -31,7 +31,7 @@ namespace Cmd {
 			error("suprapack download <pkg>");
 		foreach (var pkg in av[2:av.length]) {
 			var supralist = Sync.get_from_pkg(pkg);
-			print_info(@"$(supralist.name) $(supralist.version)", "Download");
+			Log.download(@"%s %s", supralist.name, supralist.version);
 			var path = Sync.download_package(pkg);
 			if (path == null)
 				error("Cant download $(av[2])");
@@ -51,9 +51,9 @@ namespace Cmd {
 
 
 	bool refresh () throws Error {
-		print_info("Refreshing packages list");
+		Log.suprapack("Refreshing packages list");
 		Sync.refresh_list();
-		print_info("Packages list Refreshed");
+		Log.suprapack("Packages list Refreshed");
 		return true;
 	}
 
@@ -114,7 +114,7 @@ namespace Cmd {
 		if (av.length == 2)
 			error("`suprapack build [...]`");
 		foreach (var i in av[2:]) {
-			print_info(@"Build $(av[2])");
+			Log.suprapack(@"Build %s", av[2]);
 			Build.create_package(i);
 		}
 		return true;
@@ -172,11 +172,11 @@ namespace Cmd {
 
 	bool list_files (string []av) {
 		if (av.length == 2) {
-			print_info ("`suprapack list_files <pkg>`");
+			Log.suprapack("`suprapack list_files <pkg>`");
 		}
 		foreach (unowned var i in av[2:av.length]) {
 			var pkg = Query.get_from_pkg(i);
-			print_info(@"$(pkg.name) $(pkg.version)", "List");
+			Log.suprapack("%s %s", pkg.name, pkg.version);
 			var lst = pkg.get_installed_files();
 			foreach (unowned var file in lst) {
 				print("%s\n", file);
@@ -288,7 +288,7 @@ namespace Cmd {
 		if (av.length == 2)
 			error("`suprapack run [...]`");
 		if (Query.is_exist(av[2]) == false && config.force == false) {
-			print_info(@"$(av[2]) doesn't exist install it...");
+			Log.suprapack("%s doesn't exist install it...", av[2]);
 			Cmd.install({"", "install", av[2]});
 		}
 		if (Query.is_exist(av[2]) == false && config.force == false) {
