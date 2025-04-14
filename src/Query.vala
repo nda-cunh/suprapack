@@ -98,6 +98,9 @@ namespace Query{
 	 * @param name_pkg: the package name to get required_by
 	 */
 	public string[] get_required_by (string name_pkg) throws Error {
+
+		if (name_pkg == "suprapack")
+			return Query.get_all_installed_pkg ();
 		string []res = {};
 		string contents;
 		var required_by = @"$(config.path_suprapack_cache)/$name_pkg/required_by";
