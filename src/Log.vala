@@ -17,7 +17,7 @@ public const string ENDCURSOR= "\033[?25h";
 extern int printf(string str, ...);
 
 public void init_message () {
-	Log.set_default_handler((type, level, message)=> {
+	GLib.Log.set_default_handler((type, level, message) => {
 		unowned string real_message;
 		var len = message.index_of_char(':') + 1;
 		real_message = message.offset(len);
@@ -45,9 +45,9 @@ public void init_message () {
 				break;
 			case LogLevelFlags.LEVEL_INFO:
 				if (type == null)
-					print("\033[35m[Info]\033[0m: %s\n", real_message);
+					print("\033[35m[Info]\033[0m: %s\n", message);
 				else
-					print("%s: %s\n", type, real_message);
+					print("%s: %s\n", type, message);
 				break;
 			case LogLevelFlags.FLAG_RECURSION:
 			case LogLevelFlags.FLAG_FATAL:
@@ -69,12 +69,45 @@ errordomain ErrorSP {
 
 }
 
-[Diagnostics]
-public void debug(string type, string msg, ...) {
-	logv(type, LogLevelFlags.LEVEL_DEBUG, msg, va_list());
-}
+namespace Log {
 
-public void print_info(string? msg, string prefix = "SupraPack", string color = "\033[33;1m") {
-	string type = "%s[%s]\033[0m".printf(color, prefix);
-	log(type, LogLevelFlags.LEVEL_INFO, msg ?? "");
+	[Diagnostics]
+		public unowned string vala_line(string do_not_touch = "") {
+			return do_not_touch;
+		}
+
+	[Diagnostics]
+	public void debug (string type, string msg, ...) {
+		logv(type, LogLevelFlags.LEVEL_DEBUG, msg, va_list());
+	}
+
+	public void info (string format, ...) {
+		const string type = "\033[37m[Info]\033[0m";
+		va_list args = va_list();
+		logv(type, LogLevelFlags.LEVEL_INFO, format, args); 
+	}
+
+	public void skip (string format, ...) {
+		const string type = "\033[33;1m[Skip]\033[0m";
+		va_list args = va_list();
+		logv(type, LogLevelFlags.LEVEL_INFO, format, args); 
+	}
+
+	public void suprapack (string format, ...) {
+		const string type = "\033[33;1m[Suprapack]\033[0m";
+		va_list args = va_list();
+		logv(type, LogLevelFlags.LEVEL_INFO, format, args); 
+	}
+
+	public void download (string format, ...) {
+		const string type = "\033[33;1m[Download]\033[0m";
+		va_list args = va_list();
+		logv(type, LogLevelFlags.LEVEL_INFO, format, args); 
+	}
+
+	public void conflict (string format, ...) {
+		const string type = "\033[31;1m[Conflict]\033[0m";
+		va_list args = va_list();
+		logv(type, LogLevelFlags.LEVEL_INFO, format, args); 
+	}
 }

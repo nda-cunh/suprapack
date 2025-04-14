@@ -142,7 +142,7 @@ public class Makepkg : Object {
 			}
 			foreach (unowned var i in dependency) {
 				if (Query.is_exist (i) == false) {
-					print_info(@"$i is not installed cancelling...");
+					Log.suprapack("%s is not installed cancelling...", i);
 					foreach (var pkg in dependency) {
 						if (!(Query.is_exist (pkg)))
 							prepare_install (pkg);
@@ -156,7 +156,7 @@ public class Makepkg : Object {
 
 
 		print("\n");
-		print_info ("Downloading all sources", "Source", "\033[36;1m");
+		Log.info("Downloading all sources");
 		/* Parse Source('item1' 'item2') */
 		foreach (var str in get_data<string>("source")?.replace("\n", " ")?.split(" "))
 		{
@@ -246,7 +246,7 @@ public class Makepkg : Object {
 		var prepare = get_function (contents, "prepare");
 		if (prepare != null) {
 			int wait_status;
-			print_info ("running prepare script", "Prepare", "\033[36;1m");
+			Log.info ("running prepare script");
 			Process.spawn_sync (srcdir, {"bash", "-c", prepare}, env, GLib.SpawnFlags.SEARCH_PATH, null, null, null, out wait_status);
 			if (wait_status != 0)
 				throw new ErrorSP.CANCEL("prepare() send [%d] error code", wait_status);
@@ -254,7 +254,7 @@ public class Makepkg : Object {
 		var package = get_function (contents, "package");
 		if (package != null) {
 			int wait_status;
-			print_info ("running package script", "Package", "\033[36;1m");
+			Log.info ("running package script");
 			Process.spawn_sync (srcdir, {"bash", "-c", package}, env, GLib.SpawnFlags.SEARCH_PATH, null, null, null, out wait_status);
 			if (wait_status != 0)
 				throw new ErrorSP.CANCEL("prepare() send [%d] error code", wait_status);

@@ -27,7 +27,7 @@ public struct SupraList {
 			description = info.fetch_named("desc");
 		}
 		else
-			throw new SupraListError.FAILED("Can't parse line %s (%s:%d)", line, Log.FILE, Log.LINE);
+			throw new SupraListError.FAILED("Can't parse line %s (%s)", line, Log.vala_line());
 	}
 
 	unowned string repo_name;

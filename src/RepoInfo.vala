@@ -21,10 +21,10 @@ public class RepoInfo : Object {
 	/* fetch the 'list' file  LOCAL or HTTP */
 	public void fetch_list (string url, string output) throws Error {
 		string url_list = url;
-		debug("URL %s %s", url_list, output);
+		Log.debug("URL %s %s", url_list, output);
 		if (url.has_prefix ("http")) {
 			url_list += "list";
-			debug("Repository", "FETCH HTTP repository %s", url_list);
+			Log.debug("Repository", "FETCH HTTP repository %s", url_list);
 			try {
 				Http.download(url_list, output, true);
 			}
@@ -38,7 +38,7 @@ public class RepoInfo : Object {
 			var file_list = GLib.File.new_for_path(url_list);
 			var file_output = GLib.File.new_for_path(output);
 			file_list.copy (file_output, FileCopyFlags.OVERWRITE);
-			debug("Repository", "FETCH local repository %s", url_list);
+			Log.debug("Repository", "FETCH local repository %s", url_list);
 			this.local = true;
 		}
 	}

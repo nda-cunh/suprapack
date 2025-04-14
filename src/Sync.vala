@@ -220,12 +220,12 @@ class Sync : Object {
 		string url = this.get_url_from_name(pkg.repo_name) + pkgname;
 		try  {
 			print(CURSOR);
-			debug("Sync", "Download [%s] from [%s] local:(%s)", pkg.name, url, pkg.is_local ? "true" : "false");
+			Log.debug("Sync", "Download [%s] from [%s] local:(%s)", pkg.name, url, pkg.is_local ? "true" : "false");
 			if (pkg.is_local == true) {
 				var file_list = GLib.File.new_for_path(url);
 				var file_output = GLib.File.new_for_path(output);
 				file_list.copy (file_output, FileCopyFlags.OVERWRITE);
-				debug("Sync", "Copy from local name: [%s] repo: [%s]", pkg.name, pkg.repo_name);
+				Log.debug("Sync", "Copy from local name: [%s] repo: [%s]", pkg.name, pkg.repo_name);
 			}
 			else
 				Http.download(url, output, false, cancel);
