@@ -3,13 +3,14 @@
  * It's used to store the configuration of the user and the package
  **/
 public class Config : Object {
+
 	public Config () throws Error {
 		this.change_prefix (@"$HOME/.local");
 		this.load_config();
 		var prefix_tmp = Environ.get_variable(Environ.get(), "PREFIX");
 		if (prefix_tmp != null)
 			this.change_prefix(prefix_tmp);
-		queue_pkg = new List<Package?>();
+		queue_pkg = new PackageSet();
 		create_source_profile();
 	}
 
@@ -73,13 +74,13 @@ export fpath=(%1$s/bin $fpath)
 		this.strap = this.prefix;
 	}
 
-	private void load_config() throws Error{
+	private void load_config () throws Error{
 		string contents;
 		FileUtils.get_contents (this.config, out contents);
 
 		var lines = contents.split("\n");
 		var reg = /^([^:]+)[:]([^\s]+)$/;
-		foreach (var line in lines) {
+		foreach (unowned var line in lines) {
 			if (!reg.match(line))
 				continue;
 			if (line.has_prefix ("is_cached")) {
@@ -96,7 +97,7 @@ export fpath=(%1$s/bin $fpath)
 	}
 
 
-	inline string parse_bool (string str) {
+	private inline string parse_bool (string str) {
 		string tmp;
 		bool res;
 		tmp = str._strip ().ascii_down ();
@@ -105,6 +106,12 @@ export fpath=(%1$s/bin $fpath)
 		return res.to_string ();
 	}
 
+	/**
+	 * Parse the command line arguments (ARGV)
+	 *
+	 * @param argv: the command line arguments
+	 * @return: true if the arguments are valid, false otherwise
+	 **/
 	public void parse (ref unowned string []argv) throws Error {
 		string? _prefix_ = null;
 		string? _show_script_ = null;
@@ -141,12 +148,19 @@ export fpath=(%1$s/bin $fpath)
 		print ("[NewFile]:\n  %s\n", contents.replace("\n", "\n  "));
 	}
 
-	private void add(string key, string value) throws Error {
+	/**
+	 * Add a new config to the config file
+	 * @param key: the key to add
+	 * @param value: the value to add
+	 */
+
+
+	private void add (string key, string value) throws Error {
 		var new_contents = new StringBuilder();
 		string contents;
 		FileUtils.get_contents (this.config, out contents);
 
-		foreach (var line in contents.split("\n")) {
+		foreach (unowned var line in contents.split("\n")) {
 			if (!line.has_prefix (key)) {
 				new_contents.append(line);
 				new_contents.append_c ('\n');
@@ -156,17 +170,12 @@ export fpath=(%1$s/bin $fpath)
 		FileUtils.set_contents(this.config, new_contents.str);
 	}
 
-	public bool check_if_in_queue(string name) {
-		unowned List<Package?> it = queue_pkg;
-		while (it != null)
-		{
-			if (it.data.name == name)
-				return true;
-			it = it.next;
-		}
-		return false;
-	}
-
+	/**
+	 * Check if the architecture is the same as the current architecture
+	 *
+	 * @param arch: the architecture to check
+	 * @return: true if the architecture is the same, false otherwise
+	 */
 	public static bool is_my_arch (string arch) throws Error {
 		unowned string arch_actual = Utils.get_arch ();
 		if ("any" in arch)
@@ -177,7 +186,12 @@ export fpath=(%1$s/bin $fpath)
 	}
 
 
-	public List<Package?>	queue_pkg;
+
+	/***************************************
+	 * Variables used by the package manager
+	 ****************************************/
+
+	public PackageSet queue_pkg;
 	public unowned string[] cmd;
 	public bool want_remove 	{get; set; default=false;}
 
@@ -192,9 +206,10 @@ export fpath=(%1$s/bin $fpath)
 	// The path of the cache ($HOME/.local/.suprapack/)
 	public string path_suprapack_cache			{get; private set;}
 
-	/*********
-	 * Options
-	 ***********/
+
+	/*********************************
+	 * Options from the command line
+	 **********************************/
 
 	// The prefix where the package will be installed
 	public string prefix		{get; private set; default=@"$HOME/.local";}

@@ -7,9 +7,9 @@
  */
 namespace Repository {
 
-	private List<string> list_file_in_dir (string dir_name) {
+	private SList<string> list_file_in_dir (string dir_name) {
 		try {
-			var result = new List<string>();
+			var result = new SList<string>();
 			var dir = Dir.open(dir_name);
 			unowned string tmp;
 
@@ -31,7 +31,7 @@ namespace Repository {
 		var fs = FileStream.open(@"$pwd/list", "w");
 		if (fs == null)
 			error("Cant create %s/list", pwd);
-		foreach (var file in lst) {
+		foreach (unowned var file in lst) {
 			string lore = "";
 			try {
 				int status;

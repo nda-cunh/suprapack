@@ -18,7 +18,7 @@ namespace Query{
 
 
 	/**
-	 * remove package with all files installed and remove ~/suprastore/name_pkg
+	 * remove package with all files installed and remove ~/.suprapack/name_pkg
 	 *
 	 * @param name_pkg: the package name to remove
 	 */
@@ -51,7 +51,7 @@ namespace Query{
 		Query.remove_pkg(name_pkg);
 		print("\n");
 	}
-
+	
 
 	/**
 	* return the Package struct from a package-name
@@ -125,13 +125,17 @@ namespace Query{
 	private void remove_pkg (string name_pkg) {
 		var pkg = @"$(config.path_suprapack_cache)/$name_pkg/";
 		FileUtils.unlink(pkg + "info");
-		FileUtils.unlink(pkg + "required_by");
 		var uninstall_dir = @"$pkg/uninstall";
-		if (config.want_remove == true && FileUtils.test(uninstall_dir, FileTest.EXISTS)) {
-			const string _remove = BOLD + YELLOW + "[Uninstall script]" + NONE + " ";
-			print("%s[%s]\n", _remove, name_pkg);
-			Utils.run({uninstall_dir}, Utils.prepare_envp(config.prefix));
-			FileUtils.remove(uninstall_dir);
+		// If the package need to be removed (suprapack remove command is used)
+		if (config.want_remove == true) {
+			FileUtils.unlink(pkg + "required_by");
+			// Uninstall Script
+			if (FileUtils.test(uninstall_dir, FileTest.EXISTS)) {
+				const string _remove = BOLD + YELLOW + "[Uninstall script]" + NONE + " ";
+				print("%s[%s]\n", _remove, name_pkg);
+				Utils.run({uninstall_dir}, Utils.prepare_envp(config.prefix));
+				FileUtils.remove(uninstall_dir);
+			}
 		}
 		DirUtils.remove(pkg);
 	}

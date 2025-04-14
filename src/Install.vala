@@ -181,7 +181,7 @@ public void install () throws Error {
 
 	print("\nresolving dependencies...\n");
 
-	if (config.queue_pkg.length() == 0){
+	if (config.queue_pkg.length == 0){
 		print_info("there's nothing to be done");
 		return;
 	}
@@ -216,7 +216,7 @@ public void install () throws Error {
 	}
 
 	int64 size_installed = 0;
-	print("Package (%u)\n\n", config.queue_pkg.length());
+	print("Package (%u)\n\n", config.queue_pkg.length);
 
 	foreach (unowned var i in config.queue_pkg) {
 		string version = i.version;
@@ -237,8 +237,9 @@ public void install () throws Error {
 	print(@"\nTotal Installed Size:  " + BOLD + "%s" + NONE + "\n", (string)buffer);
 
 
-	unowned var first_package = config.queue_pkg.nth_data(0).name;
-	config.queue_pkg.reverse();
+	unowned var first_package = config.queue_pkg.get_first().name;
+	// config.queue_pkg.reverse();
+	// WARNING REVERSE ???
 	if (config.allays_yes || Utils.stdin_bool_choose(":: Proceed with installation [Y/n] ", true)) {
 		print("\n");
 		foreach (unowned var i in config.queue_pkg) {
@@ -356,14 +357,14 @@ private void add_queue_list(SupraList pkg, string output) throws Error {
 	pkgtmp.repo = pkg.repo_name;
 
 	// Add the package in the queue
-	config.queue_pkg.append(pkgtmp);
+	config.queue_pkg.add(pkgtmp);
 
 	// Add alls dependencies of the package in the queue
 	try {
 		// Add Dependency in QUEUE
 		foreach (unowned var i in pkgtmp.dependency.split(" ")) {
 			// skip if the package is already in the queue
-			if (config.check_if_in_queue(i)) {
+			if (config.queue_pkg.contains_name(i)) {
 				continue;
 			}
 			
@@ -379,9 +380,9 @@ private void add_queue_list(SupraList pkg, string output) throws Error {
 				prepare_install(i);
 		}
 		// Add Optional Dependency in QUEUE
-		foreach (var i in pkgtmp.optional_dependency.split(" ")) {
+		foreach (unowned var i in pkgtmp.optional_dependency.split(" ")) {
 			// skip if the package is already in the queue
-			if (config.check_if_in_queue(i)) {
+			if (config.queue_pkg.contains_name(i)) {
 				continue;
 			}
 			// if the package is not found in repository skip it because it's optional
