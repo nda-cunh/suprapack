@@ -57,7 +57,7 @@ namespace Uninstall {
 	}
 
 
-	private int calc_padding_max (GenericSet<string?> queue) {
+	private int calc_padding_max (QueueSet queue) {
 		int size_max = 12;
 		foreach (unowned var i in queue) {
 			var len = i.length;

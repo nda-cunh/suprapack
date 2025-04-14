@@ -12,11 +12,10 @@ public struct SupraList {
 		return _regex;
 	}}
 
-	//42cformatter-v1.0_amd64-Linux.suprapack c formatter for 42 norm
+	// 42cformatter-v1.0_amd64-Linux.suprapack c formatter for 42 norm
 	public SupraList (string repo_name, string line, bool is_local) throws SupraListError {
 		this.is_local = is_local;
 		MatchInfo info;
-
 
 		if (regex.match(line, 0, out info)) {
 			this.repo_name = repo_name;
@@ -30,6 +29,7 @@ public struct SupraList {
 		else
 			throw new SupraListError.FAILED("Can't parse line %s (%s:%d)", line, Log.FILE, Log.LINE);
 	}
+
 	unowned string repo_name;
 	string pkg_name;
 	string name;

@@ -51,6 +51,39 @@ public struct Package {
 		this.arch = "";
 	}
 
+	public bool equal (Package pkg) {
+		if (this.name == pkg.name &&
+			this.version == pkg.version &&
+			this.arch == pkg.arch &&
+			this.author == pkg.author &&
+			this.description == pkg.description &&
+			this.binary == pkg.binary &&
+			this.dependency == pkg.dependency &&
+			this.optional_dependency == pkg.optional_dependency &&
+			this.size_tar == pkg.size_tar)
+			return true;
+		return false;
+	} 
+	
+	public uint hash () {
+		uint hash = 17;
+		hash = hash * 31 + name.hash ();
+		hash = hash * 31 + author.hash();
+		hash = hash * 31 + version.hash();
+		hash = hash * 31 + description.hash();
+		hash = hash * 31 + binary.hash();
+		hash = hash * 31 + dependency.hash();
+		hash = hash * 31 + optional_dependency.hash();
+		hash = hash * 31 + size_tar.hash();
+		hash = hash * 31 + size_installed.hash();
+		hash = hash * 31 + installed_files.hash();
+		hash = hash * 31 + exclude_package.hash();
+		hash = hash * 31 + output.hash();
+		hash = hash * 31 + repo.hash();
+		hash = hash * 31 + arch.hash();
+		return hash;
+	}
+
 	// constructor
 	public Package.from_input() {
 		try {

@@ -1,4 +1,4 @@
-private void env_change(ref string []env, string variable, string value, bool no_last = false) {
+private void env_change (ref string []env, string variable, string value, bool no_last = false) {
 	unowned string? last_variable = Environ.get_variable (env, variable);
 	if (no_last)
 		last_variable = null;
