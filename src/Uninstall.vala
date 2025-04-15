@@ -30,7 +30,7 @@ namespace Uninstall {
 
 		Utils.convertBytePrint (size_max, buffer);
 		printf("\nTotal Remove Size:  " + BOLD + "%s\n" + NONE, buffer);
-		if (config.allays_yes || Utils.stdin_bool_choose(":: Proceed with installation [Y/n] ", true)) {
+		if (config.allays_yes || Utils.stdin_bool_choose(":: Proceed with uninstallation [y/N] ", false)) {
 			foreach (unowned var i in queue) {
 				Query.uninstall(i);
 			}
