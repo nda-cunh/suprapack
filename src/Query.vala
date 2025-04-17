@@ -85,7 +85,6 @@ namespace Query{
 			contents = "";
 
 		// Check if the line already exists in the file
-		debug ("line: %s", line);
 		if ((line in contents) == false) {
 			DirUtils.create_with_parents (folder, 0755);
 			FileUtils.set_contents(dest, contents + line);
