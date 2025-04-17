@@ -15,26 +15,34 @@ public class Main : Object {
 	public static bool build_and_install = false;
 	public static string? build_output = null;
 	public static bool _debug = false;
+	private const string COLOR = "\033[36;1m";
 
 	const OptionEntry[] options = {
-		{ "prefix", 'p', OptionFlags.NONE, OptionArg.STRING, ref prefix, "", "Path to the folder" },
-		{ "debug", '\0', OptionFlags.NONE, OptionArg.NONE, ref _debug, "add the debug mode", "debug"},
-		{ "refresh", 'r', OptionFlags.NONE, OptionArg.NONE, ref refresh, "refresh the list of packages", null },
-		{ "force", 'f', OptionFlags.NONE, OptionArg.NONE, ref force, "force the operation", null },
-		{ "yes", 'y', OptionFlags.NONE, OptionArg.NONE, ref yes, "answer yes to all questions", null },
-		{ "simple-print", '\0', OptionFlags.NONE, OptionArg.NONE, ref simple_print, "simple print", null },
-		{ "supraforce", 's', OptionFlags.NONE, OptionArg.NONE, ref supraforce, "force the operation", null },
-		{ "no-fakeroot", '\0', OptionFlags.NONE, OptionArg.NONE, ref no_fakeroot, "don't build package with fakeroot", null },
-		{ "strap", '\0', OptionFlags.NONE, OptionArg.STRING, ref strap, "like pacstrap", null },
-		{ "install", '\0', OptionFlags.NONE, OptionArg.NONE, ref build_and_install, "build and install the package", null },
-		{ "build-output", '\0', OptionFlags.NONE, OptionArg.STRING, ref build_output, "build output", null },
+		// Special options hidden
+		{ "simple-print", '\0', OptionFlags.HIDDEN, OptionArg.NONE, ref simple_print, "simple print used by other program", null },
+		{ "supraforce", 's', OptionFlags.HIDDEN, OptionArg.NONE, ref supraforce, "force the operation without update check", null },
+		// Normal Options
+		{ "prefix", 'p', OptionFlags.NONE, OptionArg.STRING, ref prefix, COLOR + "(All) " + NONE + " the path of the suprapack folder root", "PATH TO THE FOLDER" },
+		{ "debug", '\0', OptionFlags.NONE, OptionArg.NONE, ref _debug, COLOR + "(All)" + NONE + " add the debug mode", "DEBUG"},
+		{ "refresh", 'r', OptionFlags.NONE, OptionArg.NONE, ref refresh, COLOR + "(All)" + NONE + " refresh the list of packages", null },
+		{ "force", 'f', OptionFlags.NONE, OptionArg.NONE, ref force, COLOR + "(Install, Uninstall, Download)" + NONE + " force the operation", null },
+		{ "yes", 'y', OptionFlags.NONE, OptionArg.NONE, ref yes, COLOR + "(All)" + NONE + " answer yes to all questions", null },
+		{ "no-fakeroot", '\0', OptionFlags.NONE, OptionArg.NONE, ref no_fakeroot, COLOR + "(Build)" + NONE + " don't build package with fakeroot", null },
+		{ "strap", '\0', OptionFlags.NONE, OptionArg.STRING, ref strap, COLOR + "(All)" + NONE + " like PacStrap install to another root", "PREFIX"},
+		{ "install", '\0', OptionFlags.NONE, OptionArg.NONE, ref build_and_install, COLOR + "(Build)" + NONE + " build and install the package", null },
+		{ "build-output", '\0', OptionFlags.NONE, OptionArg.STRING, ref build_output, COLOR + "(Build)" + NONE + " build output", null },
+		{ "recursive", '\0', OptionFlags.NONE, OptionArg.NONE, ref force, COLOR + "(Uninstall)" + NONE + " recursive", null},
 		{ null }
 	};
 	bool all_cmd(string []commands) throws Error {
 
+		var opt_context = new OptionContext ();
+		opt_context.add_main_entries (options, null);
+		opt_context.set_help_enabled(false);
+		opt_context.parse(ref commands);
+
 		if (commands.length < 2) {
-			Cmd.help();
-			return true;
+			return Cmd.help(opt_context.get_help(false, null));
 		}
 
 		if (commands[1] == "config") {
@@ -42,10 +50,6 @@ public class Main : Object {
 			return true;
 		}
 
-		var opt_context = new OptionContext ();
-		opt_context.add_main_entries (options, null);
-		opt_context.set_help_enabled(false);
-		opt_context.parse(ref commands);
 
 		if (_debug == true)
 			Environment.set_variable ("G_MESSAGES_DEBUG", "all", true);
@@ -98,7 +102,7 @@ public class Main : Object {
 			case "build":
 				return Cmd.build(commands);
 			case "help":
-				return Cmd.help();
+				return Cmd.help(opt_context.get_help(false, null));
 			case "install":
 			case "add":
 			case "-S":
