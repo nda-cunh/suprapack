@@ -14,9 +14,11 @@ public class Main : Object {
 	public static string? strap = null;
 	public static bool build_and_install = false;
 	public static string? build_output = null;
+	public static bool _debug = false;
 
 	const OptionEntry[] options = {
 		{ "prefix", 'p', OptionFlags.NONE, OptionArg.STRING, ref prefix, "", "Path to the folder" },
+		{ "debug", '\0', OptionFlags.NONE, OptionArg.NONE, ref _debug, "add the debug mode", "debug"},
 		{ "refresh", 'r', OptionFlags.NONE, OptionArg.NONE, ref refresh, "refresh the list of packages", null },
 		{ "force", 'f', OptionFlags.NONE, OptionArg.NONE, ref force, "force the operation", null },
 		{ "yes", 'y', OptionFlags.NONE, OptionArg.NONE, ref yes, "answer yes to all questions", null },
@@ -45,7 +47,8 @@ public class Main : Object {
 		opt_context.set_help_enabled(false);
 		opt_context.parse(ref commands);
 
-
+		if (_debug == true)
+			Environment.set_variable ("G_MESSAGES_DEBUG", "all", true);
 		if (refresh)
 			Sync.refresh_list();
 		if (prefix != null)

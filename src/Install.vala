@@ -92,7 +92,7 @@ private bool run_post_pre_script (string dir, string filename, string print_name
 			if (Utils.stdin_bool_choose("Continue ? [Y/n]", true) == false)
 				throw new ErrorSP.ACCESS("you refused to execute the script.");
 		}
-		Log.info("%s", print_name);
+		info("%s", print_name);
 		var envp = Utils.prepare_envp(dir);
 		if (Utils.run({filename}, envp) != 0)
 			throw new ErrorSP.FAILED("non zero exit code of pre installation script");
@@ -165,7 +165,7 @@ private void force_suprapack_update () throws Error {
 	if (!Query.is_exist("suprapack"))
 		return ;
 	if (config.supraforce == false && Sync.check_update("suprapack")) {
-		Log.info("Canceling... An update of suprapack is here");
+		info("Canceling... An update of suprapack is here");
 		Process.spawn_command_line_sync(@"$(config.prefix)/bin/suprapack --force --supraforce add suprapack");
 		var cmd_str = string.joinv(" ", config.cmd);
 		Process.spawn_command_line_sync(cmd_str);
@@ -181,7 +181,7 @@ public void install () throws Error {
 	print("\nresolving dependencies...\n");
 
 	if (config.queue_pkg.length == 0){
-		Log.info("there's nothing to be done");
+		info("there's nothing to be done");
 		return;
 	}
 
@@ -251,7 +251,7 @@ public void install () throws Error {
 						install_suprapackage(i.output);
 					}
 					else
-						Log.info("%s is already installed", i.name);
+						info("%s is already installed", i.name);
 				}
 				else
 					install_suprapackage(i.output);
@@ -328,7 +328,7 @@ private void prepare_install(string name_search, string name_repo = "") throws E
 			print("please choose one: ");
 			var nb = int.parse(stdin.read_line());
 			if (nb < 0 || nb > queue.length - 1) {
-				Log.info("Cancelling...");
+				info("Cancelling...");
 				return ;
 			}
 			pkg = queue[nb];

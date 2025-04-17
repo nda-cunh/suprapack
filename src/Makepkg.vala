@@ -156,7 +156,7 @@ public class Makepkg : Object {
 
 
 		print("\n");
-		Log.info("Downloading all sources");
+		info("Downloading all sources");
 		/* Parse Source('item1' 'item2') */
 		foreach (var str in get_data<string>("source")?.replace("\n", " ")?.split(" "))
 		{
@@ -246,7 +246,7 @@ public class Makepkg : Object {
 		var prepare = get_function (contents, "prepare");
 		if (prepare != null) {
 			int wait_status;
-			Log.info ("running prepare script");
+			info ("running prepare script");
 			Process.spawn_sync (srcdir, {"bash", "-c", prepare}, env, GLib.SpawnFlags.SEARCH_PATH, null, null, null, out wait_status);
 			if (wait_status != 0)
 				throw new ErrorSP.CANCEL("prepare() send [%d] error code", wait_status);
@@ -254,7 +254,7 @@ public class Makepkg : Object {
 		var package = get_function (contents, "package");
 		if (package != null) {
 			int wait_status;
-			Log.info ("running package script");
+			info ("running package script");
 			Process.spawn_sync (srcdir, {"bash", "-c", package}, env, GLib.SpawnFlags.SEARCH_PATH, null, null, null, out wait_status);
 			if (wait_status != 0)
 				throw new ErrorSP.CANCEL("prepare() send [%d] error code", wait_status);
