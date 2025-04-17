@@ -352,7 +352,7 @@ namespace Cmd {
 	}
 
 	private const string p_suprapack = BOLD + "suprapack" + NONE;
-	bool help () {
+	bool help (string help_command) {
 		stdout.printf(BOLD + YELLOW + "[SupraPack] ----- Help -----\n\n");
 		stdout.printf("\t" + p_suprapack + " (add | install) [package name]\n");
 		stdout.printf("\t  " + COM + " install a package from a repository\n");
@@ -381,20 +381,8 @@ namespace Cmd {
 		stdout.printf("\t  " + COM + " you have RTFM... so you are a real\n");
 		stdout.printf("\n");
 		stdout.printf(BOLD + YELLOW + "[Special argument]\n" + NONE);
-		stdout.printf("\t" + p_suprapack + " --prefix " + CYAN + "(all commands)\n");
-		stdout.printf("\t  " + COM + " change the prefix for the install\n"); 
-		stdout.printf("\t" + p_suprapack + " --strap " + CYAN + "(all commands)\n");
-		stdout.printf("\t  " + COM + " change the strap for the install\n");
-		stdout.printf("\t" + p_suprapack + " --force " + CYAN + "(install, uninstall, download)\n");
-		stdout.printf("\t  " + COM + " force the install and reinstall all dependencies\n");
-		stdout.printf("\t" + p_suprapack + " --yes " + CYAN + "(all commands)\n");
-		stdout.printf("\t  " + COM + " say yes to all question\n");
-		stdout.printf("\t" + p_suprapack + " --no-fakeroot " + CYAN + "(build)\n");
-		stdout.printf("\t  " + COM + " disable fakeroot\n");
-		stdout.printf("\t" + p_suprapack + " --build-output " + CYAN + "(build)\n");
-		stdout.printf("\t  " + COM + " change the output for the build\n");
-		stdout.printf("\t" + p_suprapack + " --install " + CYAN + "(build)\n");
-		stdout.printf("\t  " + COM + " build and install a package\n");
+		unowned string help_text = help_command.offset(help_command.index_of("Options:") + 8);
+		stdout.printf ("%s", help_text);
 		stdout.printf("\n");
 		stdout.printf(BOLD + YELLOW + "[Dev Only]\n" + NONE);
 		stdout.printf(p_suprapack + " build " + CYAN + "[PREFIX]\n");
