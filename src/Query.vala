@@ -28,6 +28,18 @@ namespace Query{
 		if (Query.is_exist(name_pkg) == false)
 			error("the package %s doesn't exist", name_pkg);
 
+		var pkg = Query.get_from_pkg (name_pkg);
+		var deps = pkg.get_all_dependency ();
+		try {
+			// remove the required_by of the package
+			foreach (unowned var i in deps) {
+				Query.remove_package_to_required_by(name_pkg, i);
+			}
+		}
+		catch (Error e) {
+			debug (e.message);
+		}
+
 		const string remove = BOLD + YELLOW + "[Remove]" + NONE + " ";
 		var lst = Query.get_from_pkg(name_pkg).get_installed_files();
 		for (int i = 0; i != lst.length; ++i) {
@@ -89,6 +101,19 @@ namespace Query{
 			DirUtils.create_with_parents (folder, 0755);
 			FileUtils.set_contents(dest, contents + line);
 		}
+	}
+
+	public void remove_package_to_required_by (string name_pkg, string package_remove) throws Error {
+		var folder = @"$(config.path_suprapack_cache)/$package_remove/";
+		var dest = @"$(folder)/required_by";
+		string contents;
+		if (FileUtils.test(dest, FileTest.EXISTS)) {
+			FileUtils.get_contents(dest, out contents);
+			contents = contents.replace(name_pkg + "\n", "");
+			FileUtils.set_contents(dest, contents);
+		}
+		else
+			debug ("the file %s doesn't exist", dest);
 	}
 
 

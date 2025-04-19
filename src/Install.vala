@@ -359,7 +359,6 @@ private void add_queue_list(SupraList pkg, string output) throws Error {
 	pkgtmp.is_wanted = pkg.is_wanted;
 
 	// Add the package in the queue
-	print ("Adding %s to the queue\n", pkgtmp.name);
 	config.queue_pkg.add(pkgtmp);
 
 	// Add alls dependencies of the package in the queue
