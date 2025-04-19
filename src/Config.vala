@@ -229,4 +229,8 @@ export fpath=(%1$s/bin $fpath)
 	public bool build_and_install {get; set; default=false;}
 	// where the package will be moved after the build
 	public string? build_output 		{get; set;default=null;}
+	/**
+	 * Pour chaque paquetage demandé, le supprime avec toutes ses dépendances, à condition que ces dépendances (A) ne soient pas nécessaires à un autre paquetage installé et (B) qu'elles n'aient pas été installées explicitement par l'utilisateur. Pour se passer de la condition (B), appeler l'option deux fois sur la même ligne de commande.
+	 **/
+	public bool is_recursive_uninstall {get; set; default=false;}
 }

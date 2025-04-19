@@ -4,6 +4,7 @@ public unowned string USERNAME;
 public Config config;
 
 public class Main : Object {
+	private const string COLOR = "\033[36;1m";
 	public static string? prefix = null;
 	public static bool refresh = false;
 	public static bool force = false;
@@ -15,7 +16,8 @@ public class Main : Object {
 	public static bool build_and_install = false;
 	public static string? build_output = null;
 	public static bool _debug = false;
-	private const string COLOR = "\033[36;1m";
+	public static bool _recursive = false;
+
 
 	const OptionEntry[] options = {
 		// Special options hidden
@@ -31,25 +33,16 @@ public class Main : Object {
 		{ "strap", '\0', OptionFlags.NONE, OptionArg.STRING, ref strap, COLOR + "(All)" + NONE + " like PacStrap install to another root", "PREFIX"},
 		{ "install", '\0', OptionFlags.NONE, OptionArg.NONE, ref build_and_install, COLOR + "(Build)" + NONE + " build and install the package", null },
 		{ "build-output", '\0', OptionFlags.NONE, OptionArg.STRING, ref build_output, COLOR + "(Build)" + NONE + " build output", null },
-		{ "recursive", '\0', OptionFlags.NONE, OptionArg.NONE, ref force, COLOR + "(Uninstall)" + NONE + " recursive", null},
+		{ "recursive", '\0', OptionFlags.NONE, OptionArg.NONE, ref _recursive, COLOR + "(Uninstall)" + NONE + " recursive", null},
 		{ null }
 	};
+
 	bool all_cmd(string []commands) throws Error {
 
 		var opt_context = new OptionContext ();
 		opt_context.add_main_entries (options, null);
 		opt_context.set_help_enabled(false);
 		opt_context.parse(ref commands);
-
-		if (commands.length < 2) {
-			return Cmd.help(opt_context.get_help(false, null));
-		}
-
-		if (commands[1] == "config") {
-			config.parse(ref commands);
-			return true;
-		}
-
 
 		if (_debug == true)
 			Environment.set_variable ("G_MESSAGES_DEBUG", "all", true);
@@ -66,7 +59,16 @@ public class Main : Object {
 		config.use_fakeroot = !no_fakeroot;
 		config.build_and_install = build_and_install;
 		config.build_output = build_output ?? ".";
+		config.is_recursive_uninstall = _recursive;
 
+		if (commands.length < 2) {
+			return Cmd.help(opt_context.get_help(false, null));
+		}
+
+		if (commands[1] == "config") {
+			config.parse(ref commands);
+			return true;
+		}
 
 		unowned string av1 = commands[1];
 		config.cmd = commands;

@@ -54,6 +54,21 @@ namespace Uninstall {
 		foreach (unowned var deps in all_required) {
 			add_queue(deps, queue);
 		}
+		
+
+		if (config.is_recursive_uninstall == false) {
+			return ;
+		}
+
+		var all_deps = Query.get_from_pkg (name).get_dependency ();
+		foreach (unowned var deps in all_deps) {
+			add_queue(deps, queue);
+		}
+
+		all_deps = Query.get_from_pkg (name).get_optional_dependency ();
+		foreach (unowned var deps in all_deps) {
+			add_queue(deps, queue);
+		}
 	}
 
 
