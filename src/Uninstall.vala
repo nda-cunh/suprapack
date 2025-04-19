@@ -56,18 +56,31 @@ namespace Uninstall {
 		}
 		
 
+		// Mode recursive uninstall
 		if (config.is_recursive_uninstall == false) {
 			return ;
 		}
 
-		var all_deps = Query.get_from_pkg (name).get_dependency ();
-		foreach (unowned var deps in all_deps) {
-			add_queue(deps, queue);
-		}
+		var pkg = Query.get_from_pkg (name);
 
-		all_deps = Query.get_from_pkg (name).get_optional_dependency ();
+		var all_deps = pkg.get_all_dependency ();
 		foreach (unowned var deps in all_deps) {
-			add_queue(deps, queue);
+			var p = Query.get_from_pkg (deps);
+			if (p.is_wanted == true && config.force == false)
+				continue;
+			var lst_of_required = Query.get_required_by(deps);
+			bool need_add = true;
+			foreach (unowned var i in lst_of_required) {
+				if (i in queue)
+					continue;
+				else {
+					need_add = false;
+					debug("Can't remove %s because %s need it", i, deps);
+					break;
+				}
+			}
+			if (need_add)
+				add_queue(deps, queue);
 		}
 	}
 

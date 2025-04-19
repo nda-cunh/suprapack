@@ -53,6 +53,13 @@ public struct Package {
 		this.arch = "";
 	}
 
+	public string[] get_all_dependency () {
+		var bs = new StrvBuilder();
+		bs.addv (get_dependency ());
+		bs.addv (get_optional_dependency ());
+		return bs.end();
+	}
+
 	public string[] get_dependency () {
 		var sp = this.dependency.split(" ");
 		return (owned)sp;

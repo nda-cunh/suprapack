@@ -33,7 +33,7 @@ public class Main : Object {
 		{ "strap", '\0', OptionFlags.NONE, OptionArg.STRING, ref strap, COLOR + "(All)" + NONE + " like PacStrap install to another root", "PREFIX"},
 		{ "install", '\0', OptionFlags.NONE, OptionArg.NONE, ref build_and_install, COLOR + "(Build)" + NONE + " build and install the package", null },
 		{ "build-output", '\0', OptionFlags.NONE, OptionArg.STRING, ref build_output, COLOR + "(Build)" + NONE + " build output", null },
-		{ "recursive", '\0', OptionFlags.NONE, OptionArg.NONE, ref _recursive, COLOR + "(Uninstall)" + NONE + " recursive", null},
+		{ "no-recursive", '\0', OptionFlags.NONE, OptionArg.NONE, ref _recursive, COLOR + "(Uninstall)" + NONE + " remove the recursive", null},
 		{ null }
 	};
 
@@ -59,7 +59,7 @@ public class Main : Object {
 		config.use_fakeroot = !no_fakeroot;
 		config.build_and_install = build_and_install;
 		config.build_output = build_output ?? ".";
-		config.is_recursive_uninstall = _recursive;
+		config.is_recursive_uninstall = !_recursive;
 
 		if (commands.length < 2) {
 			return Cmd.help(opt_context.get_help(false, null));
