@@ -88,15 +88,15 @@ namespace Cmd {
 
 		var regex = /((?P<repo>[^\s]*)\/)?(?P<package>[^\s]*)/;
 		MatchInfo match_info;
-		foreach (var i in av[2:av.length]) {
+		foreach (unowned var i in av[2:av.length]) {
 			try {
 				if (regex.match(i, 0, out match_info) && !i.has_suffix(".suprapack")) {
 					string name_pkg = match_info.fetch_named("package");
 					string name_repo = match_info.fetch_named("repo");
-					prepare_install(name_pkg, name_repo);
+					prepare_install(name_pkg, name_repo, true);
 				}
 				else if (i.has_suffix(".suprapack")){
-					prepare_install(i);
+					prepare_install(i, null, true);
 				}
 			}catch (Error e) {
 				if (e is ErrorSP.FAILED) {

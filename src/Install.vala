@@ -75,7 +75,7 @@ private void post_install(List<string> list, int len, ref Package pkg) {
 	if (fs == null)
 		error("Cant open %s", info_file);
 	fs.printf("[FILES]\n");
-	foreach(var i in list) {
+	foreach(unowned var i in list) {
 		unowned string basename = i.offset(len);
 		if (basename != "/info")
 			fs.printf("%s\n", basename);
@@ -112,22 +112,25 @@ private void script_post_install(string dir) throws Error {
 }
 
 // install package suprapack
-public void install_suprapackage(string suprapack) throws Error {
+public void install_suprapackage(Package suprapack) throws Error {
 	force_suprapack_update();
 
-	if (FileUtils.test(suprapack, FileTest.EXISTS)) {
-		if (!(suprapack.has_suffix(".suprapack")))
+	unowned string output = suprapack.output;
+
+	if (FileUtils.test(output, FileTest.EXISTS)) {
+		if (!(output.has_suffix(".suprapack")))
 			throw new ErrorSP.BADFILE("ce fichier n'est pas un suprapack");
 	}
 	else
-		throw new ErrorSP.ACCESS("%s n'existe pas", suprapack);
+		throw new ErrorSP.ACCESS("%s n'existe pas", output);
 	var tmp_dir = DirUtils.make_tmp("suprastore_XXXXXX");
-	Log.suprapack("Extraction de " + CYAN + "%s" + NONE, suprapack);
-	if (Utils.run({"tar", "-xf", suprapack, "-C", tmp_dir}, {}, true) != 0)
-		throw new ErrorSP.FAILED("unable to decompress package\npackage => %s", suprapack);
+	Log.suprapack("Extraction de " + CYAN + "%s" + NONE, output);
+	if (Utils.run({"tar", "-xf", output, "-C", tmp_dir}, {}, true) != 0)
+		throw new ErrorSP.FAILED("unable to decompress package\npackage => %s", output);
 
-	debug ("Extracted in %s/info (%s)", tmp_dir, suprapack);
+	debug ("Extracted in %s/info (%s)", tmp_dir, output);
 	var pkg = Package.from_file(@"$tmp_dir/info");
+	pkg.is_wanted = suprapack.is_wanted;
 
 	/* Pre Install script launch */
 	script_pre_install(tmp_dir);
@@ -196,7 +199,7 @@ public void install () throws Error {
 			if (Query.is_exist(exclude)) {
 				Log.conflict("Impossible to install '%s' because '%s' is in conflict with him", i.name, exclude);
 				Log.conflict("please choose if you want to uninstall '%s' [y/N]", exclude);
-				if (Utils.stdin_bool_choose(": ") == true) {
+				if (Utils.stdin_bool_choose(": ", false)) {
 					Query.uninstall(exclude);
 				}
 				else {
@@ -236,25 +239,26 @@ public void install () throws Error {
 	print("\nTotal Installed Size:  " + BOLD + "%s" + NONE + "\n", (string)buffer);
 
 
-	unowned var first_package = config.queue_pkg.get_first().name;
-	// config.queue_pkg.reverse();
+	unowned Package first_package = config.queue_pkg.get_first();
 	// WARNING REVERSE ???
+	// config.queue_pkg.reverse();
 	if (config.allays_yes || Utils.stdin_bool_choose(":: Proceed with installation [Y/n] ", true)) {
 		print("\n");
 		foreach (unowned var i in config.queue_pkg) {
-			if (config.force == true || i.name == first_package) {
-				install_suprapackage(i.output);
+			if (config.force == true || i.name == first_package.name) {
+				print (" FIRST PACKAGE %s\n", i.name);
+				install_suprapackage(i);
 			}
 			else {
 				if (Query.is_exist(i.name) == true) {
 					if (Sync.check_update(i.name)) {
-						install_suprapackage(i.output);
+						install_suprapackage(i);
 					}
 					else
 						info("%s is already installed", i.name);
 				}
 				else
-					install_suprapackage(i.output);
+					install_suprapackage(i);
 			}
 			if (!config.is_cached && i.repo != "Local") {
 				FileUtils.unlink(i.output);
@@ -274,7 +278,7 @@ public void install () throws Error {
 }
 
 //* Add one package in Config.queue *//
-private void prepare_install(string name_search, string name_repo = "") throws Error{
+private void prepare_install (string name_search, string? name_repo = null, bool is_wanted = false) throws Error{
 	if (name_search == "")
 		return;
 	// Check and update if 'Suprapack' have the last version
@@ -285,6 +289,7 @@ private void prepare_install(string name_search, string name_repo = "") throws E
 		if (!FileUtils.test(name_search, FileTest.EXISTS))
 			throw new ErrorSP.ACCESS (@"$name_search not found");
 		SupraList pkg = SupraList("Local", name_search, true);
+		pkg.is_wanted = is_wanted;
 		add_queue_list(pkg, name_search);
 		return;
 	}
@@ -292,7 +297,7 @@ private void prepare_install(string name_search, string name_repo = "") throws E
 
 	// get all package with the same name in all repo or in a specific repo
 	SupraList[] queue = {};
-	var list = Sync.get_list_package (name_repo);
+	var list = Sync.get_list_package (name_repo ?? "");
 	foreach (unowned var pkg in list) {
 		if (pkg.name == name_search) {
 			queue += pkg;
@@ -338,6 +343,7 @@ private void prepare_install(string name_search, string name_repo = "") throws E
 	// Download the package
 	var output = Sync.download(pkg);
 	// Add the package in the queue	
+	pkg.is_wanted = is_wanted;
 	add_queue_list(pkg, output);
 }
 
@@ -345,7 +351,6 @@ private void prepare_install(string name_search, string name_repo = "") throws E
 // output is the path of the file package (/tmp/lua_5.4.7_amd64-Linux.suprapack)
 // pkg is the package object with all the info of the package
 private void add_queue_list(SupraList pkg, string output) throws Error {
-
 	Log.debug ("Add in queue: %s", pkg.name);
 	// get the info file of the package
 	Process.spawn_command_line_sync(@"tar -xf $(output) ./info");
@@ -354,14 +359,16 @@ private void add_queue_list(SupraList pkg, string output) throws Error {
 	FileUtils.unlink("./info");
 	pkgtmp.output = output;
 	pkgtmp.repo = pkg.repo_name;
+	pkgtmp.is_wanted = pkg.is_wanted;
 
 	// Add the package in the queue
+	print ("Adding %s to the queue\n", pkgtmp.name);
 	config.queue_pkg.add(pkgtmp);
 
 	// Add alls dependencies of the package in the queue
 	try {
 		// Add Dependency in QUEUE
-		foreach (unowned var i in pkgtmp.dependency.split(" ")) {
+		foreach (unowned var i in pkgtmp.get_dependency()) {
 			// skip if the package is already in the queue
 			if (config.queue_pkg.contains_name(i)) {
 				continue;

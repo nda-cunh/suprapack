@@ -19,8 +19,9 @@ public class Makepkg : Object {
 			if (regex_function.match(tmp)) {
 				unowned string begin = tmp.offset(tmp.index_of_char ('{'));
 				int end = 0;
-
+	
 				int count = 1;
+				
 				while (begin[end] != '\0') {
 					if (begin[end] == '{')
 						count++;

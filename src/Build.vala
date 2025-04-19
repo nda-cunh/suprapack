@@ -105,7 +105,7 @@ namespace Build {
 		thread.join ();
 		Log.suprapack("%s is created", package_dest);
 		if (config.build_and_install == true) {
-			prepare_install(package_dest);
+			prepare_install(package_dest, "", true);
 			install();
 		}
 	}

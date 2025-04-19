@@ -14,6 +14,7 @@ public struct SupraList {
 
 	// 42cformatter-v1.0_amd64-Linux.suprapack c formatter for 42 norm
 	public SupraList (string repo_name, string line, bool is_local) throws SupraListError {
+		this.is_wanted = false;
 		this.is_local = is_local;
 		MatchInfo info;
 
@@ -37,6 +38,7 @@ public struct SupraList {
 	string description;
 	string arch;
 	bool is_local;
+	bool is_wanted;
 }
 
 public errordomain SupraListError {

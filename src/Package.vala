@@ -35,8 +35,10 @@ public struct Package {
 	string repo;
 	string arch;
 
+	bool is_wanted;
 
 	public void init () {
+		this.is_wanted = false;
 		this.name = "";
 		this.author = "";
 		this.version = "";
@@ -82,6 +84,16 @@ public struct Package {
 		hash = hash * 31 + repo.hash();
 		hash = hash * 31 + arch.hash();
 		return hash;
+	}
+
+	public string[] get_dependency () {
+		var sp = this.dependency.split(" ");
+		return (owned)sp;
+	}
+	
+	public string[] get_optional_dependency () {
+		var sp = this.optional_dependency.split(" ");
+		return (owned)sp;
 	}
 
 	// constructor
@@ -151,6 +163,8 @@ public struct Package {
 					this.size_installed = value.strip();
 				else if (line.has_prefix("exclude_package"))
 					this.exclude_package = value.strip();
+				else if (line.has_prefix("wanted"))
+					this.is_wanted = value.strip() == "yes" ? true : false;
 			}
 			if ("[FILES]" in contents) {
 				value = contents.offset(contents.index_of("[FILES]") + 8);
@@ -200,5 +214,6 @@ public struct Package {
 		fs.printf("binary: %s\n", this.binary);
 		fs.printf("size_tar: %s\n", this.size_tar);
 		fs.printf("size_installed: %s\n", this.size_installed);
+		fs.printf("wanted: %s\n", this.is_wanted ? "yes" : "no");
 	}
 }
