@@ -4,19 +4,13 @@ public class QueueSet : GenericSet<string?> {
 	}
 }
 
-public class PackageSet : GenericSet<Package?> {
-	public PackageSet () {
-		base (hash, equal);
+public class PackageSet {
+	private SList<Package?>  lst = new SList<Package?> ();
+
+	public void reverse () {
+		lst.reverse ();
 	}
 
-	private static uint hash (Package? pkg) {
-		return pkg.hash ();
-	}
-
-	private static bool equal (Package? pkg1, Package? pkg2) {
-		return pkg1.equal (pkg2);
-	}
-	
 	public bool contains_name (string name) {
 		foreach (unowned var pkg in this) {
 			if (pkg.name == name)
@@ -25,11 +19,23 @@ public class PackageSet : GenericSet<Package?> {
 		return false;
 	}
 
-	public unowned Package? get_first () {
-		foreach (unowned var pkg in this) {
-			return pkg;
+	public void add ( Package? pkg ) {
+		if (pkg == null)
+			return;
+		foreach (unowned var p in this) {
+			if (p.name == pkg.name)
+				return;
 		}
-		return null;
+		lst.append (pkg);
 	}
 
+	public unowned Package? get (uint index) {
+		return lst.nth_data (index);
+	}
+
+	public uint size {
+		get {
+			return (uint)lst.length();
+		}
+	}
 }

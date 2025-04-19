@@ -183,7 +183,7 @@ public void install () throws Error {
 
 	print("\nresolving dependencies...\n");
 
-	if (config.queue_pkg.length == 0){
+	if (config.queue_pkg.size == 0){
 		info("there's nothing to be done");
 		return;
 	}
@@ -218,9 +218,9 @@ public void install () throws Error {
 	}
 
 	int64 size_installed = 0;
-	print("Package (%u)\n\n", config.queue_pkg.length);
+	print("Package (%u)\n\n", config.queue_pkg.size);
 
-	foreach (unowned var i in config.queue_pkg) {
+	foreach (unowned var? i in config.queue_pkg) {
 		string version = i.version;
 		if (Query.is_exist(i.name)) {
 			version = Query.get_from_pkg(i.name).version;
@@ -238,15 +238,12 @@ public void install () throws Error {
 	Utils.convertBytePrint   (size_installed, buffer);
 	print("\nTotal Installed Size:  " + BOLD + "%s" + NONE + "\n", (string)buffer);
 
+	config.queue_pkg.reverse();
 
-	unowned Package first_package = config.queue_pkg.get_first();
-	// WARNING REVERSE ???
-	// config.queue_pkg.reverse();
 	if (config.allays_yes || Utils.stdin_bool_choose(":: Proceed with installation [Y/n] ", true)) {
 		print("\n");
 		foreach (unowned var i in config.queue_pkg) {
-			if (config.force == true || i.name == first_package.name) {
-				print (" FIRST PACKAGE %s\n", i.name);
+			if (config.force == true || i.is_wanted == true) {
 				install_suprapackage(i);
 			}
 			else {
