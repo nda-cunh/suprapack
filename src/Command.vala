@@ -1,6 +1,8 @@
 namespace Cmd {
 	[NoReturn]
 	void loading (string []av) {
+		if (av.length == 2)
+			error("suprapack loading <command> [<args>]");
 		int status = 0;
 		var loop = new MainLoop();
 
