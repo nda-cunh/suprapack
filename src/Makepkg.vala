@@ -269,6 +269,7 @@ public class Makepkg : Object {
 			version= get_data("pkgver") ?? "";
 			description = get_data("pkgdesc") ?? "";
 			author = get_data("pkgauthor") ?? "";
+			arch = get_data("arch") ?? "";
 
 			string dependencies = get_data("depends");
 			foreach (var i in dependencies?.replace("\n", " ")?.split(" ")) {
