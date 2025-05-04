@@ -8,4 +8,5 @@ optional_dependency:
 exclude_package: 
 binary: suprapack
 size_tar: 
-size_installed: 201980
+size_installed: 234681
+wanted: no

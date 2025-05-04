@@ -1,6 +1,22 @@
 #!/bin/sh
 
-REPO_LIST=$HOME/.local/.suprapack/repo.list
+# check if is root
+
+if [ "$(id -u)" -eq 0 ]; then
+	echo "Please do not run this script as root."
+	mkdir -p /usr/.suprapack
+	REPO_LIST=/usr/.suprapack/repo.list
+else
+	if grep -q 'fpath+=($HOME/.local/share/zsh/site-functions)' ~/.zshrc;
+	then
+		echo ''
+	else
+		sed -i '1i\fpath+=($HOME/.local/share/zsh/site-functions)' ~/.zshrc
+	fi
+	mkdir -p $HOME/.local/.suprapack
+	REPO_LIST=$HOME/.local/.suprapack/repo.list
+fi
+
 
 if grep -q "Cosmos https://gitlab.com/supraproject/suprastore_repository/-/raw/master/cosmos" $REPO_LIST;
 then
@@ -13,12 +29,6 @@ else
 	echo "Supravim https://gitlab.com/supraproject/suprastore_repository/-/raw/master/supravim/" >> $REPO_LIST
 fi
 
-if grep -q 'fpath+=($HOME/.local/share/zsh/site-functions)' ~/.zshrc;
-then
-	echo ''
-else
-	sed -i '1i\fpath+=($HOME/.local/share/zsh/site-functions)' ~/.zshrc
-fi
 
 
 which suprapack 2>/dev/null 1>/dev/null

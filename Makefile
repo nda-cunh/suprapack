@@ -50,7 +50,11 @@ install: suprapack
 	@rm -rf *.suprapack
 	@mkdir -p usr/bin
 	@cp ./suprapack usr/bin/suprapack
+ifeq ($(shell id -u), 0)
+	@./suprapack build usr --no-fakeroot --install --supraforce --prefix=/usr
+else 
 	@./suprapack build usr --no-fakeroot --install --supraforce
+endif
 
 run: $(NAME) 
 	cp -f suprapack ~/.local/bin/suprapack
