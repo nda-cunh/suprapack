@@ -3,7 +3,15 @@
 SUPRAVIM_REPO='Supravim https://gitlab.com/supraproject/suprastore_repository/-/raw/master/supravim/'
 COSMOS_x86_64='Cosmos https://gitlab.com/supraproject/suprastore_repository/-/raw/master/cosmos/'
 
-REPO_LIST=$HOME/.local/.suprapack/repo.list
+if [ "$(id -u)" -eq 0 ]; then
+	echo "Please do not run this script as root."
+	REPO_LIST=/usr/.suprapack/repo.list
+	CONFIG=/usr/.suprapack/user.conf
+else
+	REPO_LIST=$HOME/.local/.suprapack/repo.list
+	CONFIG=$HOME/.local/.suprapack/user.conf
+fi
+
 if [ -f "$REPO_LIST" ]; then
 	echo "already existing repo.list skipping..."
 	if ! grep -q $SUPRAVIM_REPO $REPO_LIST 2>/dev/null; then
@@ -18,7 +26,6 @@ else
 	echo "$SUPRAVIM_REPO" >> $REPO_LIST
 fi
 
-CONFIG=$HOME/.local/.suprapack/user.conf
 if [ -f "$CONFIG" ]; then
 	echo "already existing user.conf skipping..."
 else
@@ -26,15 +33,18 @@ else
 	echo "is_cached:false" | cat > $CONFIG
 fi
 
-mkdir -p $HOME/.etc
-
 
 # generate PROFILE Files 
 
 echo generate PATH in .profile
 
-if ! grep -q 'source $HOME/.suprapack_profile' $HOME/.profile 2>/dev/null; then
-	echo 'source $HOME/.suprapack_profile' >> $HOME/.profile
+
+if [ "$(id -u)" -eq 0 ]; then
+	echo "prefix:/usr" | cat > $CONFIG
+else
+	if ! grep -q 'source $HOME/.suprapack_profile' $HOME/.profile 2>/dev/null; then
+		echo 'source $HOME/.suprapack_profile' >> $HOME/.profile
+	fi
+	[ -d $HOME/.suprapack ] && mv $HOME/.suprapack $HOME/.local/ 2> /dev/null; true
 fi
 
-[ -d $HOME/.suprapack ] && mv $HOME/.suprapack $HOME/.local/ 2> /dev/null; true
