@@ -5,7 +5,11 @@
 public class Config : Object {
 
 	public Config () throws Error {
-		this.change_prefix (@"$HOME/.local");
+		// If the user is a root user, we need to change the prefix to /usr
+		if (SupraUnix.is_root ())
+			this.change_prefix ("/usr");
+		else
+			this.change_prefix (@"$HOME/.local");
 		this.load_config();
 		var prefix_tmp = Environ.get_variable(Environ.get(), "PREFIX");
 		if (prefix_tmp != null)
@@ -47,7 +51,6 @@ export fpath=(%1$s/bin $fpath)
 		var new_suprapack_cache = prefix + "/.suprapack";
 		var new_config = new_suprapack_cache + "/user.conf";
 		var new_repo_list = new_suprapack_cache + "/repo.list";
-		FileUtils.symlink(@"$HOME/.local/.suprapack", @"$HOME/.config/suprapack");
 
 		DirUtils.create_with_parents(new_prefix, 0755);
 		DirUtils.create_with_parents(new_suprapack_cache, 0755);
