@@ -10,6 +10,7 @@ if [ "$(id -u)" -eq 0 ]; then
 else
 	REPO_LIST=$HOME/.local/.suprapack/repo.list
 	CONFIG=$HOME/.local/.suprapack/user.conf
+	ln -s $HOME/.local/.suprapack $HOME/.config/suprapack 2> /dev/null; true
 fi
 
 if [ -f "$REPO_LIST" ]; then
