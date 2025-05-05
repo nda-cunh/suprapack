@@ -233,7 +233,10 @@ class Sync : Object {
 		} catch (Error e) {
 			print(ENDCURSOR);
 			FileUtils.remove (output);
-			error ("Can't download %s (%s)", url, e.message);
+			if (e is TlsError) {
+				warning ("Try to install glib-networking");
+			}
+			error ("Can't download %s\n(%s)", url, e.message);
 		}
 		return output;
 	}
