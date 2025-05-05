@@ -61,6 +61,8 @@ public class Main : Object {
 		config.build_output = build_output ?? ".";
 		config.is_recursive_uninstall = !_recursive;
 
+		debug ("prefix: [%s] strap: %s", config.prefix, config.strap);
+
 		if (commands.length < 2) {
 			return Cmd.help(opt_context.get_help(false, null));
 		}
