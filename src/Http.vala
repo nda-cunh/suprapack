@@ -20,6 +20,7 @@ namespace Http {
 	 * @param cancel a cancellable object
 	 */
 	public void download (string url, string? output = null, bool no_print = false, Cancellable? cancel = null, bool rec = false) throws Error {
+		Error err = null;
 		var loop = new MainLoop ();
 
 		var s = new Unix.SignalSource(2);
@@ -31,23 +32,29 @@ namespace Http {
 		});
 		s.attach(GLib.MainContext.default());
 
-		_download.begin(url, output, no_print, rec, cancel, () => {
+		_download.begin(url, output, no_print, rec, cancel, (obj, res) => {
 			if (cancel.is_cancelled ())
 				FileUtils.remove (output);
+			err = _download.end (res);
 			loop.quit ();
 		});
 		loop.run ();
 		s.destroy ();
+		if (err != null) {
+			throw err;
+		}
 		if (cancel.is_cancelled ())
 			throw new HttpError.CANCEL("the download is cancel (%s)", Log.vala_line ());
 	}
 
-	private async void _download (string url, string? output = null, bool no_print = false, bool rec = false, Cancellable? cancel = null) throws Error {
+	private async Error? _download (string url, string? output = null, bool no_print = false, bool rec = false, Cancellable? cancel = null) {
+		try {
 		const size_t SIZE_BUFFER = 16777216;
 		unowned string	host;
 		unowned string	query;
 		unowned string	path;
 		int				port;
+
 
 		/* Parse Url */
 		Uri uri = Uri.parse (url, UriFlags.SCHEME_NORMALIZE | UriFlags.ENCODED);
@@ -122,14 +129,14 @@ namespace Http {
 					if (((string)buffer).ascii_down () == "chunked") {
 						Log.debug("download", "Retry chunked not supported");
 						download(url, output, no_print, null, true);
-						return;
+						return null;
 					}
 				}
 				else if (line.has_prefix("Location: ")) {
 					line.scanf("Location: %s", out buffer);
 					Log.debug("download", "redirect to %s", (string)buffer);
 					download((string)buffer, output, no_print, null, true);
-					return;
+					return null;
 				}
 			}
 
@@ -158,9 +165,14 @@ namespace Http {
 						throw e;
 					}
 				} while (len > 0);
-				return;
+
 			}
 		}
+		}
+		catch (Error e) {
+			return e;
+		}
+		return null;
 	}
 
 	/**
