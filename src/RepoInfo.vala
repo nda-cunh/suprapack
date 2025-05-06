@@ -26,7 +26,8 @@ public class RepoInfo : Object {
 			url_list += "list";
 			Log.debug("Repository", "FETCH HTTP repository %s", url_list);
 			try {
-				Http.download(url_list, output, true);
+				config.set_have_download_mirrorlist ();
+				Http.download(url_list, output, false);
 			}
 			catch (Error e) {
 				FileUtils.remove (output);

@@ -59,10 +59,19 @@ class Sync : Object {
 				warning ("Can't read [%s] in %s/repo.list", line, config.prefix);
 		}
 
+		if (config.have_download_mirrorlist == true)
+			stderr.printf("\n");
+
 		/* init List Property package-1.0.suprapack*/
 		// var regex = /[a-zA-Z0-9]+[-][a-zA-Z0-9.]+[.]suprapack/;
-		foreach (var repo in _repo) {
+		foreach (unowned var repo in _repo) {
 			FileUtils.get_contents(repo.list, out contents);
+			// IF the file is empty, try to refresh the repo
+			if (contents[0] == '\0') {
+				warning("Can't read %s Retry ", repo.list);
+				repo.refresh_repo ();
+				FileUtils.get_contents(repo.list, out contents);
+			}
 			foreach (var pkg in contents.split("\n")) {
 				if (SupraList.regex.match(pkg)) {
 					var lst = SupraList(repo.name, pkg, repo.local);

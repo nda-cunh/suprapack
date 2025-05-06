@@ -209,6 +209,17 @@ export fpath=(%1$s/bin $fpath)
 	// The path of the cache ($HOME/.local/.suprapack/)
 	public string path_suprapack_cache			{get; private set;}
 
+	public bool have_download_mirrorlist = false;
+	public bool set_have_download_mirrorlist () {
+		if (have_download_mirrorlist == false) {
+			have_download_mirrorlist = true;
+			stderr.printf(BOLD + YELLOW + "[Suprapack] " + NONE + "Download mirrorlist ...\n");
+			return true;
+		}
+		else
+			return false;
+	}
+
 
 	/*********************************
 	 * Options from the command line
