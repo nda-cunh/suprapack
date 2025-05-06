@@ -192,7 +192,7 @@ namespace Http {
 		uint8[] progress_bar = "[                    ] \0".data;
 
 		if (max <= 0.0) {
-			stdout.printf("%-50s %8s\r", name_file, "%.2f Mib / ??? Mib     ".printf(actual / MIB));
+			stderr.printf("%-50s %8s\r", name_file, "%.2f Mib / ??? Mib     ".printf(actual / MIB));
 			return;
 		}
 		if (actual > max)
@@ -200,9 +200,9 @@ namespace Http {
 
 		modify_percent_bar(progress_bar, percent);
 		var part2 = "%.2f Mib / %.2f Mib %s %.1f%%".printf((actual / MIB), (max / MIB), ((string)progress_bar), percent);
-		stdout.printf("%-27s %70s\r", name_file, part2);
+		stderr.printf("%-27s %70s\r", name_file, part2);
 		if (percent == 100.0)
-			print("\r\n");
+			stderr.printf("\r\n");
 	}
 
 

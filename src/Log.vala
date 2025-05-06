@@ -25,11 +25,11 @@ public class LogObject : Object {
 
 		switch (levels) {
 			case LogLevelFlags.LEVEL_WARNING:
-				print ("\033[33m[WARNING]\033[0m %s", text_to_debug (message, out len));
+				stderr.printf("\033[33m[WARNING]\033[0m %s", text_to_debug (message, out len));
 				print_line_debug(message, len);
 				break;
 			case LogLevelFlags.LEVEL_CRITICAL:
-				print("\033[31m[Critical]\033[0m %s", text_to_debug (message, out len));
+				stderr.printf("\033[31m[Critical]\033[0m %s", text_to_debug (message, out len));
 				print_line_debug(message, len);
 				break;
 			case LogLevelFlags.LEVEL_MESSAGE:
@@ -38,7 +38,7 @@ public class LogObject : Object {
 				break;
 			case LogLevelFlags.LEVEL_DEBUG:
 				if (Environment.get_variable ("G_MESSAGES_DEBUG") != null) {
-					print("\033[32m[Debug]\033[0m %s", text_to_debug (message, out len));
+					stderr.printf("\033[32m[Debug]\033[0m %s", text_to_debug (message, out len));
 					print_line_debug(message, len);
 				}
 				break;
@@ -51,7 +51,7 @@ public class LogObject : Object {
 			case LogLevelFlags.FLAG_FATAL:
 			case LogLevelFlags.LEVEL_ERROR:
 			default:
-				print("\033[31m[Error]\033[0m %s", text_to_debug (message, out len));
+				stderr.printf("\033[31m[Error]\033[0m %s", text_to_debug (message, out len));
 				print_line_debug(message, len);
 				Process.exit(-1);
 		}
@@ -59,8 +59,8 @@ public class LogObject : Object {
 
 	private static void print_line_debug (string text, int len) {
 		if (len != -1)
-			print ("\033[35m (%.*s)\033[0m", len - 2, text);
-		print("\n");
+			stderr.printf ("\033[35m (%.*s)\033[0m", len - 2, text);
+		stderr.printf("\n");
 	}
 
 	private static unowned string text_to_debug (string text, out int len) {
