@@ -44,7 +44,9 @@ namespace Uninstall {
 		}
 
 		if (Query.is_exist (name) == false) {
-			warning("%s is not installed", name);
+			var tmp = BetterSearch.search_good_package_from_query (name);
+			if (tmp != null)
+				add_queue (tmp, queue);
 			return ;
 		}
 

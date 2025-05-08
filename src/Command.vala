@@ -104,7 +104,14 @@ namespace Cmd {
 				if (e is ErrorSP.FAILED) {
 					throw e;
 				}
-				warning(e.message);
+				else if (e is ErrorSP.NOT_FOUND) {
+					var? new_name = BetterSearch.search_good_package_from_sync (e.message);
+					if (new_name != null) {
+						prepare_install(new_name, null, true);
+					}
+				}
+				else
+					warning ("Error: %s", e.message);
 			}
 		}
 		global::install();
@@ -124,9 +131,19 @@ namespace Cmd {
 
 
 	bool info (string []av) {
+		string tmp;
 		if (av.length == 2)
 			error("`suprapack info [...]`");
-		var info = Query.get_from_pkg(av[2]);
+		if (Query.is_exist (av[2]) == false) {
+			tmp = BetterSearch.search_good_package_from_query (av[2], true);
+			if (tmp == null) {
+				warning ("Cancelling ...");
+				return false;
+			}
+		}
+		else
+			tmp = av[2];
+		var info = Query.get_from_pkg(tmp);
 		print(BOLD + "Nom                      : " + NONE + "%s\n", info.name);
 		print(BOLD + "Version                  : " + NONE + "%s\n", info.version);
 		print(BOLD + "Description              : " + NONE + "%s\n", info.description);
@@ -174,10 +191,21 @@ namespace Cmd {
 
 	bool list_files (string []av) {
 		if (av.length == 2) {
-			Log.suprapack("`suprapack list_files <pkg>`");
+			Log.suprapack("`suprapack list_files <pkg..>`");
 		}
 		foreach (unowned var i in av[2:av.length]) {
-			var pkg = Query.get_from_pkg(i);
+			string tmp;
+
+			if (Query.is_exist (i) == false) {
+				tmp = BetterSearch.search_good_package_from_query (i, true);
+				if (tmp == null) {
+					warning ("Cancelling ...");
+					continue;
+				}
+			}
+			else
+				tmp = av[2];
+			var pkg = Query.get_from_pkg(tmp);
 			Log.suprapack("%s %s", pkg.name, pkg.version);
 			var lst = pkg.get_installed_files();
 			foreach (unowned var file in lst) {
@@ -330,7 +358,7 @@ namespace Cmd {
 		// All Update
 		if (av.length == 2) {
 			var Qpkg = Query.get_all_installed_pkg();
-			foreach (var pkg in Qpkg) {
+			foreach (unowned var pkg in Qpkg) {
 				if (Sync.check_update(pkg)) {
 					prepare_install(pkg, Sync.get_from_pkg(pkg).repo_name);
 				}
@@ -340,9 +368,18 @@ namespace Cmd {
 		}
 		// update pkg_name
 		else {
-			pkg_name = av[2];
-			if (Query.is_exist(pkg_name) == false) {
-				error("%s is not installed", pkg_name);
+			string tmp;
+			foreach (unowned var i in av[2:av.length]) {
+				if (Query.is_exist(i) == false) {
+					tmp = BetterSearch.search_good_package_from_query(i, true);
+					if (tmp == null) {
+						warning ("Cancelling ...");
+						return false;
+					}
+				}
+				else
+					tmp = i;
+				pkg_name = tmp;
 			}
 			return true;
 		}

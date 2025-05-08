@@ -17,6 +17,7 @@ sources = [
     'Http.vala',
     'SupraList.vala',
     'RepoInfo.vala',
+    'BetterSearch.vala',
     'uname.vapi')
 ]
 

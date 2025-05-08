@@ -284,7 +284,7 @@ private void prepare_install (string name_search, string? name_repo = null, bool
 	// Check if the package is a local file (file.suprapack)
 	if (name_search.has_suffix(".suprapack")) {
 		if (!FileUtils.test(name_search, FileTest.EXISTS))
-			throw new ErrorSP.ACCESS (@"$name_search not found");
+			throw new ErrorSP.NOT_FOUND(name_search);
 		SupraList pkg = SupraList("Local", name_search, true);
 		pkg.is_wanted = is_wanted;
 		add_queue_list(pkg, name_search);
@@ -308,7 +308,7 @@ private void prepare_install (string name_search, string? name_repo = null, bool
 		if (Query.is_exist(name_search) == true) {
 			throw new ErrorSP.ACCESS("Can't found %s but exist in local", name_search);
 		}
-		throw new ErrorSP.ACCESS("%s not found", name_search);
+		throw new ErrorSP.NOT_FOUND(name_search);
 	}
 	// if only one package found
 	else if (queue.length == 1){
