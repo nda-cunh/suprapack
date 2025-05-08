@@ -50,6 +50,22 @@ namespace BetterSearch {
 		return (search_end(best_result, package, choose));
 	}
 
+	//bad score is lower and good score is higher
+	public int get_score_sync (string s1, string s2) {
+		double max_distance = double.MAX;
+		int score = 0;
+		int len1 = s1.length;
+		int len2 = s2.length;
+		int distance = levenshtein(s1, s2, len1, len2);
+		double normalized_distance = (double) distance / max(len1, len2);
+		if (normalized_distance < max_distance) {
+			max_distance = normalized_distance;
+			score = (int) ((1.0 - normalized_distance) * 100);
+		}
+
+		return score;
+	}
+
 	public inline int min (int a, int b) {
 		return a < b ? a : b;
 	}
