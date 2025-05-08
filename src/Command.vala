@@ -223,24 +223,43 @@ namespace Cmd {
 		int width_version = 0;
 		try {
 			var regex = new Regex(av[2] ?? "", RegexCompileFlags.EXTENDED);
+			Package [] good = {};
+			int max_score = 0; 
+			if (av.length > 2) {
+				foreach (unowned var i in installed) {
+					var score = BetterSearch.get_score_sync(i.name, av[2]);
+					if (score > max_score)
+						max_score = score;
+				}
+				max_score = max_score * 80 / 100;
+			}
+			else
+				max_score = int.MAX;
 			foreach (unowned var i in installed) {
-				if (regex.match(i.name) || regex.match(i.version) || regex.match(i.description) || regex.match(i.author)) {
+				int score;
+				if (av.length == 2)
+					score = -1;
+				else
+					score = BetterSearch.get_score_sync(i.name, av[2]);
+				debug ("MAX Score: %d, Score: %d %s", max_score, score, i.name);
+				if (regex.match(i.name) || regex.match(i.version) || regex.match(i.description) || regex.match(i.author) || 18 <= score >= max_score) {
+					good += i;
+				}
+			}
+			foreach (unowned var i in good) {
 					if (i.name.length > width)
 						width = i.name.length;
 					if (i.version.length > width_version)
 						width_version = i.version.length;
-				}
 			}
 			++width_version;
 			++width;
-			foreach (unowned var i in installed) {
-				if (regex.match(i.name) || regex.match(i.version) || regex.match(i.description) || regex.match(i.author)) {
+			foreach (unowned var i in good) {
 					uint8 buffer[32];
 					unowned var size = Utils.convertBytePrint(uint64.parse(i.size_installed), buffer);
 					const string format = BOLD + WHITE + "%-*s " + GREEN + " %-*s" + NONE;
 					print(format, width, i.name, width_version, i.version, size);
 					print("%9s" + COM + " %s" + NONE + "\n", size, i.description);
-				}
 			}
 		} catch (Error e) {
 			error(e.message);
@@ -299,10 +318,21 @@ namespace Cmd {
 		// search with regex pattern
 		else {
 			try {
+				int max_score = 0; 
+				foreach (var i in list) {
+					var score = BetterSearch.get_score_sync(i.name, av[2]);
+					if (score > max_score)
+						max_score = score;
+				}
+				// take 20% of the max score
+				max_score = max_score * 80 / 100;
+
 				string regex_str = av[2].replace("*", ".*");
 				var regex = new Regex(regex_str, RegexCompileFlags.OPTIMIZE);
 				foreach(var i in list) {
-					if (regex.match(i.name) || regex.match(i.version) || regex.match(i.description))
+					var score = BetterSearch.get_score_sync(i.name, av[2]);
+					debug ("MAX Score: %d, Score: %d %s", max_score, score, i.name);
+					if (regex.match(i.name) || regex.match(i.version) || regex.match(i.description) || score >= max_score)
 						print_search(ref i, (i.name in installed));
 				}
 			}
