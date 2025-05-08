@@ -104,6 +104,7 @@ errordomain ErrorSP {
 	ACCESS,
 	FAILED,
 	CANCEL,
+	NOT_FOUND,
 	BADFILE
 
 }
