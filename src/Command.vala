@@ -231,7 +231,7 @@ namespace Cmd {
 					if (score > max_score)
 						max_score = score;
 				}
-				max_score = max_score * 80 / 100;
+				max_score = max_score * 75 / 100;
 			}
 			else
 				max_score = int.MAX;
@@ -242,7 +242,7 @@ namespace Cmd {
 				else
 					score = BetterSearch.get_score_sync(i.name, av[2]);
 				debug ("MAX Score: %d, Score: %d %s", max_score, score, i.name);
-				if (regex.match(i.name) || regex.match(i.version) || regex.match(i.description) || regex.match(i.author) || 18 <= score >= max_score) {
+				if (max_score >= 35 && (regex.match(i.name) || regex.match(i.version) || regex.match(i.description) || regex.match(i.author) || 18 <= score >= max_score)) {
 					good += i;
 				}
 			}
@@ -325,14 +325,14 @@ namespace Cmd {
 						max_score = score;
 				}
 				// take 20% of the max score
-				max_score = max_score * 80 / 100;
+				max_score = max_score * 75 / 100;
 
 				string regex_str = av[2].replace("*", ".*");
 				var regex = new Regex(regex_str, RegexCompileFlags.OPTIMIZE);
 				foreach(var i in list) {
 					var score = BetterSearch.get_score_sync(i.name, av[2]);
 					debug ("MAX Score: %d, Score: %d %s", max_score, score, i.name);
-					if (regex.match(i.name) || regex.match(i.version) || regex.match(i.description) || score >= max_score)
+					if (max_score >= 35 && (regex.match(i.name) || regex.match(i.version) || regex.match(i.description) || score >= max_score))
 						print_search(ref i, (i.name in installed));
 				}
 			}
