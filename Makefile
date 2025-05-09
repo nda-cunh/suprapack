@@ -1,6 +1,6 @@
 # VERSION = sed -s "s/version:.*$/version: $VERSION/" usr/info -i
 NAME =	suprapack_dev
-LDFLAGS=-X -O2 --pkg=gio-2.0 -X -w -X -flto --enable-experimental --target-glib=auto
+LDFLAGS=-X -O2 --disable-warnings --pkg=gio-2.0 -X -w -X -flto --enable-experimental --target-glib=auto
 
 VAPI =	src/uname.vapi
 SRC =	src/main.vala \
