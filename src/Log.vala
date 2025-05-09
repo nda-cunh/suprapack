@@ -37,7 +37,7 @@ public class LogObject : Object {
 				print_line_debug(message, len);
 				break;
 			case LogLevelFlags.LEVEL_DEBUG:
-				if (Environment.get_variable ("G_MESSAGES_DEBUG") != null) {
+				if (debug == true) {
 					stderr.printf("\033[32m[Debug]\033[0m %s", text_to_debug (message, out len));
 					print_line_debug(message, len);
 				}
@@ -73,7 +73,7 @@ public class LogObject : Object {
 		real_message = text.offset(len);
 		len += real_message.index_of_char(':') + 2;
 		real_message = text.offset(len);
-		if (debug == true) {
+		if (debug == false) {
 			len = -1;
 			return real_message;
 		}
@@ -85,9 +85,9 @@ public class LogObject : Object {
 		get {
 			if (_debug == null) {
 				if (Environment.get_variable ("G_MESSAGES_DEBUG") == null) {
-					_debug = true;
-				} else {
 					_debug = false;
+				} else {
+					_debug = true;
 				}
 			}
 			return _debug;
