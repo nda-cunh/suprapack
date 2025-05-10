@@ -73,6 +73,10 @@ public class RepoInfo : Object {
 						fetch_list(this.url, list_file);
 					}
 				} catch (Error e) {
+					if (e is TlsError) {
+						e.message += "try to install " + BOLD + PURPLE + "glib-networking" + NONE + " package";
+
+					}
 					error("unable to download file %s", e.message);
 				}
 				_list = list_file;

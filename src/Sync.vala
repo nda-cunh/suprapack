@@ -243,7 +243,7 @@ class Sync : Object {
 			print(ENDCURSOR);
 			FileUtils.remove (output);
 			if (e is TlsError) {
-				warning ("Try to install glib-networking");
+				e.message += "try to install " + BOLD + PURPLE + "glib-networking" + NONE + " package";
 			}
 			error ("Can't download %s\n(%s)", url, e.message);
 		}
