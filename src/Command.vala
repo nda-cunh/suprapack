@@ -61,6 +61,7 @@ namespace Cmd {
 
 
 	bool query_get_comp (string []av) {
+		FileUtils.close (2);
 		var pkgs = Query.get_all_package();
 		for (var i = 0; i != pkgs.length; ++i) {
 			if (i == pkgs.length - 1)
@@ -73,6 +74,7 @@ namespace Cmd {
 
 
 	bool sync_get_comp (string []av) {
+		FileUtils.close (2);
 		var pkgs = Sync.get_list_package();
 		for (var i = 0; i != pkgs.length; ++i) {
 			if (i == pkgs.length - 1)
