@@ -61,9 +61,14 @@ export fpath=(%1$s/bin $fpath)
 			FileUtils.set_contents (new_config, "is_cached:false");
 		}
 		if (FileUtils.test (new_repo_list, FileTest.EXISTS) == false) {
-			if (FileUtils.test(this.repo_list, FileTest.EXISTS)) {
-				info("[Repo] Copy all %s content in new prefix", this.prefix);
+			if (this.repo_list != null && FileUtils.test(this.repo_list, FileTest.EXISTS)) {
+				info("[Repo] Copy all \033[35m%s\033[0m content in new prefix \033[33m%s\033[0m", this.repo_list, new_repo_list);
 				FileUtils.get_contents (this.repo_list, out contents);
+				FileUtils.set_contents (new_repo_list, contents);
+			}
+			else if (this.repo_list == null && FileUtils.test ("/usr/.suprapack/repo.list", FileTest.EXISTS)) {
+				FileUtils.get_contents ("/usr/.suprapack/repo.list", out contents);
+				info("[Repo] Copy all \033[35m/usr/.suprapack/repo.list\033[0m content in new prefix \033[33m%s\033[0m", new_repo_list);
 				FileUtils.set_contents (new_repo_list, contents);
 			}
 			else
