@@ -1,0 +1,15 @@
+image: "archlinux:latest"
+
+pages:
+  stage: deploy
+  script:
+    - pacman -Sy valadoc --noconfirm
+    - valadoc -o public --package-name=suprapack src/*.vapi src/*.vala   --use-svg-images --force
+    - echo "Pages deployment job at ${CI_PAGES_URL}"
+  
+  artifacts:
+    paths:
+      - public
+  only:
+  - main
+
