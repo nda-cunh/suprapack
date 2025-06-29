@@ -118,7 +118,6 @@ export fpath=(%1$s/bin $fpath)
 	 * Parse the command line arguments (ARGV)
 	 *
 	 * @param argv: the command line arguments
-	 * @return: true if the arguments are valid, false otherwise
 	 **/
 	public void parse (ref unowned string []argv) throws Error {
 		string? _prefix_ = null;
@@ -181,8 +180,8 @@ export fpath=(%1$s/bin $fpath)
 	/**
 	 * Check if the architecture is the same as the current architecture
 	 *
-	 * @param arch: the architecture to check
-	 * @return: true if the architecture is the same, false otherwise
+	 * @param arch the architecture to check
+	 * @return true if the architecture is the same, false otherwise
 	 */
 	public static bool is_my_arch (string arch) throws Error {
 		unowned string arch_actual = Utils.get_arch ();

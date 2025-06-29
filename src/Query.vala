@@ -170,7 +170,7 @@ namespace Query{
 
 	/**
 	 * return all package ever install
-	 * @return: all package ever install
+	 * @return all package ever install
 	 */
 	public Package []get_all_package () {
 		try {
@@ -192,7 +192,7 @@ namespace Query{
 
 	/**
 	 * return all package ever install but only the name
-	 * @return: all package ever install
+	 * @return all package ever install
 	 */
 	public string []get_all_installed_pkg () {
 		try {

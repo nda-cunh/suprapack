@@ -8,7 +8,7 @@
  * and if the repository is local or not (http or local (folder))
  *
  * a name can be (Cosmos)
- * an url can be (http://gitlab/../../) or (/home/user/repo)
+ * an url can be [[http://gitlab/../../]] or [[home/user/repo]]
  */
 public class RepoInfo : Object {
 	public RepoInfo (string name, string url, bool local) {
