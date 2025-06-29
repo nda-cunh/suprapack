@@ -4,20 +4,20 @@
  * it's like the SupraList package but with more information
  * A Package have always a info file
  *
- * @name: the name of the package
- * @author: the author of the package
- * @version: the version of the package
- * @description: the description of the package
- * @binary: the binary name of the package (for suprapack run command)
- * @dependency: the dependency of the package
- * @optional_dependency: the optional dependency of the package
- * @size_tar: the size of the tar file
- * @size_installed: the size of the installed package
- * @installed_files: the list of installed files
- * @exclude_package: the list of files to exclude from the package
- * @output: the output of the package
- * @repo: the repository of the package
- * @arch: the architecture of the package
+ * @param name the name of the package
+ * @param author the author of the package
+ * @param version the version of the package
+ * @param description the description of the package
+ * @param binary the binary name of the package (for suprapack run command)
+ * @param dependency the dependency of the package
+ * @param optional_dependency the optional dependency of the package
+ * @param size_tar the size of the tar file
+ * @param size_installed the size of the installed package
+ * @param installed_files the list of installed files
+ * @param exclude_package the list of files to exclude from the package
+ * @param output the output of the package
+ * @param repo the repository of the package
+ * @param arch the architecture of the package
  **/
 public struct Package {
 	string name;
@@ -158,7 +158,7 @@ public struct Package {
 	 * return all installed files
 	 * ex: suprapack return $prefix/bin/suprapack ...
 	 *
-	 * @return: the list of installed files
+	 * @return the list of installed files
 	 */
 	public string []get_installed_files() {
 		string []sp = this.installed_files?.split("\n");
