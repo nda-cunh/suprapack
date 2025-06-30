@@ -162,7 +162,7 @@ namespace Http {
 					catch (Error e) {
 						if (bytes == 0)
 							break;
-						throw e;
+						throw new HttpError.ERR("Error reading data: %s %s", e.message, Log.vala_line());
 					}
 				} while (len > 0);
 
