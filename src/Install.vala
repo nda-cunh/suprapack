@@ -270,6 +270,11 @@ public void install () throws Error {
 
 	if (config.allays_yes || Utils.stdin_bool_choose(":: Proceed with installation [Y/n] ", true)) {
 		print("\n");
+		// Remove all suprapackages in the queue
+		foreach (unowned var i in config.queue_pkg_uninstall) {
+			Query.uninstall(i.name);
+		}
+		// Installation of suprapackages
 		foreach (unowned var i in config.queue_pkg) {
 			if (config.force == true || i.is_wanted == true) {
 				install_suprapackage(i);
