@@ -15,6 +15,7 @@ public class Config : Object {
 		if (prefix_tmp != null)
 			this.change_prefix(prefix_tmp);
 		queue_pkg = new PackageSet();
+		queue_pkg_uninstall = new PackageSet();
 		create_source_profile();
 	}
 
@@ -199,6 +200,7 @@ export fpath=(%1$s/bin $fpath)
 	 ****************************************/
 
 	public PackageSet queue_pkg;
+	public PackageSet queue_pkg_uninstall;
 	public unowned string[] cmd;
 	public bool want_remove 	{get; set; default=false;}
 

@@ -197,10 +197,20 @@ public void install () throws Error {
 		foreach (unowned var exclude in i.exclude_package.split(" ")) {
 			exclude = exclude._strip();
 			if (Query.is_exist(exclude)) {
+				if (Query.is_exist(i.name)) {
+					var pkg = Query.get_from_pkg(i.name);	
+					if (exclude in pkg.get_all_dependency()) {
+						warning ("Uninstalling %s because it is an old dependency of %s\n", exclude, i.name);
+						var pkg_exclude = Query.get_from_pkg(exclude);
+						config.queue_pkg_uninstall.add(pkg_exclude);
+						continue ;
+					}
+				}
 				Log.conflict("Impossible to install '%s' because '%s' is in conflict with him", i.name, exclude);
 				Log.conflict("please choose if you want to uninstall '%s' [y/N]", exclude);
 				if (Utils.stdin_bool_choose(": ", false)) {
-					Query.uninstall(exclude);
+					var pkg_exclude = Query.get_from_pkg(exclude);
+					config.queue_pkg_uninstall.add(pkg_exclude);
 				}
 				else {
 					throw new ErrorSP.CANCEL("Cancelling...");
@@ -218,6 +228,7 @@ public void install () throws Error {
 	}
 
 	int64 size_installed = 0;
+	int64 size_uninstalled = 0;
 	print("Package (%u)\n\n", config.queue_pkg.size);
 
 	foreach (unowned var? i in config.queue_pkg) {
@@ -225,16 +236,33 @@ public void install () throws Error {
 		if (Query.is_exist(i.name)) {
 			version = Query.get_from_pkg(i.name).version;
 		}
-		int n = 0;
-		n += printf("  " + BOLD + PURPLE +"%s" + NONE + "/%-*s " + BOLD + GREEN, i.repo, name_max - i.repo.length, i.name);
-		n += printf("%-*s" + NONE, version_max, version);
+		printf("  " + BOLD + PURPLE +"%s" + NONE + "/%-*s " + BOLD + GREEN, i.repo, name_max - i.repo.length, i.name);
+		printf("%-*s" + NONE, version_max, version);
 		if (version != i.version)
-			n += printf(" --> " + BOLD + YELLOW + "%s", i.version);
-		n += printf(NONE + "\n");
+			printf(" --> " + BOLD + YELLOW + "%s", i.version);
+		printf(NONE + "\n");
 		size_installed += int64.parse(i.size_installed);
 	}
 
+	if (config.queue_pkg_uninstall.size > 0) {
+		print(BOLD + COM + "\nUninstalling (%u)\n\n", config.queue_pkg_uninstall.size);
+		foreach (unowned var? i in config.queue_pkg_uninstall) {
+			string version = i.version;
+			if (Query.is_exist(i.name)) {
+				version = Query.get_from_pkg(i.name).version;
+			}
+			uint8 buffer[32];
+			Utils.convertBytePrint (int64.parse(i.size_installed), buffer);
+			printf (BOLD + PURPLE + "  " + RED + "%s " + COM + " %-20s\n" + NONE, i.name, buffer);
+			size_uninstalled += int64.parse(i.size_installed);
+		}
+	}
+
 	uint8 buffer[32];
+	if (size_uninstalled > 0) {
+		Utils.convertBytePrint (size_uninstalled, buffer);
+		print(COM + "\nTotal Uninstalled Size: " + BOLD + RED + "%s" + NONE + "", (string)buffer);
+	}
 	Utils.convertBytePrint   (size_installed, buffer);
 	print("\nTotal Installed Size:  " + BOLD + "%s" + NONE + "\n", (string)buffer);
 
