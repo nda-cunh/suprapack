@@ -1,5 +1,5 @@
 name: suprapack
-version: 2.18
+version: 2.19
 arch: amd64-Linux
 author: nda-cunh
 description: package-manager without root
@@ -8,5 +8,5 @@ optional_dependency:
 exclude_package: 
 binary: suprapack
 size_tar: 
-size_installed: 207195
+size_installed: 207179
 wanted: no

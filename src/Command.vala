@@ -224,27 +224,11 @@ namespace Cmd {
 		int width = 0;
 		int width_version = 0;
 		try {
-			var regex = new Regex(av[2] ?? "", RegexCompileFlags.EXTENDED);
+			var str_regex = av[2]?.replace("*", ".*") ?? "";
+			var regex = new Regex(str_regex, RegexCompileFlags.EXTENDED);
 			Package [] good = {};
-			int max_score = 0; 
-			if (av.length > 2) {
-				foreach (unowned var i in installed) {
-					var score = BetterSearch.get_score_sync(i.name, av[2]);
-					if (score > max_score)
-						max_score = score;
-				}
-				max_score = max_score * 75 / 100;
-			}
-			else
-				max_score = int.MAX;
 			foreach (unowned var i in installed) {
-				int score;
-				if (av.length == 2)
-					score = -1;
-				else
-					score = BetterSearch.get_score_sync(i.name, av[2]);
-				debug ("MAX Score: %d, Score: %d %s", max_score, score, i.name);
-				if (max_score >= 35 && (regex.match(i.name) || regex.match(i.version) || regex.match(i.description) || regex.match(i.author) || 18 <= score >= max_score)) {
+				if ((regex.match(i.name) || regex.match(i.version) || regex.match(i.description) || regex.match(i.author))) {
 					good += i;
 				}
 			}
@@ -320,21 +304,10 @@ namespace Cmd {
 		// search with regex pattern
 		else {
 			try {
-				int max_score = 0; 
-				foreach (var i in list) {
-					var score = BetterSearch.get_score_sync(i.name, av[2]);
-					if (score > max_score)
-						max_score = score;
-				}
-				// take 20% of the max score
-				max_score = max_score * 75 / 100;
-
 				string regex_str = av[2].replace("*", ".*");
 				var regex = new Regex(regex_str, RegexCompileFlags.OPTIMIZE);
 				foreach(var i in list) {
-					var score = BetterSearch.get_score_sync(i.name, av[2]);
-					debug ("MAX Score: %d, Score: %d %s", max_score, score, i.name);
-					if (max_score >= 35 && (regex.match(i.name) || regex.match(i.version) || regex.match(i.description) || score >= max_score))
+					if ((regex.match(i.name) || regex.match(i.version) || regex.match(i.description)))
 						print_search(ref i, (i.name in installed));
 				}
 			}
