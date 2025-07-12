@@ -98,60 +98,56 @@ public struct Package {
 		}
 	}
 
-	public Package.from_file (string info_file) {
+	public Package.from_file (string info_file) throws Error {
 		string contents;
 		unowned string @value;
 
 		init();
-		try {
-			FileUtils.get_contents(info_file, out contents);
-			var lines = contents.split("\n");
+		FileUtils.get_contents(info_file, out contents);
+		var lines = contents.split("\n");
 
-			foreach (unowned var line in lines) {
-				if (line == "[FILES]")
-					break;
-				value = line.offset(line.index_of_char(':') + 1);
-				if (line.has_prefix("name")) {
-					this.name = value.strip();
-					this.name = /\f\r\n\t\v /.replace(name, -1, 0, "");
-				}
-				else if (line.has_prefix("version")) {
-					this.version = value.strip();
-					this.version = /[^0-9.]/.replace(this.version, -1, 0, "");
-				}
-				else if (line.has_prefix("arch"))
-					this.arch = value.strip();
-				else if (line.has_prefix("author"))
-					this.author = value.strip();
-				else if (line.has_prefix("description"))
-					this.description = value.strip();
-				else if (line.has_prefix("binary"))
-					this.binary = value.strip();
-				else if (line.has_prefix("dependency"))
-					this.dependency = value.strip();
-				else if (line.has_prefix("optional_dependency"))
-					this.optional_dependency = value.strip();
-				else if (line.has_prefix("size_tar"))
-					this.size_tar = value.strip();
-				else if (line.has_prefix("size_installed"))
-					this.size_installed = value.strip();
-				else if (line.has_prefix("exclude_package"))
-					this.exclude_package = value.strip();
-				else if (line.has_prefix("wanted"))
-					this.is_wanted = value.strip() == "yes" ? true : false;
+		foreach (unowned var line in lines) {
+			if (line == "[FILES]")
+				break;
+			value = line.offset(line.index_of_char(':') + 1);
+			if (line.has_prefix("name")) {
+				this.name = value.strip();
+				this.name = /\f\r\n\t\v /.replace(name, -1, 0, "");
 			}
-			if ("[FILES]" in contents) {
-				value = contents.offset(contents.index_of("[FILES]") + 8);
-				installed_files = value;
+			else if (line.has_prefix("version")) {
+				this.version = value.strip();
+				this.version = /[^0-9.]/.replace(this.version, -1, 0, "");
 			}
-			if (this.arch == "") {
-				this.arch = Utils.get_arch();
-			}
-			if (this.binary == "")
-				this.binary = this.name;
-		} catch (Error e) {
-			error("%s (%s)", e.message, info_file);
+			else if (line.has_prefix("arch"))
+				this.arch = value.strip();
+			else if (line.has_prefix("author"))
+				this.author = value.strip();
+			else if (line.has_prefix("description"))
+				this.description = value.strip();
+			else if (line.has_prefix("binary"))
+				this.binary = value.strip();
+			else if (line.has_prefix("dependency"))
+				this.dependency = value.strip();
+			else if (line.has_prefix("optional_dependency"))
+				this.optional_dependency = value.strip();
+			else if (line.has_prefix("size_tar"))
+				this.size_tar = value.strip();
+			else if (line.has_prefix("size_installed"))
+				this.size_installed = value.strip();
+			else if (line.has_prefix("exclude_package"))
+				this.exclude_package = value.strip();
+			else if (line.has_prefix("wanted"))
+				this.is_wanted = value.strip() == "yes" ? true : false;
 		}
+		if ("[FILES]" in contents) {
+			value = contents.offset(contents.index_of("[FILES]") + 8);
+			installed_files = value;
+		}
+		if (this.arch == "") {
+			this.arch = Utils.get_arch();
+		}
+		if (this.binary == "")
+			this.binary = this.name;
 	}
 
 	/**
