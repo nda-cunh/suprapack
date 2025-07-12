@@ -40,6 +40,8 @@ namespace Query{
 			debug (e.message);
 		}
 
+		var config_prefix_len = config.prefix.length;
+		var bs = new StringBuilder.sized (256);
 		const string remove = BOLD + YELLOW + "[Remove]" + NONE + " ";
 		var lst = Query.get_from_pkg(name_pkg).get_installed_files();
 		for (int i = 0; i != lst.length; ++i) {
@@ -55,10 +57,23 @@ namespace Query{
 			else
 				stdout.printf("%s[%u/%u] %s%*c\r", remove, i+1, lst.length, lst[i], calc, ' ');
 			g_last_size = file_len;
-			if (lst[i].has_prefix(config.prefix))
+			if (lst[i].has_prefix(config.prefix)) {
 				FileUtils.unlink(lst[i]);
-			else
-				FileUtils.unlink(config.prefix + lst[i]);
+			}
+			else{
+				bs.len = 0;
+				bs.append (config.prefix);
+				bs.append (lst[i]);
+				FileUtils.unlink(bs.str);
+				var end = bs.str.last_index_of_char ('/', config_prefix_len);
+				bs.truncate (end);
+				if (DirUtils.remove (bs.str) == 0) {
+					do {
+						end = bs.str.last_index_of_char ('/', 0);
+						bs.truncate (end);
+					} while (DirUtils.remove (bs.str) == 0);
+				}
+			}
 		}
 		Query.remove_pkg(name_pkg);
 		print("\n");
@@ -69,7 +84,7 @@ namespace Query{
 	* return the Package struct from a package-name
 	* @param name_pkg: the package name to get
 	*/
-	public Package get_from_pkg (string name_pkg) {
+	public Package get_from_pkg (string name_pkg) throws Error {
 		var pkg = Package.from_file(@"$(config.path_suprapack_cache)/$name_pkg/info");
 		return pkg;
 	}
