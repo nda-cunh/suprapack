@@ -42,6 +42,7 @@ public class Main : Object {
 		var opt_context = new OptionContext ();
 		opt_context.add_main_entries (options, null);
 		opt_context.set_help_enabled(false);
+		opt_context.set_ignore_unknown_options(true);
 		opt_context.parse(ref commands);
 
 		if (_debug == true)

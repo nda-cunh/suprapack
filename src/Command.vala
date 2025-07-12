@@ -15,11 +15,13 @@ namespace Cmd {
 		Process.exit(status);
 	}
 
-
 	bool shell (string []av) throws Error {
 		var env = Environ.get();
 		var shell = Environ.get_variable(env, "SHELL") ?? "/bin/bash";
 		config.force = true;
+		if (av.length == 3) {
+			config.change_prefix (av[2]);
+		}
 		if (shell.has_suffix("bash"))
 			Cmd.run({"suprapack", "run", shell, "--noprofile", "--norc"}, true);
 		else if (shell.has_suffix("zsh"))
@@ -322,37 +324,25 @@ namespace Cmd {
 	bool run (string []av, bool is_shell = false) throws Error {
 		if (av.length == 2)
 			error("`suprapack run [...]`");
-		if (Query.is_exist(av[2]) == false && config.force == false) {
+		var name_app = Environment.find_program_in_path (av[2]);
+		if (Query.is_exist(av[2]) == false && name_app == null) {
 			Log.suprapack("%s doesn't exist install it...", av[2]);
 			Cmd.install({"", "install", av[2]});
 		}
-		if (Query.is_exist(av[2]) == false && config.force == false) {
+		name_app = Environment.find_program_in_path (av[2]);
+		if (name_app == null) {
 			error("(%s) is not installed", av[2]);
 		}
 
 		string []av_binary;
 
-		if (config.force == false) {
-			var pkg = Query.get_from_pkg(av[2]);
-			if (pkg.binary.index_of_char('/') == -1)
-				av_binary = {@"$(config.prefix)/bin/$(pkg.binary)"};
-			else
-				av_binary = {@"$(config.prefix)/$(pkg.binary)"};
-
-			if (av.length >= 3) {
-				foreach (var i in av[3: av.length])
-					av_binary += i;
-			}
-		}
-		else {
-			av_binary = {av[2]};
-			foreach (var i in av[3: av.length])
-				av_binary += i;
-		}
+		av_binary = {av[2]};
+		foreach (var i in av[3: av.length])
+			av_binary += i;
 		if (is_shell)
-			run_shell(av_binary);
+			Shell.run_shell(av_binary);
 		else
-			Utils.run(av_binary);
+			Shell.run(av_binary);
 		return true;
 	}
 
