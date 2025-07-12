@@ -124,8 +124,14 @@ namespace Cmd {
 
 
 	bool build (string []av) throws Error {
-		if (av.length == 2)
-			error("`suprapack build [...]`");
+		if (av.length == 2) {
+			if (FileUtils.test ("./PKGBUILD", FileTest.EXISTS)) {
+				Build.create_package ("./PKGBUILD");
+				return true;
+			}
+			else
+				error("`suprapack build [...]`");
+		}
 		foreach (var i in av[2:]) {
 			Log.suprapack(@"Build %s", av[2]);
 			Build.create_package(i);

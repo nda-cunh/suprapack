@@ -118,8 +118,12 @@ public struct Package {
 				this.version = value.strip();
 				this.version = /[^0-9.]/.replace(this.version, -1, 0, "");
 			}
-			else if (line.has_prefix("arch"))
+			else if (line.has_prefix("arch")) {
 				this.arch = value.strip();
+				if (this.arch == "" || this.arch == "auto") {
+					this.arch = Utils.get_arch();
+				}
+			}
 			else if (line.has_prefix("author"))
 				this.author = value.strip();
 			else if (line.has_prefix("description"))
