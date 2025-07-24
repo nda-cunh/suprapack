@@ -1,20 +1,11 @@
 namespace Cmd {
-	[NoReturn]
-	void loading (string []av) {
-		if (av.length == 2)
-			error("suprapack loading <command> [<args>]");
-		int status = 0;
-		var loop = new MainLoop();
 
-		Utils.loading.begin();
-		Utils.run_proc.begin(av, (obj, res) => {
-			status = Utils.run_proc.end(res);
-			loop.quit();
-		});
-		loop.run();
-		Process.exit(status);
-	}
-
+	/**
+	 * The Command shell of suprapack
+	 *
+	 * run zsh or bash in a suprapack environment
+	 * @param av: argv of command
+	 */
 	bool shell (string []av) throws Error {
 		var env = Environ.get();
 		var shell = Environ.get_variable(env, "SHELL") ?? "/bin/bash";
@@ -30,9 +21,17 @@ namespace Cmd {
 	}
 
 
-	bool download (string []av) throws Error {
+	/**
+	 * The Command download of suprapack
+	 *
+	 * just download a package from the repository
+	 * @param av: argv of command
+	 * @return true if the download was successful
+	 */
+	public bool download (string []av) throws Error {
 		if (av.length == 2)
 			error("suprapack download <pkg>");
+
 		foreach (var pkg in av[2:av.length]) {
 			var supralist = Sync.get_from_pkg(pkg);
 			Log.download(@"%s %s", supralist.name, supralist.version);
@@ -54,7 +53,14 @@ namespace Cmd {
 	}
 
 
-	bool refresh () throws Error {
+	/**
+	 * The flag --refresh of suprapack
+	 *
+	 * refresh the packages list from the repository
+	 *
+	 * @return true if the refresh was successful
+	 */
+	public bool refresh () throws Error {
 		Log.suprapack("Refreshing packages list");
 		Sync.refresh_list();
 		Log.suprapack("Packages list Refreshed");
@@ -62,7 +68,15 @@ namespace Cmd {
 	}
 
 
-	bool query_get_comp (string []av) {
+	/**
+	 * The hide command get_comp of suprapack
+	 *
+	 * print all installed package
+	 *
+	 * @param av: argv of command
+	 * @return true if the get was successful
+	 */
+	public bool query_get_comp (string []av) {
 		FileUtils.close (2);
 		var pkgs = Query.get_all_package();
 		for (var i = 0; i != pkgs.length; ++i) {
@@ -87,7 +101,14 @@ namespace Cmd {
 		return true;
 	}
 
-
+	/**
+	 * The Command install of suprapack
+	 *
+	 * install a package from a repository or a file
+	 *
+	 * @param av: argv of command
+	 * @return true if the install was successful
+	 */
 	bool install (string []av) throws Error {
 		if (av.length == 2)
 			error("`suprapack install [...]`");
@@ -104,7 +125,8 @@ namespace Cmd {
 				else if (i.has_suffix(".suprapack")){
 					prepare_install(i, null, true);
 				}
-			}catch (Error e) {
+			}
+			catch (Error e) {
 				if (e is ErrorSP.FAILED) {
 					throw e;
 				}
@@ -123,15 +145,21 @@ namespace Cmd {
 	}
 
 
+	/**
+	 * The command build of suprapack
+	 *
+	 * build a suprapack package from a PKGBUILD file or a directory
+	 * @param av : argv of command
+	 */
 	bool build (string []av) throws Error {
 		if (av.length == 2) {
 			if (FileUtils.test ("./PKGBUILD", FileTest.EXISTS)) {
 				Build.create_package ("./PKGBUILD");
 				return true;
 			}
-			else
-				error("`suprapack build [...]`");
+			error("`suprapack build [...]`");
 		}
+
 		foreach (var i in av[2:]) {
 			Log.suprapack(@"Build %s", av[2]);
 			Build.create_package(i);
@@ -140,7 +168,15 @@ namespace Cmd {
 	}
 
 
-	bool info (string []av) {
+	/**
+	 * The Command info of suprapack
+	 *
+	 * print information about a package
+	 *
+	 * @param av: argv of command
+	 * @return true if the information was printed successfully
+	 */
+	bool info (string []av) throws Error {
 		string tmp;
 		if (av.length == 2)
 			error("`suprapack info [...]`");
@@ -177,21 +213,37 @@ namespace Cmd {
 	}
 
 
-	bool have_update (string []av) throws Error {
+	/**
+	 * The Command have_update of suprapack
+	 *
+	 * check if a package have an update
+	 * @param av: argv of command
+	 * @return true if the package have an update
+	 */
+	public bool have_update (string []av) throws Error {
 		if (av.length == 2)
 			error("`suprapack have_update [...]`");
+
 		var Qpkg = Query.get_from_pkg(av[2]);
 		var Spkg = Sync.get_from_pkg(av[2]);
-		if (Utils.compare_versions(Spkg.version, Qpkg.version)) {
+		if (Utils.compare_versions(Spkg.version, Qpkg.version))
 			print("Update %s --> %s", Qpkg.version, Spkg.version);
-		}
 		return true;
 	}
 
 
+	/**
+	 * The Command uninstall of suprapack
+	 *
+	 * uninstall a package
+	 *
+	 * @param av: argv of command
+	 * @return true if the uninstall was successful
+	 */
 	bool uninstall (string []av) throws Error {
 		if (av.length == 2)
 			error("`suprapack uninstall [...]`");
+
 		config.want_remove = true;
 
 		Uninstall.uninstall(av);
@@ -199,10 +251,18 @@ namespace Cmd {
 	}
 
 
+	/**
+	 * The Command list_files of suprapack
+	 *
+	 * list all files installed by a package
+	 *
+	 * @param av: argv of command
+	 * @return true if the list was successful
+	 */
 	bool list_files (string []av) {
-		if (av.length == 2) {
-			Log.suprapack("`suprapack list_files <pkg..>`");
-		}
+		if (av.length == 2)
+			error ("`suprapack list_files <pkg..>`");
+
 		foreach (unowned var i in av[2:av.length]) {
 			string tmp;
 
@@ -215,11 +275,16 @@ namespace Cmd {
 			}
 			else
 				tmp = av[2];
-			var pkg = Query.get_from_pkg(tmp);
-			Log.suprapack("%s %s", pkg.name, pkg.version);
-			var lst = pkg.get_installed_files();
-			foreach (unowned var file in lst) {
-				print("%s\n", file);
+			try {
+				var pkg = Query.get_from_pkg(tmp);
+				Log.suprapack("%s %s", pkg.name, pkg.version);
+				var lst = pkg.get_installed_files();
+				foreach (unowned var file in lst) {
+					print("%s\n", file);
+				}
+			}
+			catch (Error e) {
+				warning("Error: %s", e.message);
 			}
 		}
 
@@ -227,6 +292,14 @@ namespace Cmd {
 	}
 
 
+	/**
+	 * The Command list of suprapack
+	 *
+	 * list all installed packages
+	 *
+	 * @param av: argv of command
+	 * @return true if the list was successful
+	 */
 	bool list (string []av) {
 		var installed = Query.get_all_package();
 		int width = 0;
@@ -241,19 +314,19 @@ namespace Cmd {
 				}
 			}
 			foreach (unowned var i in good) {
-					if (i.name.length > width)
-						width = i.name.length;
-					if (i.version.length > width_version)
-						width_version = i.version.length;
+				if (i.name.length > width)
+					width = i.name.length;
+				if (i.version.length > width_version)
+					width_version = i.version.length;
 			}
 			++width_version;
 			++width;
 			foreach (unowned var i in good) {
-					uint8 buffer[32];
-					unowned var size = Utils.convertBytePrint(uint64.parse(i.size_installed), buffer);
-					const string format = BOLD + WHITE + "%-*s " + GREEN + " %-*s" + NONE;
-					print(format, width, i.name, width_version, i.version, size);
-					print("%9s" + COM + " %s" + NONE + "\n", size, i.description);
+				uint8 buffer[32];
+				unowned var size = Utils.convertBytePrint(uint64.parse(i.size_installed), buffer);
+				const string format = BOLD + WHITE + "%-*s " + GREEN + " %-*s" + NONE;
+				print(format, width, i.name, width_version, i.version, size);
+				print("%9s" + COM + " %s" + NONE + "\n", size, i.description);
 			}
 		} catch (Error e) {
 			error(e.message);
@@ -263,20 +336,32 @@ namespace Cmd {
 	}
 
 
-	bool prepare () {
+	/**
+	 * The Command prepare of suprapack
+	 *
+	 * prepare the repository (for dev)
+	 */
+	public bool prepare () {
 		Repository.prepare();
 		return true;
 	}
 
 
-	private void print_supravim_plugin (ref SupraList repo, bool installed) {
+	/**
+	 * The Command search_supravim_plugin of suprapack
+	 *
+	 * print all suprapack plugin
+	 *
+	 * @param av: argv of command
+	 */
+	public void print_supravim_plugin (ref SupraList repo, bool installed) {
 		if (installed)
 			print("[installed] ");
 		print("%s %s [%s]\n", repo.name, repo.version, repo.description);
 	}
 
 
-	bool search_supravim_plugin (string []av) throws Error {
+	public bool search_supravim_plugin (string []av) throws Error {
 		force_suprapack_update();
 		var list = Sync.get_list_package();
 		var installed = Query.get_all_installed_pkg();
@@ -289,16 +374,15 @@ namespace Cmd {
 	}
 
 
-	private void print_search (ref SupraList repo, bool installed) {
-		print(BOLD + PURPLE + " %s/" + WHITE, repo.repo_name);
-		print("%s " + GREEN + "%s", repo.name, repo.version);
-		if (installed)
-			print(CYAN + " [installed]");
-		print(NONE);
-		if (repo.description != "")
-			print("\n\t" + COM + "%s\n", repo.description);
-	}
-
+	/**
+	 * The Command search of suprapack
+	 *
+	 * search a package in the repository by regex pattern
+	 * or print all package if no pattern is given
+	 *
+	 * @param av: argv of command
+	 * @return true if the search was successful
+	 */
 	bool search (string []av) throws Error {
 		force_suprapack_update();
 		var list = Sync.get_list_package();
@@ -327,31 +411,65 @@ namespace Cmd {
 		return true;
 	}
 
+	private void print_search (ref SupraList repo, bool installed) {
+		print(BOLD + PURPLE + " %s/" + WHITE, repo.repo_name);
+		print("%s " + GREEN + "%s", repo.name, repo.version);
+		if (installed)
+			print(CYAN + " [installed]");
+		print(NONE);
+		if (repo.description != "")
+			print("\n\t" + COM + "%s\n", repo.description);
+	}
+
+	/**
+	 * The Command run of suprapack
+	 * run the package.binary_name or the shell command with profile or suprapack
+	 *
+	 * it can accept --yes, --force argument
+	 * if force is true it will run a shell command
+	 *
+	 * @param av: argv of command
+	 * @param is_shell: if true run the command in a shell like bash or zsh
+	 */
 	bool run (string []av, bool is_shell = false) throws Error {
+		string []av_binary;
 		if (av.length == 2)
 			error("`suprapack run [...]`");
-		var name_app = Environment.find_program_in_path (av[2]);
+
+		var? name_app = Environment.find_program_in_path (av[2]);
 		if (Query.is_exist(av[2]) == false && name_app == null) {
 			Log.suprapack("%s doesn't exist install it...", av[2]);
 			Cmd.install({"", "install", av[2]});
 		}
 		name_app = Environment.find_program_in_path (av[2]);
-		if (name_app == null) {
-			error("(%s) is not installed", av[2]);
-		}
-
-		string []av_binary;
-
 		av_binary = {av[2]};
+		if (Query.is_exist (av[2]) && config.force == false) {
+			var pkg = Query.get_from_pkg(av[2]);
+			av_binary = {pkg.binary};
+		}
+		else if (name_app == null && av[2].has_suffix(".suprapack"))
+			name_app = av[2];
+		else if (name_app == null)
+			error("(%s) is not installed", av[2]);
+
+
 		foreach (var i in av[3: av.length])
 			av_binary += i;
 		if (is_shell)
 			Shell.run_shell(av_binary);
 		else
 			Shell.run(av_binary);
-		return true;
 	}
 
+
+	/**
+	 * The Command update of suprapack
+	 *
+	 * update all packages or a specific package
+	 *
+	 * @param av: argv of command
+	 * @return true if the update was successful
+	 */
 	bool update (string []av) throws Error {
 		force_suprapack_update();
 		unowned string pkg_name;
@@ -386,12 +504,28 @@ namespace Cmd {
 		}
 	}
 
-	bool version () {
+
+	/**
+	 * The Command version of suprapack
+	 *
+	 * print the version of suprapack
+	 *
+	 * @return true if the version was printed successfully
+	 */
+	bool version () throws Error {
 		print("SupraPack version: %s\n", Query.get_from_pkg ("suprapack").version);
 		return true;
 	}
 
-	private const string p_suprapack = BOLD + "suprapack" + NONE;
+
+	/**
+	 * The Command help of suprapack
+	 *
+	 * print the help of suprapack
+	 *
+	 * @param help_command: the command to print the help for
+	 * @return true if the help was printed successfully
+	 */
 	bool help (string help_command) {
 		stdout.printf(BOLD + YELLOW + "[SupraPack] ----- Help -----\n\n");
 		stdout.printf("\t" + p_suprapack + " (add | install) [package name]\n");
@@ -441,4 +575,21 @@ namespace Cmd {
 		return true;
 	}
 
+	[NoReturn]
+		private void loading (string []av) {
+			if (av.length == 2)
+				error("suprapack loading <command> [<args>]");
+			int status = 0;
+			var loop = new MainLoop();
+
+			Utils.loading.begin();
+			Utils.run_proc.begin(av, (obj, res) => {
+					status = Utils.run_proc.end(res);
+					loop.quit();
+					});
+			loop.run();
+			Process.exit(status);
+		}
+
+	private const string p_suprapack = BOLD + "suprapack" + NONE;
 }
