@@ -63,9 +63,7 @@ namespace Uninstall {
 		}
 
 		if (Query.is_exist (name) == false) {
-			print ("[");
 			var tmp = BetterSearch.search_good_package_from_query (name);
-			print ("]\n");
 			if (tmp != null)
 				add_queue (tmp, queue);
 			return ;
