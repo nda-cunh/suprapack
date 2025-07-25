@@ -24,10 +24,12 @@ public const string INV = "\033[;7m";
 public const string RED = "\033[31m";
 public const string GREEN = "\033[32m";
 public const string YELLOW = "\033[33m";
+public const string BLUE = "\033[34m";
+public const string PURPLE = "\033[35m";
+public const string MAGENTA = "\033[36m";
 public const string GREY = "\033[37m";
 public const string WHITE = "\033[39m";
 public const string CYAN = "\033[96m";
-public const string PURPLE = "\033[35m";
 public const string NONE = "\033[0m";
 public const string CURSOR = "\033[?25l";
 public const string ENDCURSOR= "\033[?25h";
@@ -44,25 +46,25 @@ public class LogObject : Object {
 
 		switch (levels) {
 			case LogLevelFlags.LEVEL_WARNING:
-				stderr.printf("\033[33m[WARNING]\033[0m %s", text_to_debug (message, out len));
+				stderr.printf(YELLOW + "[WARNING]" + NONE + " %s", text_to_debug (message, out len));
 				print_line_debug(message, len);
 				break;
 			case LogLevelFlags.LEVEL_CRITICAL:
-				stderr.printf("\033[31m[Critical]\033[0m %s", text_to_debug (message, out len));
+				stderr.printf(RED + "[Critical]" + NONE + " %s", text_to_debug (message, out len));
 				print_line_debug(message, len);
 				break;
 			case LogLevelFlags.LEVEL_MESSAGE:
-				print("\033[32m[SupraPack]\033[0m %s", text_to_debug (message, out len));
+				print(GREEN + "[SupraPack]" + NONE + " %s", text_to_debug (message, out len));
 				print_line_debug(message, len);
 				break;
 			case LogLevelFlags.LEVEL_DEBUG:
 				if (debug == true) {
-					stderr.printf("\033[32m[Debug]\033[0m %s", text_to_debug (message, out len));
+					stderr.printf(GREEN + "[Debug]" + NONE + " %s", text_to_debug (message, out len));
 					print_line_debug(message, len);
 				}
 				break;
 			case LogLevelFlags.LEVEL_INFO:
-				const string type_default = "\033[37m[Info]\033[0m";
+				const string type_default = GREY + "[Info]" + NONE;
 				print("%s: %s", type ?? type_default, text_to_debug (message, out len));
 				print_line_debug(message, len);
 				break;
@@ -70,7 +72,7 @@ public class LogObject : Object {
 			case LogLevelFlags.FLAG_FATAL:
 			case LogLevelFlags.LEVEL_ERROR:
 			default:
-				stderr.printf("\033[31m[Error]\033[0m %s", text_to_debug (message, out len));
+				stderr.printf(RED + "[Error]" + NONE + " %s", text_to_debug (message, out len));
 				print_line_debug(message, len);
 				Process.exit(-1);
 		}
@@ -78,7 +80,7 @@ public class LogObject : Object {
 
 	private static void print_line_debug (string text, int len) {
 		if (len != -1)
-			stderr.printf ("\033[35m (%.*s)\033[0m", len - 2, text);
+			stderr.printf (PURPLE + "(%.*s)" + NONE, len - 2, text);
 		stderr.printf("\n");
 	}
 
@@ -142,35 +144,35 @@ namespace Log {
 
 	[Diagnostics]
 	public void info (string format, ...) {
-		const string type = "\033[37m[Info]\033[0m";
+		const string type = GREY + BOLD + "[Info]" + NONE;
 		va_list args = va_list();
 		logv(type, LogLevelFlags.LEVEL_INFO, format, args); 
 	}
 
 	[Diagnostics]
 	public void skip (string format, ...) {
-		const string type = "\033[33;1m[Skip]\033[0m";
+		const string type = YELLOW + BOLD + "[Skip]" + NONE;
 		va_list args = va_list();
 		logv(type, LogLevelFlags.LEVEL_INFO, format, args); 
 	}
 
 	[Diagnostics]
 	public void suprapack (string format, ...) {
-		const string type = "\033[33;1m[Suprapack]\033[0m";
+		const string type = YELLOW + BOLD + "[Suprapack]" + NONE;
 		va_list args = va_list();
 		logv(type, LogLevelFlags.LEVEL_INFO, format, args); 
 	}
 
 	[Diagnostics]
 	public void download (string format, ...) {
-		const string type = "\033[33;1m[Download]\033[0m";
+		const string type = YELLOW + BOLD + "[Download]" + NONE;
 		va_list args = va_list();
 		logv(type, LogLevelFlags.LEVEL_INFO, format, args); 
 	}
 
 	[Diagnostics]
 	public void conflict (string format, ...) {
-		const string type = "\033[31;1m[Conflict]\033[0m";
+		const string type = RED + BOLD + "[Conflict]" + NONE;
 		va_list args = va_list();
 		logv(type, LogLevelFlags.LEVEL_INFO, format, args); 
 	}
