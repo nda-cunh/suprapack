@@ -144,35 +144,35 @@ namespace Log {
 
 	[Diagnostics]
 	public void info (string format, ...) {
-		const string type = GREY + BOLD + "[Info]" + NONE;
+		const string type = BOLD + GREY + "[Info]" + NONE;
 		va_list args = va_list();
 		logv(type, LogLevelFlags.LEVEL_INFO, format, args); 
 	}
 
 	[Diagnostics]
 	public void skip (string format, ...) {
-		const string type = YELLOW + BOLD + "[Skip]" + NONE;
+		const string type = BOLD + YELLOW + "[Skip]" + NONE;
 		va_list args = va_list();
 		logv(type, LogLevelFlags.LEVEL_INFO, format, args); 
 	}
 
 	[Diagnostics]
 	public void suprapack (string format, ...) {
-		const string type = YELLOW + BOLD + "[Suprapack]" + NONE;
+		const string type = BOLD + YELLOW + "[Suprapack]" + NONE;
 		va_list args = va_list();
 		logv(type, LogLevelFlags.LEVEL_INFO, format, args); 
 	}
 
 	[Diagnostics]
 	public void download (string format, ...) {
-		const string type = YELLOW + BOLD + "[Download]" + NONE;
+		const string type = BOLD + YELLOW + "[Download]" + NONE;
 		va_list args = va_list();
 		logv(type, LogLevelFlags.LEVEL_INFO, format, args); 
 	}
 
 	[Diagnostics]
 	public void conflict (string format, ...) {
-		const string type = RED + BOLD + "[Conflict]" + NONE;
+		const string type = BOLD + RED + "[Conflict]" + NONE;
 		va_list args = va_list();
 		logv(type, LogLevelFlags.LEVEL_INFO, format, args); 
 	}
