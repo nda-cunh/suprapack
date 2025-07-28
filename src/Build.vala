@@ -37,6 +37,21 @@ namespace Build {
 			new Makepkg (usr_dir);
 			return ;
 		}
+		if (FileUtils.test(@"$usr_dir/PKGBUILD", FileTest.EXISTS)) {
+			// move to usr_dir
+			var last_dir = Environment.get_current_dir();
+			if (config.build_output == ".") {
+				config.build_output = last_dir;
+			}
+			print ("Using PKGBUILD in %s\n", @"$last_dir$usr_dir/PKGBUILD");
+			var new_pwd = @"$last_dir/$usr_dir";
+			Environment.set_variable("PWD", new_pwd, true);
+			PWD = new_pwd;
+			Environment.set_current_dir(new_pwd);
+			new Makepkg (@"$new_pwd/PKGBUILD");
+			Environment.set_current_dir(last_dir);
+			return ;
+		}
 
 		// check if USR_DIR is a valid directory
 		if (!(FileUtils.test(usr_dir, FileTest.EXISTS)) || !(FileUtils.test(usr_dir, FileTest.IS_DIR)))
