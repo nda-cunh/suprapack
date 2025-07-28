@@ -1,6 +1,6 @@
 name: suprapack
-version: 2.21
-arch: auto
+version: 2.22
+arch: auto 
 author: nda-cunh
 description: package-manager without root
 dependency: 

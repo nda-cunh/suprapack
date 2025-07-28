@@ -497,8 +497,13 @@ namespace Cmd {
 		if (av.length == 2) {
 			var Qpkg = Query.get_all_installed_pkg();
 			foreach (unowned var pkg in Qpkg) {
-				if (Sync.check_update(pkg)) {
-					prepare_install(pkg, Sync.get_from_pkg(pkg).repo_name);
+				try {
+					if (Sync.check_update(pkg)) {
+						prepare_install(pkg, Sync.get_from_pkg(pkg).repo_name);
+					}
+				}
+				catch (Error e) {
+					warning("Error: %s", e.message);
 				}
 			}
 			global::install();
