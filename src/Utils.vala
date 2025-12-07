@@ -310,6 +310,8 @@ namespace Utils {
 		if (name.sysname == "Darwin") {
 			if (name.machine == "arm")
 				return "arm64-Darwin";
+			if (name.machine == "arm64")
+				return "arm64-Darwin";
 			if (name.machine == "i386")
 				return "i386-Darwin";
 			if (name.machine == "x86_64")
