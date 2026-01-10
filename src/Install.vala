@@ -17,23 +17,22 @@
  * Copyright (C) 2025 SupraCorp - Nathan Da Cunha (nda-cunh)
  */
 
-private const int SIZE_TMP_DIR = 22;
-
 // List all files in a directory (like `ls -R`)
-private void list_file_dir(string emp_dir, ref List<string> list) {
+private void list_file_dir(string emp_dir, ref GenericArray<string> list, int depth = 0) {
+	const string except_files[] = {"info", "pre_install.sh", "post_install.sh", "uninstall", "pre_install", "post_install", "env"};
 	try {
 		var dir = Dir.open(emp_dir);
 		unowned string it;
 		while ((it = dir.read_name()) != null) {
-			if (emp_dir.length == SIZE_TMP_DIR) {
-				if (it == "info" || it == "pre_install.sh" || it == "post_install.sh" || it == "uninstall" || it == "pre_install" || it == "post_install")
+			if (depth == 0) {
+				if (it in except_files)
 					continue;
 			}
-			string name = @"$emp_dir/$it";
+			string name = Path.build_filename(emp_dir, it);
 			if (FileUtils.test(name, FileTest.IS_DIR) && !FileUtils.test(name, FileTest.IS_SYMLINK))
-				list_file_dir(name, ref list);
+				list_file_dir(name, ref list, depth + 1);
 			else
-				list.append(name);
+				list.add(name);
 		}
 	} catch (Error e) {
 		error(e.message);
@@ -41,15 +40,15 @@ private void list_file_dir(string emp_dir, ref List<string> list) {
 }
 
 // copy files to PREFIX (~/.local)
-private void install_files(List<string> list, int len) {
+private void install_files(GenericArray<string> list, int len) {
 	const string install = BOLD + YELLOW + "[Install]" + NONE + " ";
 	unowned string basename;
 	uint nb = 0;
-	uint list_length = list.length();
+	uint list_length = list.length;
 	int g_last_size = 0;
 
 	try {
-		foreach (unowned var e in list) {
+		foreach (unowned var e in list.data) {
 			basename = e.offset(len);
 			var fileSrc = File.new_for_path(e);
 			var last_dest = config.prefix + basename;
@@ -83,21 +82,22 @@ private void install_files(List<string> list, int len) {
 
 
 // Create the package information in .suprapack/name_pkg/info
-private void post_install(List<string> list, int len, ref Package pkg) {
+private void post_install(GenericArray<string> list, int len, ref Package pkg) {
 	string packinfo = @"$(config.path_suprapack_cache)/$(pkg.name)";
 	string info_file = @"$packinfo/info";
 
 	DirUtils.create_with_parents(packinfo, 0755);
 	pkg.create_info_file(info_file);
-
 	var fs = FileStream.open(info_file, "a");
 	if (fs == null)
 		error("Cant open %s", info_file);
 	fs.printf("[FILES]\n");
-	foreach(unowned var i in list) {
+	foreach(unowned var i in list.data) {
 		unowned string basename = i.offset(len);
-		if (basename != "/info")
-			fs.printf("%s\n", basename);
+		if (basename != "/info") {
+			fs.puts(basename);
+			fs.putc('\n');
+		}
 	}
 }
 
@@ -159,7 +159,7 @@ public void install_suprapackage(Package suprapack) throws Error {
 
 	Log.suprapack("Installation de" + CYAN + " %s %s" + NONE + " par %s", pkg.name, pkg.version, pkg.author);
 
-	var list = new List<string>();
+	var list = new GenericArray<string>(512);
 	list_file_dir(tmp_dir, ref list);
 	install_files(list, tmp_dir.length);
 
