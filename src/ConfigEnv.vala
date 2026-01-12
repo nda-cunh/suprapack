@@ -10,16 +10,20 @@ public string[] get_all_options() {
 	foreach (unowned var line in lines) {
 		if (line == "")
 			continue;
-		var env_file = Path.build_filename (global::config.prefix, ".suprapack", line, "env");
-		string env_contents;
-		if (FileUtils.test (env_file, FileTest.EXISTS)) {
-			FileUtils.get_contents (env_file, out env_contents);
-			var env_lines = env_contents.split ("\n");
-			foreach (unowned var env_line in env_lines) {
-				if (env_line == "")
-					continue;
-				result.add (env_line);
+		try {
+			string env_contents;
+			var env_file = Path.build_filename (global::config.prefix, ".suprapack", line, "env");
+			if (FileUtils.test (env_file, FileTest.EXISTS)) {
+				FileUtils.get_contents (env_file, out env_contents);
+				var env_lines = env_contents.split ("\n");
+				foreach (unowned var env_line in env_lines) {
+					if (env_line == "")
+						continue;
+					result.add (env_line);
+				}
 			}
+		}
+		catch (Error e) {
 		}
 	}
 	return (owned)result.data;
@@ -70,7 +74,7 @@ private string get () {
 
 // create the file in .suprapack/.env
 // it contains all package name who contains an env file
-public void add (string package_name) throws Error {
+public void add (string package_name) {
 	var file = Path.build_filename (global::config.prefix, ".suprapack", ".env");
 	// add the package name to the file if not exist
 	string contents;

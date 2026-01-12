@@ -92,7 +92,12 @@ public class Config : Object {
 		}
 		if (FileUtils.test (new_env, FileTest.EXISTS) == false) {
 			var last_path = Path.build_filename (this.prefix, ".suprapack", "suprapack", "env");
-			FileUtils.get_contents (last_path, out contents);
+			if (FileUtils.test (last_path, FileTest.EXISTS) == false) {
+				contents = "";
+			}
+			else {
+				FileUtils.get_contents (last_path, out contents);
+			}
 			FileUtils.set_contents (new_env, contents);
 		}
 		if (FileUtils.test (new_hide_env, FileTest.EXISTS) == false) {
