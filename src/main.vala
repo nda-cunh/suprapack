@@ -81,6 +81,11 @@ public class Main : Object {
 		config.build_output = build_output ?? ".";
 		config.is_recursive_uninstall = !_recursive;
 
+		// Create source profile if not exist
+		if (FileUtils.test(@"$HOME/.suprapack_profile", FileTest.EXISTS) == false) {
+			config.create_source_profile();
+		}
+
 		debug ("prefix: [%s] strap: %s", config.prefix, config.strap);
 
 		if (commands.length < 2) {

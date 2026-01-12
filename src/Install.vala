@@ -47,6 +47,7 @@ private void install_files(GenericArray<string> list, int len) {
 	uint list_length = list.length;
 	int g_last_size = 0;
 
+	stdout.printf("\033[?25l");
 	try {
 		foreach (unowned var e in list.data) {
 			basename = e.offset(len);
@@ -60,31 +61,32 @@ private void install_files(GenericArray<string> list, int len) {
 			fileSrc.move(fileDest, FileCopyFlags.OVERWRITE);
 			{
 				int file_len = basename.length;
-				int calc = g_last_size - file_len;
-
-				if (calc <= 0)
-					calc = 1;
 				++nb;
 				if (config.simple_print) {
 					uint percent = (nb * 100) / list_length;
 					stdout.printf("install: [%u] %s\n", percent, basename);
 				}
-				else
-					stdout.printf("%s[%u/%u] %s%*c\r", install, nb, list_length, basename, calc, ' ');
+				else {
+					stdout.printf("%s[%u/%u] %s\033[K\r", install, nb, list_length, basename);
+				}
 				g_last_size = file_len;
 			}
 		}
 	} catch (Error e) {
+		stdout.printf("\033[?25h");
 		error("FATAL ERROR >>> %s", e.message);
 	}
+	stdout.printf("\033[?25h");
 	print("\n");
 }
 
 
 // Create the package information in .suprapack/name_pkg/info
-private void post_install(GenericArray<string> list, int len, ref Package pkg) {
-	string packinfo = @"$(config.path_suprapack_cache)/$(pkg.name)";
-	string info_file = @"$packinfo/info";
+private void post_install(GenericArray<string> list, string tmp_dir, ref Package pkg) {
+	var packinfo = Path.build_filename(config.path_suprapack_cache, pkg.name);
+	var info_file = Path.build_filename(packinfo, "info");
+	var env_src = Path.build_filename(tmp_dir, "env");
+	var len = tmp_dir.length;
 
 	DirUtils.create_with_parents(packinfo, 0755);
 	pkg.create_info_file(info_file);
@@ -94,10 +96,15 @@ private void post_install(GenericArray<string> list, int len, ref Package pkg) {
 	fs.printf("[FILES]\n");
 	foreach(unowned var i in list.data) {
 		unowned string basename = i.offset(len);
-		if (basename != "/info") {
-			fs.puts(basename);
-			fs.putc('\n');
-		}
+		fs.puts(basename);
+		fs.putc('\n');
+	}
+	// Move the env file to packinfo/env
+	if (FileUtils.test(env_src, FileTest.EXISTS)) {
+		var fileSrc = File.new_for_path(env_src);
+		var fileDest = File.new_for_path(Path.build_filename(packinfo, "env"));
+		fileSrc.move(fileDest, FileCopyFlags.OVERWRITE);
+		ConfigEnv.add(pkg.name);
 	}
 }
 
@@ -167,7 +174,8 @@ public void install_suprapackage(Package suprapack) throws Error {
 	script_post_install(tmp_dir);
 
 	// create info file
-	post_install(list, tmp_dir.length, ref pkg);
+	// And move env file
+	post_install(list, tmp_dir, ref pkg);
 
 
 	// Uninstall script
@@ -324,6 +332,9 @@ public void install () throws Error {
 	else {
 		throw new ErrorSP.CANCEL("Cancelling...");
 	}
+	if (config.need_generate_profile == true)
+		config.create_source_profile();
+	
 }
 
 //* Add one package in Config.queue *//
