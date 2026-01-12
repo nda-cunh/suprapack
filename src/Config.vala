@@ -35,30 +35,27 @@ public class Config : Object {
 			this.change_prefix(prefix_tmp);
 		queue_pkg = new PackageSet();
 		queue_pkg_uninstall = new PackageSet();
-		create_source_profile();
 	}
 
-	void create_source_profile () throws Error {
+	public void create_source_profile () throws Error {
 		var profile = @"$HOME/.suprapack_profile";
-		if (FileUtils.test(profile, FileTest.EXISTS) == false) {
-var str = """# Prefix:%1$s
-export PATH=$PATH:%1$s/bin
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%1$s/lib
-export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:%1$s/share/pkgconfig:%1$s/lib/pkgconfig
-export XDG_DATA_DIRS=$XDG_DATA_DIRS:%1$s/share
-export XDG_CONFIG_DIRS=$XDG_CONFIG_DIRS:%1$s/etc
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:%1$s/lib"
-export LIBRARY_PATH="$LIBRARY_PATH:%1$s/lib"
-export C_INCLUDE_PATH="$C_INCLUDE_PATH:%1$s/include"
-export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:%1$s/include"
-export GSETTINGS_SCHEMA_DIR=/usr/share/glib-2.0/schemas/:%1$s/share/glib-2.0/schemas/
-export PYTHONPATH="$PYTHONPATH:%1$s/lib/python3/dist-packages"
-export DOTNET_ROOT=%1$s/share/dotnet
-export fpath=(%1$s/bin $fpath)
-""".printf(this.prefix);
-			FileUtils.set_contents(profile, str);
+		var sb = new StringBuilder("# Prefix: ");
+		sb.append((string)this.prefix);
+		sb.append_c('\n');
+		var contents = ConfigEnv.get_all_options_parsed ();
+		// each option is 2 elements in the array: name an value
+		for (uint i = 0; i < contents.length; i += 2) {
+			sb.append("export ");
+			sb.append(contents[i]);
+			sb.append_c('=');
+			sb.append_c('$');
+			sb.append(contents[i]);
+			sb.append_c(':');
+			sb.append(contents[i + 1]);
+			sb.append_c('\n');
 		}
-
+		sb.append_printf("export fpath=(%s/bin $fpath)", this.prefix);
+		FileUtils.set_contents(profile, sb.str);
 	}
 
 	public void change_strap (string prefix_strap) {
@@ -71,15 +68,28 @@ export fpath=(%1$s/bin $fpath)
 		var new_suprapack_cache = prefix + "/.suprapack";
 		var new_config = new_suprapack_cache + "/user.conf";
 		var new_repo_list = new_suprapack_cache + "/repo.list";
+		var new_env = new_suprapack_cache + "/suprapack/env";
+		var new_hide_env = new_suprapack_cache + "/.env";
 
 		DirUtils.create_with_parents(new_prefix, 0755);
 		DirUtils.create_with_parents(new_suprapack_cache, 0755);
+		DirUtils.create_with_parents(Path.build_filename(new_suprapack_cache, "suprapack"), 0755);
 		if (FileUtils.test (new_suprapack_cache, FileTest.EXISTS) == false) {
 			DirUtils.create(new_suprapack_cache, 0755);
 		}
 		if (FileUtils.test (new_config, FileTest.EXISTS) == false) {
 			FileUtils.set_contents (new_config, "is_cached:false");
 		}
+		if (FileUtils.test (new_env, FileTest.EXISTS) == false) {
+			var last_path = Path.build_filename (this.prefix, ".suprapack", "suprapack", "env");
+			FileUtils.get_contents (last_path, out contents);
+			FileUtils.set_contents (new_env, contents);
+		}
+		if (FileUtils.test (new_hide_env, FileTest.EXISTS) == false) {
+			FileUtils.set_contents (new_hide_env, "suprapack\n");
+		}
+
+
 		if (FileUtils.test (new_repo_list, FileTest.EXISTS) == false) {
 			if (this.repo_list != null && FileUtils.test(this.repo_list, FileTest.EXISTS)) {
 				info("[Repo] Copy all \033[35m%s\033[0m content in new prefix \033[33m%s\033[0m", this.repo_list, new_repo_list);
@@ -100,6 +110,7 @@ export fpath=(%1$s/bin $fpath)
 		this.config = (owned)new_config;
 		this.repo_list = (owned)new_repo_list;
 		this.strap = this.prefix;
+
 	}
 
 	private void load_config () throws Error{
@@ -213,7 +224,6 @@ export fpath=(%1$s/bin $fpath)
 	}
 
 
-
 	/***************************************
 	 * Variables used by the package manager
 	 ****************************************/
@@ -266,6 +276,7 @@ export fpath=(%1$s/bin $fpath)
 	public bool allays_yes		{get;set;default=false;}
 	// if the package need to be install after the build
 	public bool build_and_install {get; set; default=false;}
+	public bool need_generate_profile {get; set; default=false;}
 	// where the package will be moved after the build
 	public string? build_output 		{get; set;default=null;}
 	/**

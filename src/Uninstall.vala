@@ -54,6 +54,8 @@ namespace Uninstall {
 				Query.uninstall(i);
 			}
 		}
+		if (config.need_generate_profile == true)
+			config.create_source_profile();
 		return true;
 	}
 

@@ -18,29 +18,26 @@
  */
 
 namespace Shell {
-	private void env_change (ref string []env, string variable, string value, bool no_last = false) {
+	private void env_change (ref string []env, string variable, string value) {
 		unowned string? last_variable = Environ.get_variable (env, variable);
-		if (no_last)
-			last_variable = null;
-		string v = "%s/%s:%s".printf(config.prefix, value, last_variable ?? "");
-		env = Environ.set_variable(env, variable, v, true);
+		if (last_variable != null) {
+			env = Environ.set_variable(env, variable, @"$value:$last_variable", true);
+		}
+		else {
+			env = Environ.set_variable(env, variable, value, true);
+		}
 	}
 
 
 	private string[] load_env () {
 		var env = Environ.get();
-		env_change(ref env, "PATH", "bin");
-		env_change(ref env, "LD_LIBRARY_PATH", "lib");
-		env_change(ref env, "PKG_CONFIG_PATH", "share/pkgconfig");
-		env_change(ref env, "PKG_CONFIG_PATH", "lib/pkgconfig");
-		env_change(ref env, "XDG_DATA_DIRS", "share");
-		env_change(ref env, "XDG_CONFIG_DIRS", "etc");
-		env_change(ref env, "LD_LIBRARY_PATH", "lib");
-		env_change(ref env, "LIBRARY_PATH", "lib");
-		env_change(ref env, "C_INCLUDE_PATH", "include");
-		env_change(ref env, "CPLUS_INCLUDE_PATH", "include");
-		env_change(ref env, "PYTHONPATH", "lib/python3/dist-packages");
-		env_change(ref env, "DOTNET_ROOT", "share/dotnet");
+		var content = ConfigEnv.get_all_options_parsed ();
+		for (uint i = 0; i < content.length; i += 2) {
+			unowned string name = content[i];
+			unowned string value = content[i + 1];
+			env_change (ref env, name, value);
+		}
+
 		env = Environ.set_variable (env, "PREFIX", config.prefix, true);
 		return (owned)env;
 	}

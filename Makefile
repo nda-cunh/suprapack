@@ -1,27 +1,28 @@
 # VERSION = sed -s "s/version:.*$/version: $VERSION/" usr/info -i
 NAME =	suprapack_dev
-LDFLAGS=-X -O2 --disable-warnings --pkg=gio-2.0 -X -w -X -flto --enable-experimental --target-glib=auto
+LDFLAGS=-X -O2 --disable-warnings --pkg=gio-2.0 -X -w -X -flto --enable-experimental --target-glib=auto -X -s
 
 VAPI =	src/uname.vapi
-SRC =	src/main.vala \
-		src/Uninstall.vala \
-		src/QueueSet.vala \
-		src/Run.vala \
-		src/Makepkg.vala \
+SRC = src/BetterSearch.vala \
 		src/Build.vala \
-		src/Repository.vala \
-		src/Utils.vala \
 		src/Command.vala \
-		src/Query.vala \
-		src/Log.vala \
-		src/BetterSearch.vala \
-		src/Sync.vala \
-		src/Install.vala \
-		src/Package.vala \
 		src/Config.vala \
+		src/ConfigEnv.vala \
 		src/Http.vala \
-		src/SupraList.vala \
+		src/Install.vala \
+		src/Log.vala \
+		src/Makepkg.vala \
+		src/Package.vala \
+		src/Query.vala \
+		src/QueueSet.vala \
 		src/RepoInfo.vala \
+		src/Repository.vala \
+		src/Run.vala \
+		src/SupraList.vala \
+		src/Sync.vala \
+		src/Uninstall.vala \
+		src/Utils.vala \
+		src/main.vala \
 
 all: install 
 
@@ -59,7 +60,5 @@ endif
 
 run: $(NAME) 
 	cp -f suprapack ~/.local/bin/suprapack
-	# suprapack remove supravim 
-	suprapack add sfmlll
 
 .PHONY: bootstrap valac install run make_bootstrap all

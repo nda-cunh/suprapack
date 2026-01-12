@@ -94,6 +94,7 @@ namespace Query{
 				}
 			}
 		}
+		ConfigEnv.remove (name_pkg);
 		Query.remove_pkg(name_pkg);
 		print("\n");
 	}
