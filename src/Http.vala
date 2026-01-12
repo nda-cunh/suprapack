@@ -46,7 +46,7 @@ namespace Http {
 		s.set_callback( () => {
 			print("\n");
 			warning("Cancel by Ctrl + C (SIGINT) signal");
-			cancel.cancel ();
+			cancel?.cancel ();
 			return false;
 		});
 		s.attach(GLib.MainContext.default());
