@@ -274,6 +274,8 @@ public void install () throws Error {
 	if (config.queue_pkg_uninstall.size > 0) {
 		print(BOLD + COM + "\nUninstalling (%u)\n\n", config.queue_pkg_uninstall.size);
 		foreach (unowned var? i in config.queue_pkg_uninstall) {
+			if (i == null)
+				continue;
 			string version = i.version;
 			if (Query.is_exist(i.name)) {
 				version = Query.get_from_pkg(i.name).version;

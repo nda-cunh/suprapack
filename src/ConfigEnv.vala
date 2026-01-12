@@ -34,16 +34,24 @@ public string[] get_all_options_parsed() {
 	var result = new StrvBuilder ();
 	var content = ConfigEnv.get_all_options ();
 	unowned string prefix = global::config.prefix;
-	uint8 name[256];
-	uint8 value[256];
+	uint8 name_buffer[256];
+	uint8 value_buffer[256];
 
 	foreach (unowned var opt in content) {
-		opt.scanf ("%255[^ =] = %255[^\n]", name, value);
-		result.add ((string)name);
+		opt.scanf ("%255[^ =] = %255[^\n]", name_buffer, value_buffer);
+		unowned string name = (string)name_buffer;
+		unowned string value = (string)value_buffer;
+
+		result.add (name);
+		// the value is special
+		if (name[0] == '@') {
+			name = name.offset (1);
+		}
+
 		// parse value
 		new_value.truncate(0);
-		new_value.append((string)value);
-		new_value.replace ("@var@", (string)name);
+		new_value.append(value);
+		new_value.replace ("@var@", name);
 		new_value.replace ("@prefix@", prefix);
 		result.add (new_value.str);
 	}
