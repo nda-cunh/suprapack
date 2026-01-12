@@ -45,13 +45,23 @@ public class Config : Object {
 		var contents = ConfigEnv.get_all_options_parsed ();
 		// each option is 2 elements in the array: name an value
 		for (uint i = 0; i < contents.length; i += 2) {
+			unowned string name = contents[i];
+			unowned string value = contents[i + 1];
+			// a special variable begin with @ 
+			bool is_special = (name[0] == '@');
+			if (is_special) {
+				name = name.offset(1);
+			}
 			sb.append("export ");
-			sb.append(contents[i]);
+			sb.append(name);
 			sb.append_c('=');
-			sb.append_c('$');
-			sb.append(contents[i]);
-			sb.append_c(':');
-			sb.append(contents[i + 1]);
+			// if the variable is special we don't put the name before the value
+			if (is_special == false) {
+				sb.append_c('$');
+				sb.append(name);
+				sb.append_c(':');
+			}
+			sb.append(value);
 			sb.append_c('\n');
 		}
 		sb.append_printf("export fpath=(%s/bin $fpath)", this.prefix);
