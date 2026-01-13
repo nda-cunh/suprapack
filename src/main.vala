@@ -21,6 +21,8 @@ public unowned string HOME;
 public unowned string PWD;
 public unowned string USERNAME;
 public Config config;
+[CCode (has_target = false)]
+public delegate bool CommandExecute (string [] commands) throws Error ;
 
 public class Main : Object {
 	private const string COLOR = "\033[36;1m";
@@ -56,7 +58,7 @@ public class Main : Object {
 		{ null }
 	};
 
-	bool all_cmd(string []commands) throws Error {
+	bool all_cmd (string []commands) throws Error {
 
 		var opt_context = new OptionContext ();
 		opt_context.add_main_entries (options, null);
@@ -89,7 +91,7 @@ public class Main : Object {
 		debug ("prefix: [%s] strap: %s", config.prefix, config.strap);
 
 		if (commands.length < 2) {
-			return Cmd.help(opt_context.get_help(false, null));
+			return Cmd.help(commands);
 		}
 
 		if (commands[1] == "config") {
@@ -106,67 +108,73 @@ public class Main : Object {
 			return true;
 		}
 
-		switch (av1) {
-			case "query_get_comp":
-				return Cmd.query_get_comp(commands);
-			case "sync_get_comp":
-				return Cmd.sync_get_comp(commands);
-			case "shell":
-				return Cmd.shell(commands);
-			case "list_files":
-			case "-Ql":
-				return Cmd.list_files(commands);
-			case "loading":
-				Cmd.loading(commands);
-			case "run":
-			case "Qr":
-				return Cmd.run(commands);
-			case "-Q":
-			case "list":
-				return Cmd.list(commands);
-			case "search":
-			case "-Ss":
-				return Cmd.search(commands);
-			case "-B":
-			case "build":
-				return Cmd.build(commands);
-			case "help":
-				return Cmd.help(opt_context.get_help(false, null));
-			case "install":
-			case "add":
-			case "-S":
-				return Cmd.install(commands);
-			case "uninstall":
-			case "remove":
-			case "-r":
-				return Cmd.uninstall(commands);
-			case "have_update":
-				return Cmd.have_update(commands);
-			case "update":
-			case "-Su":
-				return Cmd.update(commands);
-			case "info":
-			case "-Qi":
-				return Cmd.info(commands);
-			case "prepare":
-			case "-P":
-				return Cmd.prepare();
-			case "search_supravim_plugin":
-				return Cmd.search_supravim_plugin(commands);
-			case "-G":
-			case "download":
-				return Cmd.download(commands);
-			case "update_list":
-			case "refresh":
-				return Cmd.refresh();
-			case "version":
-				return Cmd.version();
+		var cmd_table = new HashTable<string, CommandExecute>(str_hash, str_equal);
+		// special
+		cmd_table["loading"] = Cmd.loading;
+		cmd_table["query_get_comp"] = Cmd.query_get_comp;
+		cmd_table["sync_get_comp"] = Cmd.sync_get_comp;
+		// pacman
+		cmd_table["-B"] = Cmd.build;
+		cmd_table["-P"] = Cmd.prepare;
+		cmd_table["-Q"] = Cmd.list;
+		cmd_table["-Qi"] = Cmd.info;
+		cmd_table["-Ql"] = Cmd.list_files;
+		cmd_table["-Qr"] = Cmd.run;
+		cmd_table["-G"] = Cmd.download;
+		cmd_table["-R"] = Cmd.uninstall;
+		cmd_table["-S"] = Cmd.install;
+		cmd_table["-Ss"] = Cmd.search;
+		cmd_table["-Su"] = Cmd.update;
+		cmd_table["-Syyu"] = Cmd.update;
+		cmd_table["add"] = Cmd.install;
+		cmd_table["build"] = Cmd.build;
+		cmd_table["download"] = Cmd.download;
+		cmd_table["have_update"] = Cmd.have_update;
+		cmd_table["help"] = Cmd.help;
+		cmd_table["info"] = Cmd.info;
+		cmd_table["install"] = Cmd.install;
+		cmd_table["list"] = Cmd.list;
+		cmd_table["list_files"] = Cmd.list_files;
+		cmd_table["prepare"] = Cmd.prepare;
+		cmd_table["refresh"] = Cmd.refresh;
+		cmd_table["remove"] = Cmd.uninstall;
+		cmd_table["run"] = Cmd.run;
+		cmd_table["search"] = Cmd.search;
+		cmd_table["search_supravim_plugin"] = Cmd.search_supravim_plugin;
+		cmd_table["shell"] = Cmd.shell;
+		cmd_table["uninstall"] = Cmd.uninstall;
+		cmd_table["update"] = Cmd.update;
+		cmd_table["version"] = Cmd.version;
+
+
+		if (av1 in cmd_table) {
+			CommandExecute cmd_execute = cmd_table[av1];
+			return cmd_execute(commands);
 		}
+		else {
+			int max = 0;
+			unowned string? best_match = null;
+			foreach (unowned var key in cmd_table.get_keys ()) {
+				int score = BetterSearch.get_score_sync(av1, key);
+				if (score > max) {
+					best_match = key;
+					max = score;
+				}
+			}
+			if (best_match != null && max >= 20) {
+				var value = Utils.stdin_bool_choose(YELLOW +  BOLD + "[Suprapack] Did you mean " + PURPLE + best_match + NONE + " [y/N] ?", false);
+				if (value == true) {
+					CommandExecute cmd_execute = cmd_table[best_match];
+					return cmd_execute(commands);
+				}
+			}
+		}
+
 		error("La commande \"%s\" n'existe pas.", av1);
 	}
 
 	// INIT
-	public Main(string []args) {
+	public Main (string []args) {
 		if (Environment.get_variable("GIO_MODULE_DIR") == null) {
 			if (FileUtils.test("/usr/lib/gio/modules", FileTest.IS_DIR | FileTest.EXISTS))
 				Environment.set_variable ("GIO_MODULE_DIR", "/usr/lib/gio/modules", true);

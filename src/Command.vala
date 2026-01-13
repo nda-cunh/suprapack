@@ -32,10 +32,12 @@ namespace Cmd {
 		if (av.length == 3) {
 			config.change_prefix (av[2]);
 		}
+
+		config.is_shell = true;
 		if (shell.has_suffix("bash"))
-			Cmd.run({"suprapack", "run", shell, "--noprofile", "--norc"}, true);
+			Cmd.run({"suprapack", "run", shell, "--noprofile", "--norc"});
 		else if (shell.has_suffix("zsh"))
-			Cmd.run({"suprapack", "run", shell, "-f"}, true);
+			Cmd.run({"suprapack", "run", shell, "-f"});
 		return true;
 	}
 
@@ -95,7 +97,7 @@ namespace Cmd {
 	 * @param av: argv of command
 	 * @return true if the get was successful
 	 */
-	public bool query_get_comp (string []av) {
+	public bool query_get_comp (string []av) throws Error {
 		FileUtils.close (2);
 		var pkgs = Query.get_all_package();
 		for (var i = 0; i != pkgs.length; ++i) {
@@ -108,7 +110,7 @@ namespace Cmd {
 	}
 
 
-	bool sync_get_comp (string []av) {
+	bool sync_get_comp (string []av) throws Error {
 		FileUtils.close (2);
 		var pkgs = Sync.get_list_package();
 		for (var i = 0; i != pkgs.length; ++i) {
@@ -278,7 +280,7 @@ namespace Cmd {
 	 * @param av: argv of command
 	 * @return true if the list was successful
 	 */
-	bool list_files (string []av) {
+	bool list_files (string []av) throws Error {
 		if (av.length == 2)
 			error ("`suprapack list_files <pkg..>`");
 
@@ -319,36 +321,32 @@ namespace Cmd {
 	 * @param av: argv of command
 	 * @return true if the list was successful
 	 */
-	bool list (string []av) {
+	public bool list (string []av) throws Error {
 		var installed = Query.get_all_package();
 		int width = 0;
 		int width_version = 0;
-		try {
-			var str_regex = av[2]?.replace("*", ".*") ?? "";
-			var regex = new Regex(str_regex, RegexCompileFlags.EXTENDED);
-			Package [] good = {};
-			foreach (unowned var i in installed) {
-				if ((regex.match(i.name) || regex.match(i.version) || regex.match(i.description) || regex.match(i.author))) {
-					good += i;
-				}
+		var str_regex = av[2]?.replace("*", ".*") ?? "";
+		var regex = new Regex(str_regex, RegexCompileFlags.EXTENDED);
+		Package [] good = {};
+		foreach (unowned var i in installed) {
+			if ((regex.match(i.name) || regex.match(i.version) || regex.match(i.description) || regex.match(i.author))) {
+				good += i;
 			}
-			foreach (unowned var i in good) {
-				if (i.name.length > width)
-					width = i.name.length;
-				if (i.version.length > width_version)
-					width_version = i.version.length;
-			}
-			++width_version;
-			++width;
-			foreach (unowned var i in good) {
-				uint8 buffer[32];
-				unowned var size = Utils.convertBytePrint(uint64.parse(i.size_installed), buffer);
-				const string format = BOLD + WHITE + "%-*s " + GREEN + " %-*s" + NONE;
-				print(format, width, i.name, width_version, i.version, size);
-				print("%9s" + COM + " %s" + NONE + "\n", size, i.description);
-			}
-		} catch (Error e) {
-			error(e.message);
+		}
+		foreach (unowned var i in good) {
+			if (i.name.length > width)
+				width = i.name.length;
+			if (i.version.length > width_version)
+				width_version = i.version.length;
+		}
+		++width_version;
+		++width;
+		foreach (unowned var i in good) {
+			uint8 buffer[32];
+			unowned var size = Utils.convertBytePrint(uint64.parse(i.size_installed), buffer);
+			const string format = BOLD + WHITE + "%-*s " + GREEN + " %-*s" + NONE;
+			print(format, width, i.name, width_version, i.version, size);
+			print("%9s" + COM + " %s" + NONE + "\n", size, i.description);
 		}
 		print(NONE);
 		return true;
@@ -360,7 +358,7 @@ namespace Cmd {
 	 *
 	 * prepare the repository (for dev)
 	 */
-	public bool prepare () {
+	public bool prepare () throws Error {
 		Repository.prepare();
 		return true;
 	}
@@ -450,7 +448,7 @@ namespace Cmd {
 	 * @param av: argv of command
 	 * @param is_shell: if true run the command in a shell like bash or zsh
 	 */
-	bool run (string []av, bool is_shell = false) throws Error {
+	public bool run (string []av) throws Error {
 		string []av_binary;
 		if (av.length == 2)
 			error("`suprapack run [...]`");
@@ -474,7 +472,7 @@ namespace Cmd {
 
 		foreach (var i in av[3: av.length])
 			av_binary += i;
-		if (is_shell)
+		if (config.is_shell)
 			Shell.run_shell(av_binary);
 		else
 			Shell.run(av_binary);
@@ -550,7 +548,7 @@ namespace Cmd {
 	 * @param help_command: the command to print the help for
 	 * @return true if the help was printed successfully
 	 */
-	bool help (string help_command) {
+	public bool help (string []av) throws Error {
 		stdout.printf(BOLD + YELLOW + "[SupraPack] ----- Help -----\n\n");
 		stdout.printf("\t" + p_suprapack + " (add | install) [package name]\n");
 		stdout.printf("\t  " + COM + " install a package from a repository\n");
@@ -579,8 +577,6 @@ namespace Cmd {
 		stdout.printf("\t  " + COM + " you have RTFM... so you are a real\n");
 		stdout.printf("\n");
 		stdout.printf(BOLD + YELLOW + "[Special argument]\n" + NONE);
-		unowned string help_text = help_command.offset(help_command.index_of("Options:") + 8);
-		stdout.printf ("%s", help_text);
 		stdout.printf("\n");
 		stdout.printf(BOLD + YELLOW + "[Dev Only]\n" + NONE);
 		stdout.printf(p_suprapack + " build " + CYAN + "[PREFIX]\n");
@@ -600,20 +596,21 @@ namespace Cmd {
 	}
 
 	[NoReturn]
-		private void loading (string []av) {
-			if (av.length == 2)
-				error("suprapack loading <command> [<args>]");
-			int status = 0;
-			var loop = new MainLoop();
+	private bool loading (string []av) throws Error {
+		if (av.length == 2)
+			error("suprapack loading <command> [<args>]");
+		int status = 0;
+		var loop = new MainLoop();
 
-			Utils.loading.begin();
-			Utils.run_proc.begin(av, (obj, res) => {
-					status = Utils.run_proc.end(res);
-					loop.quit();
-					});
-			loop.run();
-			Process.exit(status);
-		}
+		Utils.loading.begin();
+		Utils.run_proc.begin(av, (obj, res) => {
+			status = Utils.run_proc.end(res);
+			loop.quit();
+		});
+		loop.run();
+		Process.exit(status);
+		return true;
+	}
 
 	private const string p_suprapack = BOLD + "suprapack" + NONE;
 }
