@@ -292,6 +292,8 @@ public class Config : Object {
 	// if the package need to be install after the build
 	public bool build_and_install {get; set; default=false;}
 	public bool need_generate_profile {get; set; default=false;}
+
+	public bool is_shell {get; set; default=false;}
 	// where the package will be moved after the build
 	public string? build_output 		{get; set;default=null;}
 	/**
