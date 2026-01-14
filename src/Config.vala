@@ -56,20 +56,23 @@ public class Config : Object {
 			sb.append(name);
 			sb.append_c('=');
 			// if the variable is special we don't put the name before the value
-			if (is_special == false && profile_priority == false) {
-				sb.append_c('$');
+			if (is_special == false && profile_priority == true) {
+				sb.append("${");
 				sb.append(name);
-				sb.append_c(':');
+				sb.append(":+$");
+				sb.append(name);
+				sb.append(":}");
 			}
 			sb.append(value);
-			if (is_special == false && profile_priority == true) {
-				sb.append_c(':');
-				sb.append_c('$');
+			if (is_special == false && profile_priority == false) {
+				sb.append("${");
 				sb.append(name);
+				sb.append(":+:$");
+				sb.append(name);
+				sb.append("}");
 			}
 			sb.append_c('\n');
 		}
-		sb.append_printf("export fpath=(%s/bin $fpath)", this.prefix);
 		FileUtils.set_contents(profile, sb.str);
 	}
 
