@@ -31,7 +31,7 @@ _suprapack() {
 			_arguments "*:commands:($(suprapack query_get_comp))"
 			;;
 		config)
-			_arguments '1:config name' '2:config value'
+			_arguments "*:commands:($(suprapack config --shell_print_hidden))"
 			;;
 	esac
 }
