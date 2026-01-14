@@ -7,6 +7,7 @@ SRC = src/BetterSearch.vala \
 		src/Build.vala \
 		src/Command.vala \
 		src/Config.vala \
+		src/ConfigUser.vala \
 		src/ConfigEnv.vala \
 		src/Http.vala \
 		src/Install.vala \

@@ -4,6 +4,7 @@ sources = [
     'Build.vala',
     'Command.vala',
     'Config.vala',
+    'ConfigUser.vala',
     'ConfigEnv.vala',
     'Http.vala',
     'Install.vala',
