@@ -43,6 +43,9 @@ public class Config : Object {
 		sb.append((string)this.prefix);
 		sb.append_c('\n');
 		var contents = ConfigEnv.get_all_options_parsed ();
+		if (contents.length == 0) {
+			return;
+		}
 		// each option is 2 elements in the array: name an value
 		for (uint i = 0; i < contents.length; i += 2) {
 			unowned string name = contents[i];
