@@ -77,6 +77,7 @@ private string get () {
 public void add (string package_name) {
 	var file = Path.build_filename (global::config.prefix, ".suprapack", ".env");
 	// add the package name to the file if not exist
+	config.need_generate_profile = true;
 	string contents;
 	if (FileUtils.test (file, FileTest.EXISTS)) {
 		FileUtils.get_contents (file, out contents);
@@ -88,7 +89,6 @@ public void add (string package_name) {
 	else {
 		contents = package_name + "\n";
 	}
-	config.need_generate_profile = true;
 	FileUtils.set_contents (file, contents);
 } 
 
@@ -96,6 +96,7 @@ public void remove (string package_name) {
 	var file = Path.build_filename (global::config.prefix, ".suprapack", ".env");
 	string contents;
 	// remove the package name to the file if exist
+	config.need_generate_profile = true;
 	try {
 		if (FileUtils.test (file, FileTest.EXISTS)) {
 			FileUtils.get_contents (file, out contents);
@@ -118,7 +119,6 @@ public void remove (string package_name) {
 				contents += "\n";
 			FileUtils.set_contents (file, contents);
 		}
-		config.need_generate_profile = true;
 	}
 	catch (Error e) {
 		warning ("Error removing package from .env: %s", e.message);

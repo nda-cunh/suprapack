@@ -36,10 +36,6 @@ fi
 
 
 # generate PROFILE Files 
-
-echo generate PATH in .profile
-
-
 if [ "$(id -u)" -eq 0 ]; then
 	echo "prefix:/usr" | cat > $CONFIG
 else
@@ -48,4 +44,3 @@ else
 	fi
 	[ -d $HOME/.suprapack ] && mv $HOME/.suprapack $HOME/.local/ 2> /dev/null; true
 fi
-
