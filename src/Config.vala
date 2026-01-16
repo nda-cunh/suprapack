@@ -60,22 +60,15 @@ public class Config : Object {
 			sb.append_c('=');
 			// if the variable is special we don't put the name before the value
 			if (is_special == false && profile_priority == true) {
-				sb.append("${");
-				sb.append(name);
-				sb.append(":+$");
-				sb.append(name);
-				sb.append(":}");
+				sb.append("${"); sb.append(name); sb.append(":+$"); sb.append(name); sb.append(":}");
 			}
 			sb.append(value);
 			if (is_special == false && profile_priority == false) {
-				sb.append("${");
-				sb.append(name);
-				sb.append(":+:$");
-				sb.append(name);
-				sb.append("}");
+				sb.append("${"); sb.append(name); sb.append(":+:$"); sb.append(name); sb.append("}");
 			}
 			sb.append_c('\n');
 		}
+		sb.append("fpath=(" + prefix + "/share/zsh/site-functions $fpath)\n");
 		FileUtils.set_contents(profile, sb.str);
 	}
 
