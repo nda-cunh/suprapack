@@ -10,3 +10,5 @@ CPLUS_INCLUDE_PATH = @prefix@/include
 GSETTINGS_SCHEMA_DIR = /usr/share/glib-2.0/schemas/:@prefix@/share/glib-2.0/schemas/
 PYTHONPATH = @prefix@/lib/python3/dist-packages
 DOTNET_ROOT = @prefix@/share/dotnet
+MANPATH = @prefix@/share/man
+CMAKE_PREFIX_PATH = @prefix@
