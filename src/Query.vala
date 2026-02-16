@@ -179,18 +179,19 @@ namespace Query{
 
 
 	/**
-	 * remove only ~/suprapack/PKG info and required_by
+	 * remove only ~/suprapack/PKG info and required_by and ENV
 	 * and run uninstall script if exist
 	 *
 	 * @param name_pkg: the package name to remove
 	 */
 	private void remove_pkg (string name_pkg) {
 		var pkg = @"$(config.path_suprapack_cache)/$name_pkg/";
-		FileUtils.unlink(pkg + "info");
+		FileUtils.unlink (Path.build_filename (pkg, "info"));
+		FileUtils.unlink (Path.build_filename (pkg, "env"));
 		var uninstall_dir = @"$pkg/uninstall";
 		// If the package need to be removed (suprapack remove command is used)
 		if (config.want_remove == true) {
-			FileUtils.unlink(pkg + "required_by");
+			FileUtils.unlink (Path.build_filename (pkg, "required_by"));
 			// Uninstall Script
 			if (FileUtils.test(uninstall_dir, FileTest.EXISTS)) {
 				const string _remove = BOLD + YELLOW + "[Uninstall script]" + NONE + " ";
@@ -199,7 +200,9 @@ namespace Query{
 				FileUtils.remove(uninstall_dir);
 			}
 		}
-		DirUtils.remove(pkg);
+		int is_remove = DirUtils.remove(pkg);
+		if (is_remove != 0)
+			warning("the folder %s is not empty, please remove it manually", pkg);
 	}
 
 
