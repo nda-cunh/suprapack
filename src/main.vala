@@ -38,6 +38,7 @@ public class Main : Object {
 	public static string? build_output = null;
 	public static bool _debug = false;
 	public static bool _recursive = false;
+	public static bool create_suprapack_profile = false;
 
 
 	const OptionEntry[] options = {
@@ -55,6 +56,7 @@ public class Main : Object {
 		{ "install", '\0', OptionFlags.NONE, OptionArg.NONE, ref build_and_install, COLOR + "(Build)" + NONE + " build and install the package", null },
 		{ "build-output", '\0', OptionFlags.NONE, OptionArg.STRING, ref build_output, COLOR + "(Build)" + NONE + " build output", null },
 		{ "no-recursive", '\0', OptionFlags.NONE, OptionArg.NONE, ref _recursive, COLOR + "(Uninstall)" + NONE + " remove the recursive", null},
+		{ "regenerate_suprapack_profile", '\0', OptionFlags.NONE, OptionArg.NONE, ref create_suprapack_profile, COLOR + "(Config)" + NONE + " regenerate the suprapack profile", null},
 		{ null }
 	};
 
@@ -84,8 +86,12 @@ public class Main : Object {
 		config.is_recursive_uninstall = !_recursive;
 
 		// Create source profile if not exist
-		if (FileUtils.test(@"$HOME/.suprapack_profile", FileTest.EXISTS) == false) {
+		if (FileUtils.test(@"$HOME/.suprapack_profile", FileTest.EXISTS) == false || create_suprapack_profile == true) {
 			config.create_source_profile();
+			if (create_suprapack_profile == true) {
+				message("Suprapack profile regenerated.");
+				return true;
+			}
 		}
 
 		debug ("prefix: [%s] strap: %s", config.prefix, config.strap);

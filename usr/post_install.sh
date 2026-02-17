@@ -44,3 +44,5 @@ else
 	fi
 	[ -d $HOME/.suprapack ] && mv $HOME/.suprapack $HOME/.local/ 2> /dev/null; true
 fi
+
+$PREFIX/bin/suprapack --regenerate_suprapack_profile
