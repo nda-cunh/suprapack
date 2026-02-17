@@ -28,7 +28,7 @@ public class Config : Object {
 		if (SupraUnix.is_root ())
 			this.change_prefix ("/usr");
 		else
-			this.change_prefix (@"$HOME/.local");
+			this.change_prefix (Path.build_filename (HOME, ".local"));
 		this.load_config();
 		var prefix_tmp = Environ.get_variable(Environ.get(), "PREFIX");
 		if (prefix_tmp != null)

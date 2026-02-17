@@ -32,7 +32,7 @@ namespace Query{
 
 	/* verify if package is installed in ~/suprastore/name_pkg */
 	public bool is_exist (string name_pkg) {
-		return FileUtils.test(@"$(config.path_suprapack_cache)/$name_pkg/info", FileTest.EXISTS);
+		return FileUtils.test(Path.build_filename(config.path_suprapack_cache, name_pkg, "info"), FileTest.EXISTS);
 	}
 
 
@@ -105,7 +105,8 @@ namespace Query{
 	* @param name_pkg: the package name to get
 	*/
 	public Package get_from_pkg (string name_pkg) throws Error {
-		var pkg = Package.from_file(@"$(config.path_suprapack_cache)/$name_pkg/info");
+		var path_info = Path.build_filename(config.path_suprapack_cache, name_pkg, "info");
+		var pkg = Package.from_file(path_info);
 		return pkg;
 	}
 
@@ -120,8 +121,8 @@ namespace Query{
 	* @param package_add: the package name to add in required_by
 	*/
 	public void add_package_to_required_by (string name_pkg, string package_add) throws Error {
-		var folder = @"$(config.path_suprapack_cache)/$package_add/";
-		var dest = @"$(folder)/required_by";
+		var folder = Path.build_filename(config.path_suprapack_cache, package_add);
+		var dest = Path.build_filename(folder, "required_by");
 		var line = name_pkg + "\n";
 	
 		// Get the contents of the file if it exists or create it
@@ -139,8 +140,7 @@ namespace Query{
 	}
 
 	public void remove_package_to_required_by (string name_pkg, string package_remove) throws Error {
-		var folder = @"$(config.path_suprapack_cache)/$package_remove/";
-		var dest = @"$(folder)/required_by";
+		var dest = Path.build_filename(config.path_suprapack_cache, package_remove, "required_by");
 		string contents;
 		if (FileUtils.test(dest, FileTest.EXISTS)) {
 			FileUtils.get_contents(dest, out contents);
@@ -162,7 +162,7 @@ namespace Query{
 			return Query.get_all_installed_pkg ();
 		string []res = {};
 		string contents;
-		var required_by = @"$(config.path_suprapack_cache)/$name_pkg/required_by";
+		var required_by = Path.build_filename(config.path_suprapack_cache, name_pkg, "required_by");
 		if (FileUtils.test(required_by, FileTest.EXISTS) == false) {
 			return res;
 		}
@@ -217,9 +217,10 @@ namespace Query{
 			unowned string? tmp;
 
 			while ((tmp = dir.read_name()) != null) {
-				if (tmp[0] != '.' && tmp != "pkg" && FileUtils.test(@"$(config.path_suprapack_cache)/$tmp", FileTest.IS_DIR))
+				var tmp_dir = Path.build_filename(config.path_suprapack_cache, tmp);
+				if (tmp[0] != '.' && tmp != "pkg" && FileUtils.test(tmp_dir, FileTest.IS_DIR))
 					if (Query.is_exist(tmp))
-						result += Package.from_file(@"$(config.path_suprapack_cache)/$tmp/info");
+						result += Package.from_file(Path.build_filename(tmp_dir, "info"));
 			}
 			return result;
 		} catch(Error e) {
@@ -239,7 +240,8 @@ namespace Query{
 			unowned string? tmp;
 
 			while ((tmp = dir.read_name()) != null) {
-				if (tmp[0] != '.' && tmp != "pkg" && FileUtils.test(@"$(config.path_suprapack_cache)/$tmp", FileTest.IS_DIR))
+				var tmp_dir = Path.build_filename(config.path_suprapack_cache, tmp);
+				if (tmp[0] != '.' && tmp != "pkg" && FileUtils.test(tmp_dir, FileTest.IS_DIR))
 					result += tmp;
 			}
 			return result;
