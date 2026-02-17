@@ -1,0 +1,2 @@
+option('bootstrap', type : 'feature', value : 'disabled', description : 'Use C sources instead of Vala Source')
+
