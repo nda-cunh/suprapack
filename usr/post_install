@@ -1,0 +1,76 @@
+#!/bin/sh
+
+SUPRAVIM_REPO='Supravim https://gitlab.com/supraproject/suprastore_repository/-/raw/master/supravim/'
+COSMOS_x86_64='Cosmos https://gitlab.com/supraproject/suprastore_repository/-/raw/master/cosmos/'
+
+# Detect if running as root or not and set paths accordingly
+if [ "$(id -u)" -eq 0 ]; then
+    echo "Please do not run this script as root."
+    REPO_LIST=/usr/.suprapack/repo.list
+    CONFIG=/usr/.suprapack/user.conf
+else
+    REPO_LIST=$HOME/.local/.suprapack/repo.list
+    CONFIG=$HOME/.local/.suprapack/user.conf
+    mkdir -p $HOME/.config
+    ln -s $HOME/.local/.suprapack $HOME/.config/suprapack 2> /dev/null || true
+fi
+
+# Add repositories to repo.list
+if [ -f "$REPO_LIST" ]; then
+    echo "already existing repo.list skipping..."
+    grep -q "$SUPRAVIM_REPO" "$REPO_LIST" || echo "$SUPRAVIM_REPO" >> "$REPO_LIST"
+    grep -q "$COSMOS_x86_64" "$REPO_LIST" || echo "$COSMOS_x86_64" >> "$REPO_LIST"
+else
+    mkdir -p "$(dirname "$REPO_LIST")"
+    echo "$COSMOS_x86_64" > "$REPO_LIST"
+    echo "$SUPRAVIM_REPO" >> "$REPO_LIST"
+fi
+
+# Create user.conf if it doesn't exist
+if [ ! -f "$CONFIG" ]; then
+    mkdir -p "$(dirname "$CONFIG")"
+    echo "is_cached:false" > "$CONFIG"
+fi
+
+# Set prefix in user.conf
+if [ "$(id -u)" -eq 0 ]; then
+    echo "prefix:/usr" > "$CONFIG"
+else
+    # 
+    LOAD_STR='[ -f "$HOME/.suprapack_profile" ] && . "$HOME/.suprapack_profile"'
+    
+    # Load suprapack_profile in various shell configuration files if not already present
+    TARGET_FILES="$HOME/.profile $HOME/.bash_profile $HOME/.bashrc $HOME/.zprofile $HOME/.zshrc"
+
+    for f in $TARGET_FILES; do
+        if [ -f "$f" ]; then
+            if ! grep -q ".suprapack_profile" "$f"; then
+                echo "\n# Added by suprapack installer" >> "$f"
+                echo "$LOAD_STR" >> "$f"
+                echo "Updated: $f"
+            fi
+        fi
+    done
+
+    # If no shell config files exist, create .profile and add the load string
+    if [ ! -f "$HOME/.profile" ] && [ ! -f "$HOME/.bash_profile" ] && [ ! -f "$HOME/.zprofile" ]; then
+        echo "$LOAD_STR" > "$HOME/.profile"
+    fi
+
+    # Move .suprapack to .local/.suprapack if it exists and we're not root
+    [ -d "$HOME/.suprapack" ] && mv "$HOME/.suprapack" "$HOME/.local/" 2> /dev/null || true
+fi
+
+# Update MIME database and desktop database
+update-mime-database "$PREFIX/share/mime" 2>/dev/null || true
+update-desktop-database "$PREFIX/share/applications" 2>/dev/null || true
+
+# Set xdg-mime association for application/x-suprapack
+if command -v xdg-mime >/dev/null 2>&1; then
+    xdg-mime default suprapack-installer.desktop application/x-suprapack
+elif command -v gio >/dev/null 2>&1; then
+    gio mime application/x-suprapack suprapack-installer.desktop
+fi
+
+# Regenerate suprapack profile
+$PREFIX/bin/suprapack --regenerate_suprapack_profile
