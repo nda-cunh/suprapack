@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Suprapack Installer
+Comment=Installer des paquets suprapack
+Exec=bash -c 'source ~/.suprapack_profile && suprapack install %f'
+Icon=package-x-generic
+Terminal=true
+Type=Application
+MimeType=application/x-suprapack;
+NoDisplay=false
