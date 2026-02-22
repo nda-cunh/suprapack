@@ -195,13 +195,16 @@ public class Main : Object {
 			}
 		}
 		// set locale for utf8 support
-		Intl.setlocale();
 		// warning, error, message function
 		init_message();
 		// load environment variables
 		HOME = Environment.get_variable("HOME");
 		PWD = Environment.get_variable("PWD");
 		USERNAME = Environment.get_user_name();
+
+		Intl.setlocale();
+		Intl.textdomain ("suprapack");
+		Intl.bindtextdomain ("suprapack", HOME + "/.local/share/locale");
 
 		try {
 			config = new Config();
