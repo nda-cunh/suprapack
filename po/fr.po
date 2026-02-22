@@ -1,0 +1,77 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: suprapack\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-21 03:00+0100\n"
+"PO-Revision-Date: 2026-02-21 03:05+0100\n"
+"Last-Translator: \n"
+"Language-Team: French\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: options.vala:3
+msgid "simple print used by other program"
+msgstr "affichage simple utilisé par d'autres programmes"
+
+#: options.vala:4
+msgid "force the operation without update check"
+msgstr "forcer l'opération sans vérifier les mises à jour"
+
+#: options.vala:6
+msgid "(All)  the path of the suprapack folder root"
+msgstr "(Tous) le chemin vers la racine du dossier suprapack"
+
+#: options.vala:6
+msgid "PATH TO THE FOLDER"
+msgstr "CHEMIN DU DOSSIER"
+
+#: options.vala:7
+msgid "(All) add the debug mode"
+msgstr "(Tous) activer le mode débogage"
+
+#: options.vala:7
+msgid "DEBUG"
+msgstr "DÉBOGAGE"
+
+#: options.vala:8
+msgid "(All) refresh the list of packages"
+msgstr "(Tous) rafraîchir la liste des paquets"
+
+#: options.vala:9
+msgid "(Install, Uninstall, Download) force the operation"
+msgstr "(Install, Uninstall, Download) forcer l'opération"
+
+#: options.vala:10
+msgid "(All) answer yes to all questions"
+msgstr "(Tous) répondre oui à toutes les questions"
+
+#: options.vala:11
+msgid "(Build) don't build package with fakeroot"
+msgstr "(Build) ne pas construire le paquet avec fakeroot"
+
+#: options.vala:12
+msgid "(All) like PacStrap install to another root"
+msgstr "(Tous) comme PacStrap, installer dans une autre racine"
+
+#: options.vala:12
+msgid "PREFIX"
+msgstr "PRÉFIXE"
+
+#: options.vala:13
+msgid "(Build) build and install the package"
+msgstr "(Build) construire et installer le paquet"
+
+#: options.vala:14
+msgid "(Build) build output"
+msgstr "(Build) sortie de construction"
+
+#: options.vala:15
+msgid "(Uninstall) remove the recursive"
+msgstr "(Uninstall) supprimer la récursivité"
+
+#: options.vala:16
+msgid "(Config) regenerate the suprapack profile"
+msgstr "(Config) régénérer le profil suprapack"

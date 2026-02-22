@@ -63,7 +63,7 @@ endif
 
 executable('suprapack',
   sources,
-  c_args: '-w',
+  c_args: ['-w', '-DGETTEXT_PACKAGE="suprapack"'],
   # vala_args: '--enable-experimental',
   dependencies : [
     dependency('glib-2.0'),

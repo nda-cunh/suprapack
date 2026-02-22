@@ -1,6 +1,6 @@
 # VERSION = sed -s "s/version:.*$/version: $VERSION/" usr/info -i
 NAME =	suprapack_dev
-LDFLAGS=-X -O2 --disable-warnings --pkg=gio-2.0 -X -w -X -flto --enable-experimental --target-glib=auto -X -s
+FLAGS=-X -DGETTEXT_PACKAGE=suprapack -X -O2 --disable-warnings --pkg=gio-2.0 -X -w -X -flto --enable-experimental --target-glib=auto -X -s
 
 VAPI =	src/uname.vapi
 SRC = src/BetterSearch.vala \
@@ -29,7 +29,7 @@ all: install
 
 make_bootstrap: src/uname.vapi
 	rm -rf bootstrap.tar.gz
-	valac $(SRC) $(VAPI) $(LDFLAGS) -C 
+	valac $(SRC) $(VAPI) $(FLAGS) -C 
 	tar -cf bootstrap.tar.gz src/*.c
 
 bootstrap:
@@ -46,7 +46,7 @@ suprapack: $(SRC)
 ifeq ($(shell command -v valac 2> /dev/null),)
 	@$(MAKE) --no-print-directory bootstrap;
 else
-	valac $(SRC) src/uname.vapi $(LDFLAGS) -o suprapack 
+	valac $(SRC) src/uname.vapi $(FLAGS) -o suprapack 
 endif
 
 install: suprapack 

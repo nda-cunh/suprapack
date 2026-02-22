@@ -581,7 +581,7 @@ namespace Cmd {
 		stdout.printf(BOLD + YELLOW + "[Dev Only]\n" + NONE);
 		stdout.printf(p_suprapack + " build " + CYAN + "[PREFIX]\n");
 		stdout.printf("\t" + COM + " build a suprapack you need a prefix look note part\n");
-		stdout.printf("\t" + COM + " you can add a post_install.sh or pre_install.sh\n");
+		stdout.printf("\t" + COM + " you can add a post_install or pre_install or uninstall file\n");
 		stdout.printf("\t" + COM + " install script can use $$SRCDIR and $$PKGDIR\n");
 		stdout.printf(p_suprapack + " prepare\n");
 		stdout.printf("\t" + COM + " prepare your repository\n");
