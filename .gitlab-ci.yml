@@ -12,3 +12,42 @@ pages:
       - public
   only:
     - master
+
+stages:
+  - build
+  - deploy
+
+# --- BUILD LINUX (Compatible Ubuntu, Arch, Debian, etc.) ---
+build:linux_amd64:
+  stage: build
+  image: debian:stable-slim
+  script:
+    - apt-get update && apt-get install -y 
+        build-essential meson ninja-build valac 
+        libglib2.0-dev libgee-0.8-dev libjson-glib-dev gettext
+    - meson setup build --prefix=$PWD/prefix --strip -Db_lto=true --optimization=3
+    - ninja install -C build
+    - mkdir -p dist && cp *.suprapack dist/
+  artifacts:
+    paths:
+      - dist/*.suprapack
+
+# --- RELEASE AUTOMATIQUE (À CHAQUE COMMIT) ---
+release:
+  stage: deploy
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  needs:
+    - build:linux_amd64
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" # Se lance sur chaque commit sur master
+  script:
+    - echo "Publication de la release pour le commit $CI_COMMIT_SHORT_SHA"
+  release:
+    tag_name: "build-$CI_COMMIT_SHORT_SHA" # On crée un tag virtuel basé sur le hash du commit
+    name: "Release Commit $CI_COMMIT_SHORT_SHA"
+    description: "Build automatique généré depuis le commit $CI_COMMIT_MESSAGE"
+    assets:
+      links:
+        - name: 'Suprapack Linux (.suprapack)'
+          # On utilise CI_COMMIT_REF_NAME pour pointer vers la branche actuelle
+          url: '${CI_PROJECT_URL}/-/jobs/artifacts/${CI_COMMIT_REF_NAME}/raw/dist/suprapack_${CI_COMMIT_TAG}_amd64-Linux.suprapack?job=build:linux_amd64'
