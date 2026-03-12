@@ -61,10 +61,11 @@ else
   ]
 endif
 
-executable('suprapack',
+add_project_arguments(['--enable-experimental', '--target-glib=auto'], language: 'vala')
+
+exe_suprapack = executable('suprapack',
   sources,
   c_args: ['-w', '-DGETTEXT_PACKAGE="suprapack"'],
-  # vala_args: '--enable-experimental',
   dependencies : [
     dependency('glib-2.0'),
     dependency('gobject-2.0'),

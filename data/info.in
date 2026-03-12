@@ -1,0 +1,10 @@
+name: @name@
+version: @version@
+author: nda-cunh
+binary: @name@
+description: @description@
+dependency:
+arch: auto
+exclude_package:
+optional_dependency:
+
