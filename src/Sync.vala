@@ -42,12 +42,9 @@ class Sync : Object {
 			error (e.message);
 		}
 	}
-	// Default private Constructor
-	private Sync () throws Error {
 
-		repo = null;
-		list = null;
-		/* init Repo property */
+
+	private void init_all_repository() {
 		string contents;
 		var regex_repo = /(?P<name>[^\s]+)\s*(?P<url>[^\s]+)/;
 		MatchInfo match_info;
@@ -55,7 +52,7 @@ class Sync : Object {
 
 		int count = 0;
 		foreach (unowned var line in contents.split("\n")) {
-			if (line == "")
+			if (line._strip() == "")
 				continue;
 			if (line.has_prefix("#")) {
 				// is a comment
@@ -69,15 +66,33 @@ class Sync : Object {
 					printerr(" \033[33;1m%d\033[0m | %s\033[91m/\033[0m\n", count, line);
 					printerr(" %*s | \033[91m%*s %s\033[0m\n\n", count.to_string().length, "", line.length + 1, "^", "~~ need terminate by  '/'");
 				}
-				if (url.has_prefix ("http"))
-					_repo += new RepoInfo(name, url, false);
-				else
-					_repo += new RepoInfo(name, url, true);
+				try {
+					RepoInfo tmp_rep;
+					if (url.has_prefix ("http"))
+						tmp_rep = new RepoInfo(name, url, false);
+					else
+						tmp_rep = new RepoInfo(name, url, true);
+					_repo += (owned)tmp_rep;
+				}
+				catch (Error e) {
+					warning ("Can't read [%s] in %s/repo.list", line, config.prefix);
+					debug (e.message);
+				}
 			}
 			else
 				warning ("Can't read [%s] in %s/repo.list", line, config.prefix);
 		}
+	}
 
+	// Default private Constructor
+	private Sync () throws Error {
+
+		repo = null;
+		list = null;
+		/* init Repo property */
+		string contents;
+
+		init_all_repository();
 		if (config.have_download_mirrorlist == true)
 			stderr.printf("\n");
 
@@ -85,7 +100,7 @@ class Sync : Object {
 		// var regex = /[a-zA-Z0-9]+[-][a-zA-Z0-9.]+[.]suprapack/;
 		foreach (unowned var repo in _repo) {
 			FileUtils.get_contents(repo.list, out contents);
-			// IF the file is empty, try to refresh the repo
+
 			if (contents[0] == '\0') {
 				warning("Can't read %s Retry ", repo.list);
 				repo.refresh_repo ();
