@@ -297,30 +297,75 @@ namespace Utils {
 		utsname name;
 		utsname.uname(out name);
 
-		// Linux
-		if (name.sysname == "Linux") {
-			if (name.machine == "x86_64")
-				return "amd64-Linux";
-			if (name.machine == "x86")
-				return "x86-Linux";
-			if (name.machine == "i686")
-				return "i686-Linux";
+		unowned string os = name.sysname;
+		unowned string machine = name.machine;
+
+		if (os == "Linux") {
+			switch (machine) {
+				case "x86_64":
+				case "amd64":   return "x86_64-Linux";
+				case "aarch64":
+				case "arm64":   return "arm64-Linux";
+				case "i686":    return "i686-Linux";
+				case "i586":    return "i586-Linux";
+				case "i386":    return "i386-Linux";
+				case "armv7l":  return "armv7-Linux";
+				default:
+					assert_not_reached ();
+			}
 		}
-		// Apple Darwin
-		if (name.sysname == "Darwin") {
-			if (name.machine == "arm")
-				return "arm64-Darwin";
-			if (name.machine == "arm64")
-				return "arm64-Darwin";
-			if (name.machine == "i386")
-				return "i386-Darwin";
-			if (name.machine == "x86_64")
-				return "amd64-Darwin";
+
+		if (os == "Darwin") {
+			switch (machine) {
+				case "x86_64":  return "x86_64-Darwin";
+				case "arm64":
+				case "arm":     return "arm64-Darwin";
+				default:
+					assert_not_reached ();
+			}
 		}
+
 		return "any";
 	}
 
+	/**
+	 * Check if the package architecture is compatible with the system architecture
+	 *
+	 * @param pkg_arch the package architecture
+	 * @return true if the package architecture is compatible with the system architecture
+	 */
+	public bool is_compatible (string pkg_arch) {
+		unowned string system_arch = get_arch();
 
+		if (pkg_arch == "any" || pkg_arch == "all" || pkg_arch == "auto")
+			return true;
+		if (pkg_arch == system_arch)
+			return true;
+
+		unowned string norm_pkg = normalize_arch(pkg_arch);
+		unowned string norm_sys = normalize_arch(system_arch);
+
+		return norm_pkg == norm_sys;
+	}
+
+	private unowned string normalize_arch (string arch) {
+		if (arch == "amd64-Linux" || arch == "x86_64-Linux") {
+			return "x86_64-Linux";
+		}
+
+		if (arch == "amd64-Darwin" || arch == "x86_64-Darwin") {
+			return "x86_64-Darwin";
+		}
+
+		if (arch == "i386-Linux" || arch == "i686-Linux") {
+			return "i686-Linux";
+		}
+
+		if (arch == "aarch64-Linux" || arch == "arm64-Linux") {
+			return "arm64-Linux";
+		}
+		return arch;
+	}
 	/**
 	 * Convert a byte to a human readable string
 	 * example : 1024 -> 1 Ko  or  10240245 -> 9.76 Mo
@@ -328,7 +373,7 @@ namespace Utils {
 	 * @param b the byte to convert
 	 * @return the human readable string
 	 */
-	public unowned string convertBytePrint(uint64 b, uint8* resultat) {
+	public unowned string convertBytePrint (uint64 b, uint8* resultat) {
 		double ko = b / 1024.0;
 		double mo = ko / 1024.0;
 		double go = mo / 1024.0;
@@ -346,6 +391,4 @@ namespace Utils {
 	[CCode (cheader_filename = "stdio.h", cname="sprintf")]
 	[PrintfFormat]
 	internal extern int sprintf(uint8* str, string format, ...);
-
-
 }

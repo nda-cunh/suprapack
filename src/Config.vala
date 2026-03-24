@@ -184,21 +184,6 @@ public class Config : Object {
 		new ConfigUser(this.config).parse (ref argv);
 	}
 
-	/**
-	 * Check if the architecture is the same as the current architecture
-	 *
-	 * @param arch the architecture to check
-	 * @return true if the architecture is the same, false otherwise
-	 */
-	public static bool is_my_arch (string arch) throws Error {
-		unowned string arch_actual = Utils.get_arch ();
-		if ("any" in arch)
-			return true;
-		if (arch == arch_actual)
-			return true;
-		return false;
-	}
-
 
 	/***************************************
 	 * Variables used by the package manager

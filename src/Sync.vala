@@ -109,7 +109,7 @@ class Sync : Object {
 			foreach (var pkg in contents.split("\n")) {
 				if (SupraList.regex.match(pkg)) {
 					var lst = SupraList(repo.name, pkg, repo.local);
-					if (Config.is_my_arch(lst.arch))
+					if (Utils.is_compatible (lst.arch))
 						_list += (owned)lst;
 				}
 				else if (pkg != "")
