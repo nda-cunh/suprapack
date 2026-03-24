@@ -31,11 +31,12 @@
  * an url can be [[http://gitlab/../../]] or [[home/user/repo]]
  */
 public class RepoInfo : Object {
-	public RepoInfo (string name, string url, bool local) {
+	public RepoInfo (string name, string url, bool local) throws Error {
 		this.local = local;
 		this.name = name;
 		this.url = url;
 		this._list = null;
+		init_list();
 	}
 
 	/* fetch the 'list' file  LOCAL or HTTP */
@@ -65,43 +66,46 @@ public class RepoInfo : Object {
 	}
 
 	/* force download the 'list' file */
-	public void refresh_repo () {
+	public void refresh_repo() throws Error  {
 		string list_file = @"/tmp/$(this.name)_$(USERNAME)_list";
 		FileUtils.remove(list_file);
 		try {
 			fetch_list(this.url, list_file);
 		} catch (Error e) {
-			error("unable to download file %s", e.message);
+			throw new ErrorSP.FAILED("unable to download file %s", e.message);
 		}
 		_list = list_file;
 	}
 
 	private string? _list;
-	public string list {
+	public unowned string list {
 		get {
-			if (_list == null) {
-				string list_file = @"/tmp/$(this.name)_$(USERNAME)_list";
-				bool should_download = true;
-				if (FileUtils.test (list_file, FileTest.EXISTS)) {
-					var stat = Stat.l(list_file);
-					var now = time_t();
-					if (stat.st_mtime + 700 > now)
-						should_download = false;
-				}
-				try {
-					if (should_download == true) {
-						fetch_list(this.url, list_file);
-					}
-				} catch (Error e) {
-					if (e is TlsError) {
-						e.message += "try to install " + BOLD + PURPLE + "glib-networking" + NONE + " package";
-
-					}
-					error("unable to download file %s", e.message);
-				}
-				_list = list_file;
-			}
 			return _list;
+		}
+	}
+
+	private void init_list () throws Error {
+		if (_list == null) {
+			string list_file = @"/tmp/$(this.name)_$(USERNAME)_list";
+			bool should_download = true;
+			if (FileUtils.test (list_file, FileTest.EXISTS)) {
+				var stat = Stat.l(list_file);
+				var now = time_t();
+				if (stat.st_mtime + 700 > now)
+					should_download = false;
+			}
+			try {
+				if (should_download == true) {
+					fetch_list(this.url, list_file);
+				}
+			}
+			catch (Error e) {
+				if (e is TlsError) {
+					throw new ErrorSP.TLS_ERROR("%s try to install " + BOLD + PURPLE + "glib-networking" + NONE + " package", e.message );
+				}
+				throw new ErrorSP.REPOSITORY_NOT_FOUND("unable to download file %s", e.message);
+			}
+			_list = list_file;
 		}
 	}
 
