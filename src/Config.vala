@@ -76,6 +76,16 @@ public class Config : Object {
 			}
 			sb.append_c('\n');
 		}
+		unowned string gio_module_path = Utils.get_gio_module_dir ();
+		if (gio_module_path != null) {
+			sb.append("export GIO_MODULE_DIR=");
+			sb.append(gio_module_path);
+			sb.append_c('\n');
+		}
+		else {
+			warning("GIO_MODULE_DIR is not set, some applications may not work correctly");
+			sb.append("# GIO_MODULE_DIR is not set, some applications may not work correctly\n");
+		}
 		sb.append(@"fpath=($prefix/share/zsh/site-functions $$fpath)\n");
 		FileUtils.set_contents(profile, sb.str);
 	}

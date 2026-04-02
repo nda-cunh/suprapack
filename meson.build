@@ -1,4 +1,4 @@
-project('suprapack', ['c'], meson_version : '>= 0.56.0', version: '2.27', default_options : ['warning_level=0', 'optimization=2'])
+project('suprapack', ['c'], meson_version : '>= 0.56.0', version: '2.29', default_options : ['warning_level=0', 'optimization=2'])
 
 i18n = import('i18n')
 

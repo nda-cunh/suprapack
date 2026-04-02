@@ -181,26 +181,15 @@ public class Main : Object {
 
 	// INIT
 	public Main (string []args) {
-		const string[] candidate_paths = {
-			"/usr/lib/gio/modules",
-			"/usr/lib/x86_64-linux-gnu/gio/modules",
-			"/usr/lib/aarch64-linux-gnu/gio/modules",
-			"/usr/lib/arm-linux-gnueabihf/gio/modules",
-			"/usr/lib/arm-linux-gnueabi/gio/modules",
-			"/usr/lib/i386-linux-gnu/gio/modules",
-		};
+		unowned string gio_module_path = Utils.get_gio_module_dir ();
 
-		foreach (unowned string path in candidate_paths) {
-			if (FileUtils.test(path, FileTest.IS_DIR | FileTest.EXISTS)) {
-				Environment.set_variable ("GIO_MODULE_DIR", path, true);
-				break;
-			}
-		}
-
-		if (Environment.get_variable("GIO_MODULE_DIR") == null) {
+		if (gio_module_path == null) {
 			warning ("gio module not found");
 			warning ("try install glib-networking");
 			warning ("set GIO_MODULE_DIR to modules directory");
+		}
+		else {
+			Environment.set_variable ("GIO_MODULE_DIR", gio_module_path, true);
 		}
 
 		// set locale for utf8 support
