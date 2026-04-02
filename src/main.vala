@@ -181,19 +181,28 @@ public class Main : Object {
 
 	// INIT
 	public Main (string []args) {
-		if (Environment.get_variable("GIO_MODULE_DIR") == null) {
-			if (FileUtils.test("/usr/lib/gio/modules", FileTest.IS_DIR | FileTest.EXISTS))
-				Environment.set_variable ("GIO_MODULE_DIR", "/usr/lib/gio/modules", true);
-			else if (FileUtils.test("/usr/lib/x86_64-linux-gnu/gio/modules", FileTest.IS_DIR | FileTest.EXISTS))
-				Environment.set_variable ("GIO_MODULE_DIR", "/usr/lib/x86_64-linux-gnu/gio/modules", true);
-			else {
-				if (Environment.get_variable("GIO_MODULE_DIR") == null) {
-					warning ("gio module not found");
-					warning ("try install glib-networking");
-					warning ("set GIO_MODULE_DIR to modules directory");
-				}
+		const string[] candidate_paths = {
+			"/usr/lib/gio/modules",
+			"/usr/lib/x86_64-linux-gnu/gio/modules",
+			"/usr/lib/aarch64-linux-gnu/gio/modules",
+			"/usr/lib/arm-linux-gnueabihf/gio/modules",
+			"/usr/lib/arm-linux-gnueabi/gio/modules",
+			"/usr/lib/i386-linux-gnu/gio/modules",
+		};
+
+		foreach (unowned string path in candidate_paths) {
+			if (FileUtils.test(path, FileTest.IS_DIR | FileTest.EXISTS)) {
+				Environment.set_variable ("GIO_MODULE_DIR", path, true);
+				break;
 			}
 		}
+
+		if (Environment.get_variable("GIO_MODULE_DIR") == null) {
+			warning ("gio module not found");
+			warning ("try install glib-networking");
+			warning ("set GIO_MODULE_DIR to modules directory");
+		}
+
 		// set locale for utf8 support
 		// warning, error, message function
 		init_message();
