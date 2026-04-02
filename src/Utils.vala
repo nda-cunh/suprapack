@@ -347,5 +347,23 @@ namespace Utils {
 	[PrintfFormat]
 	internal extern int sprintf(uint8* str, string format, ...);
 
+	public unowned string? get_gio_module_dir () {
+		const string[] candidate_paths = {
+			"/usr/lib/gio/modules",
+			"/usr/lib/x86_64-linux-gnu/gio/modules",
+			"/usr/lib/aarch64-linux-gnu/gio/modules",
+			"/usr/lib/arm-linux-gnueabihf/gio/modules",
+			"/usr/lib/arm-linux-gnueabi/gio/modules",
+			"/usr/lib/i386-linux-gnu/gio/modules",
+		};
+
+		foreach (unowned string path in candidate_paths) {
+			if (FileUtils.test(path, FileTest.IS_DIR | FileTest.EXISTS)) {
+				return path;
+			}
+		}
+
+		return null;
+	}
 
 }
