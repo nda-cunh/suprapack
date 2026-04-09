@@ -24,9 +24,25 @@
  */
 namespace Http {
 
-	private errordomain HttpError {
+	public errordomain HttpError {
+		// Erreurs Génériques
 		ERR,
-		CANCEL
+		CANCEL,         // Annulation par l'utilisateur (Cancellable)
+		TIMEOUT,        // Le serveur ne répond pas assez vite
+		DNS_RESOLVE,    // Impossible de trouver l'hôte (pas d'internet ou mauvaise URL)
+
+		// Erreurs de Statut (Logique HTTP)
+		NOT_MODIFIED,   // 304 : Le fichier n'a pas bougé (Super important pour toi !)
+		BAD_REQUEST,    // 400 : La requête est mal formée
+		FORBIDDEN,      // 403 : Accès refusé (ex: Cloudflare bloque ton User-Agent)
+		NOT_FOUND,      // 404 : Le fichier n'existe pas sur le miroir
+		SERVER_ERROR,   // 500 : Le serveur du miroir a crashé
+		UNAVAILABLE,    // 503 : Le miroir est en maintenance ou surchargé
+
+		// Erreurs de Données
+		MALFORMED_URL,  // L'URL passée est invalide
+		WRITE_FAILED,   // Impossible d'écrire le fichier sur le disque (disque plein/droits)
+		SIZE_MISMATCH   // La taille reçue ne correspond pas au Content-Length
 	}
 
 	/**
@@ -39,7 +55,7 @@ namespace Http {
 	 * @param cancel a cancellable object
 	 */
 	public void download (string url, string? output = null, bool no_print = false, Cancellable? cancel = null, bool rec = false) throws Error {
-		Error err = null;
+		Error? err = null;
 		var loop = new MainLoop ();
 
 		var s = new Unix.SignalSource(2);
@@ -49,31 +65,39 @@ namespace Http {
 			cancel?.cancel ();
 			return false;
 		});
+
 		s.attach(GLib.MainContext.default());
 
 		_download.begin(url, output, no_print, rec, cancel, (obj, res) => {
-			if (cancel.is_cancelled ())
-				FileUtils.remove (output);
-			err = _download.end (res);
-			loop.quit ();
+			try {
+				if (cancel.is_cancelled ())
+					FileUtils.remove (output);
+				_download.end (res);
+				loop.quit ();
+			}
+			catch (Error e) {
+				err = e;
+				loop.quit ();
+			}
 		});
 		loop.run ();
+
+
 		s.destroy ();
-		if (err != null) {
+		if (err != null)
 			throw err;
-		}
 		if (cancel.is_cancelled ())
 			throw new HttpError.CANCEL("the download is cancel (%s)", Log.vala_line ());
 	}
 
-	private async Error? _download (string url, string? output = null, bool no_print = false, bool rec = false, Cancellable? cancel = null) {
-		try {
+
+
+	private async void _download (string url, string? output = null, bool no_print = false, bool rec = false, Cancellable? cancel = null) throws Error {
 		const size_t SIZE_BUFFER = 16777216;
 		unowned string	host;
 		unowned string	query;
 		unowned string	path;
 		int				port;
-
 
 		/* Parse Url */
 		Uri uri = Uri.parse (url, UriFlags.SCHEME_NORMALIZE | UriFlags.ENCODED);
@@ -91,9 +115,6 @@ namespace Http {
 
 		/* Open Connection-Files */
 
-		var fs = FileStream.open (target, "w");
-		if (fs == null)
-			throw new HttpError.ERR ("Impossible to create target_file: (%s) file", target);
 		var client = new SocketClient(){tls=true};
 		var conn = yield client.connect_to_host_async (host, (uint16)port, cancel);
 
@@ -108,6 +129,20 @@ namespace Http {
 			string request = @"$path$(query != null ? "?"+query : "")";
 			output_stream.put_string(@"GET $request HTTP/1.1\r\n");
 			output_stream.put_string(@"Host: $host\r\n"); // Ajout de l'en-tête "Host"
+			output_stream.put_string("User-Agent: SupraPack/1.0\r\n"); // Ajout de l'en-tête "User-Agent"
+
+			// X warning("[[%s]]", target);
+			// string? last_mod = get_last_modified_header(target);
+			// if (last_mod != null) {
+				// Log.debug("download", "Sending If-Modified-Since: %s", last_mod);
+				// output_stream.put_string(@"If-Modified-Since: $last_mod\r\n");
+			// }
+
+			string? saved_etag = read_etag_from_disk(target); // Fonction à créer
+			if (saved_etag != null) {
+				output_stream.put_string(@"If-None-Match: $saved_etag\r\n");
+			}
+
 			output_stream.put_string("Cache-Control: no-cache\r\n"); // Ignorer le cache
 			output_stream.put_string("Accept-Encoding: identity\r\n"); // Ignorer le cache
 			output_stream.put_string("Connection: close\r\n"); // Ignorer le cache
@@ -121,12 +156,49 @@ namespace Http {
 			string error = input_stream.read_line_utf8(null, cancel);
 			error = error.offset(error.index_of_char(' '));
 			int err =  int.parse(error);
-			if (err != 200) {
-				if (err != 302)
-					throw new HttpError.ERR("%s HTTP (%s)", error.replace("\r", ""), Log.vala_line());
+			var err_msg = error.replace("\r", "");
+
+			switch (err) {
+				case 304:
+					throw new HttpError.NOT_MODIFIED("File hasn't changed (304): %s (%s)", err_msg, Log.vala_line());
+
+				case 400:
+					throw new HttpError.BAD_REQUEST("Bad request: %s HTTP (%s)", err_msg, Log.vala_line());
+
+				case 401:
+				case 403:
+					throw new HttpError.FORBIDDEN("Access denied by the mirror (Auth/Permissions): %s HTTP (%s)", err_msg, Log.vala_line());
+
+				case 404:
+					throw new HttpError.NOT_FOUND("File not found on the mirror: %s HTTP (%s)", err_msg, Log.vala_line());
+
+				case 408:
+				case 504:
+					throw new HttpError.TIMEOUT("Request timeout (Server or Gateway): %s HTTP (%s)", err_msg, Log.vala_line());
+
+				case 429:
+					throw new HttpError.UNAVAILABLE("Too many requests (Rate limited): %s HTTP (%s)", err_msg, Log.vala_line());
+
+				case 500:
+					throw new HttpError.SERVER_ERROR("Internal server error: %s HTTP (%s)", err_msg, Log.vala_line());
+
+				case 502:
+				case 503:
+					throw new HttpError.UNAVAILABLE("Mirror temporarily down or overloaded: %s HTTP (%s)", err_msg, Log.vala_line());
+
+				default:
+					if (err >= 400 && err < 500) {
+						throw new HttpError.ERR("Client error %d: %s (%s)".printf(err, err_msg, Log.vala_line()));
+					} else if (err >= 500) {
+						throw new HttpError.SERVER_ERROR("Server error %d: %s (%s)".printf(err, err_msg, Log.vala_line()));
+					}
+					break;
 			}
 		}
 
+		var fs = FileStream.open (target, "w");
+		if (fs == null)
+			throw new HttpError.WRITE_FAILED("Impossible to create target_file: (%s) file", target);
 		string name_file;
 		name_file = Uri.unescape_string(target[target.last_index_of_char ('/') + 1:]);
 		name_file = name_file.to_ascii ();
@@ -136,6 +208,7 @@ namespace Http {
 		/* Get All bytes Data */
 		string line;
 		size_t bytes = 0;
+		string? current_etag = null;
 		while ((line = input_stream.read_line_utf8(null, cancel)) != null) {
 			/* Header Part */
 			{
@@ -143,19 +216,24 @@ namespace Http {
 				Log.debug("download", "HEADER: [%s]", line);
 				if (line.has_prefix("Content-Length: "))
 					line.scanf("Content-Length: %zu", out bytes);
+				if (line.has_prefix("ETag: ") || line.has_prefix("etag:")) {
+					line.scanf("ETag: %s", out buffer);
+					current_etag = line[5:]._strip(); // Enlever "ETag: " et les espaces
+				}
+
 				else if (line.has_prefix ("Transfer-Encoding:")) {
 					line.scanf("Transfer-Encoding: %s", out buffer);
 					if (((string)buffer).ascii_down () == "chunked") {
 						Log.debug("download", "Retry chunked not supported");
 						download(url, output, no_print, null, true);
-						return null;
+						return ;
 					}
 				}
 				else if (line.has_prefix("Location: ")) {
 					line.scanf("Location: %s", out buffer);
 					Log.debug("download", "redirect to %s", (string)buffer);
 					download((string)buffer, output, no_print, null, true);
-					return null;
+					return ;
 				}
 			}
 
@@ -181,17 +259,37 @@ namespace Http {
 					catch (Error e) {
 						if (bytes == 0)
 							break;
-						throw new HttpError.ERR("Error reading data: %s %s", e.message, Log.vala_line());
+						throw new HttpError.ERR ("Error reading data: %s %s", e.message, Log.vala_line());
 					}
 				} while (len > 0);
 
 			}
+			if (current_etag != null) {
+				save_etag_to_disk(target, current_etag);
+			}
 		}
+		return ;
+	}
+
+	private string? get_last_modified_header(string path) {
+		var file = File.new_for_path(path);
+		if (!file.query_exists()) return null;
+
+		try {
+			var info = file.query_info("time::modified", FileQueryInfoFlags.NONE);
+			var mtime = info.get_modification_date_time();
+			
+			string old_locale = Intl.setlocale(LocaleCategory.TIME, null);
+			Intl.setlocale(LocaleCategory.TIME, "C");
+			
+			string http_date = mtime.to_timezone(new TimeZone.utc())
+									.format("%a, %d %b %Y %H:%M:%S GMT");
+			
+			Intl.setlocale(LocaleCategory.TIME, old_locale);
+			return http_date;
+		} catch (Error e) {
+			return null;
 		}
-		catch (Error e) {
-			return e;
-		}
-		return null;
 	}
 
 	/**
@@ -243,4 +341,31 @@ namespace Http {
 		buffer[21] = ']';
 		buffer[22] = '\0';
 	}
+
+private void save_etag_to_disk(string target_path, string etag_value) {
+    string etag_path = target_path + ".etag";
+    try {
+        FileUtils.set_contents(etag_path, etag_value.strip());
+    } catch (Error e) {
+        warning("Could not save ETag for %s: %s", target_path, e.message);
+    }
+}
+
+private string? read_etag_from_disk(string target_path) {
+    string etag_path = target_path + ".etag";
+    
+    if (!FileUtils.test(etag_path, FileTest.EXISTS)) {
+        return null;
+    }
+
+    try {
+        string etag_content;
+        FileUtils.get_contents(etag_path, out etag_content);
+        return etag_content.strip(); // .strip() enlève les \n ou espaces
+    } catch (Error e) {
+        Log.debug("http", "Could not read ETag file: %s", e.message);
+        return null;
+    }
+}
+
 }
