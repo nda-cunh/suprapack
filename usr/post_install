@@ -45,7 +45,8 @@ else
     for f in $TARGET_FILES; do
         if [ -f "$f" ]; then
             if ! grep -q ".suprapack_profile" "$f"; then
-                echo "\n# Added by suprapack installer" >> "$f"
+                echo "" >> "$f"
+                echo "# Added by suprapack installer" >> "$f"
                 echo "$LOAD_STR" >> "$f"
                 echo "Updated: $f"
             fi
