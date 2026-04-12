@@ -176,7 +176,7 @@ public class Main : Object {
 			}
 		}
 
-		error("La commande \"%s\" n'existe pas.", av1);
+		error("The command \"%s\" does not exist.", av1);
 	}
 
 	// INIT
