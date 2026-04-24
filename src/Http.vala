@@ -54,7 +54,7 @@ namespace Http {
 	 * @param rec if true, retry the download ( set only by download function d'ont use it )
 	 * @param cancel a cancellable object
 	 */
-	public void download (string url, string? output = null, bool no_print = false, Cancellable? cancel = null, bool rec = false) throws Error {
+	public void download (string url, string output, bool no_print = false, Cancellable? cancel = null, bool rec = false) throws Error {
 		Error? err = null;
 		var loop = new MainLoop ();
 
@@ -66,19 +66,31 @@ namespace Http {
 			return false;
 		});
 
+		var output_etag = output + ".etag";
+		if (FileUtils.test(output_etag, FileTest.EXISTS) && !FileUtils.test(output, FileTest.EXISTS)) {
+			Log.debug("http", "ETag file exists but target file doesn't exist, removing ETag file");
+			FileUtils.remove(output_etag);
+		}
+
 		s.attach(GLib.MainContext.default());
 
 		_download.begin(url, output, no_print, rec, cancel, (obj, res) => {
 			try {
-				if (cancel.is_cancelled ())
-					FileUtils.remove (output);
+				if (cancel.is_cancelled ()) {
+						FileUtils.remove (output);
+						FileUtils.remove (output_etag);
+					}
 				_download.end (res);
-				loop.quit ();
+			}
+			catch (HttpError.NOT_MODIFIED e) {
+				Log.debug("download", "File not modified, using cached version: %s", e.message);
 			}
 			catch (Error e) {
 				err = e;
-				loop.quit ();
+				FileUtils.remove (output);
+				FileUtils.remove (output_etag);
 			}
+			loop.quit ();
 		});
 		loop.run ();
 
@@ -130,13 +142,6 @@ namespace Http {
 			output_stream.put_string(@"GET $request HTTP/1.1\r\n");
 			output_stream.put_string(@"Host: $host\r\n"); // Ajout de l'en-tête "Host"
 			output_stream.put_string("User-Agent: SupraPack/1.0\r\n"); // Ajout de l'en-tête "User-Agent"
-
-			// X warning("[[%s]]", target);
-			// string? last_mod = get_last_modified_header(target);
-			// if (last_mod != null) {
-				// Log.debug("download", "Sending If-Modified-Since: %s", last_mod);
-				// output_stream.put_string(@"If-Modified-Since: $last_mod\r\n");
-			// }
 
 			string? saved_etag = read_etag_from_disk(target); // Fonction à créer
 			if (saved_etag != null) {
@@ -272,27 +277,6 @@ namespace Http {
 		return ;
 	}
 
-	private string? get_last_modified_header(string path) {
-		var file = File.new_for_path(path);
-		if (!file.query_exists()) return null;
-
-		try {
-			var info = file.query_info("time::modified", FileQueryInfoFlags.NONE);
-			var mtime = info.get_modification_date_time();
-			
-			string old_locale = Intl.setlocale(LocaleCategory.TIME, null);
-			Intl.setlocale(LocaleCategory.TIME, "C");
-			
-			string http_date = mtime.to_timezone(new TimeZone.utc())
-									.format("%a, %d %b %Y %H:%M:%S GMT");
-			
-			Intl.setlocale(LocaleCategory.TIME, old_locale);
-			return http_date;
-		} catch (Error e) {
-			return null;
-		}
-	}
-
 	/**
 	 * Print the download progress
 	 *
@@ -362,11 +346,6 @@ private string? read_etag_from_disk(string target_path) {
     if (!FileUtils.test(etag_path, FileTest.EXISTS)) {
         return null;
     }
-	if (!FileUtils.test(target_path, FileTest.EXISTS)) {
-		// remove the etag file if the target file doesn't exist
-		FileUtils.remove(etag_path);
-		return null;
-	}
 
     try {
         string etag_content;

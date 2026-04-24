@@ -62,7 +62,7 @@ namespace Cmd {
 
 			var file = File.new_for_path(path);
 			var filed = File.new_for_path(Environment.get_current_dir() + "/" + file.get_basename());
-			file.move(filed, FileCopyFlags.OVERWRITE);
+			file.copy(filed, FileCopyFlags.OVERWRITE);
 			if (config.force == true) {
 				var dir_target =  @"./$(supralist.name)-$(supralist.version)";
 				DirUtils.create(dir_target, 0755);
