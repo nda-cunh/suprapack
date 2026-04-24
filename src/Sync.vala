@@ -273,9 +273,9 @@ class Sync : Object {
 			else
 				Http.download(url, output, false, cancel);
 			print(ENDCURSOR);
-		} catch (Error e) {
+		}
+		catch (Error e) {
 			print(ENDCURSOR);
-			FileUtils.remove (output);
 			if (e is TlsError) {
 				e.message += "try to install " + BOLD + PURPLE + "glib-networking" + NONE + " package";
 			}

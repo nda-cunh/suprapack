@@ -140,7 +140,6 @@ private void script_post_install(string dir) throws Error {
 // install package suprapack
 public void install_suprapackage(Package suprapack) throws Error {
 	force_suprapack_update();
-
 	unowned string output = suprapack.output;
 
 	if (FileUtils.test(output, FileTest.EXISTS)) {
@@ -319,8 +318,12 @@ public void install () throws Error {
 				else
 					install_suprapackage(i);
 			}
-			if (!config.is_cached && i.repo != "Local") {
-				FileUtils.unlink(i.output);
+			if (i.repo != "Local") { // On ne supprime jamais un fichier local fourni par l'user
+				if (config.is_cached == false) {
+					Log.debug("Sync", "Nettoyage du cache pour %s", i.name);
+					FileUtils.unlink(i.output);
+					FileUtils.unlink(i.output + ".etag"); 
+				}
 			}
 		}
 		/* add dependency in  .required_by file */

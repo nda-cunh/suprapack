@@ -50,9 +50,6 @@ public class RepoInfo : Object {
 				config.set_have_download_mirrorlist ();
 				Http.download(url_list, output, false);
 			}
-			catch (Http.HttpError.NOT_MODIFIED e) {
-				Log.debug("Repository", "HTTP repository %s not modified, use cached version", url_list);
-			}
 			catch (Error e) {
 				FileUtils.remove (output);
 				throw e;
