@@ -160,6 +160,7 @@ namespace Http {
 
 			switch (err) {
 				case 304:
+					Log.debug("download", "File not modified, use cached version");
 					throw new HttpError.NOT_MODIFIED("File hasn't changed (304): %s (%s)", err_msg, Log.vala_line());
 
 				case 400:
@@ -351,12 +352,21 @@ private void save_etag_to_disk(string target_path, string etag_value) {
     }
 }
 
+/**
+  Check if the etag exist and target file exist and return the etag value if exist else return null
+  the etag file is a simple text file with the same name as the target file but with the extension .etag
+*/
 private string? read_etag_from_disk(string target_path) {
     string etag_path = target_path + ".etag";
     
     if (!FileUtils.test(etag_path, FileTest.EXISTS)) {
         return null;
     }
+	if (!FileUtils.test(target_path, FileTest.EXISTS)) {
+		// remove the etag file if the target file doesn't exist
+		FileUtils.remove(etag_path);
+		return null;
+	}
 
     try {
         string etag_content;
