@@ -31,8 +31,8 @@ public const string GREY = "\033[37m";
 public const string WHITE = "\033[39m";
 public const string CYAN = "\033[96m";
 public const string NONE = "\033[0m";
-public const string CURSOR = "\033[?25l";
-public const string ENDCURSOR= "\033[?25h";
+public const string HIDECURSOR = "\033[?25l";
+public const string SHOWCURSOR = "\033[?25h";
 
 [CCode (cname = "printf", cheader_filename="stdio.h")]
 extern int printf(string str, ...);

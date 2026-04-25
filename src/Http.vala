@@ -72,6 +72,7 @@ namespace Http {
 			FileUtils.remove(output_etag);
 		}
 
+		print (HIDECURSOR);
 		s.attach(GLib.MainContext.default());
 
 		_download.begin(url, output, no_print, rec, cancel, (obj, res) => {
@@ -94,6 +95,8 @@ namespace Http {
 		});
 		loop.run ();
 
+		Source.remove (s.get_id ());
+		print (SHOWCURSOR);
 
 		s.destroy ();
 		if (err != null)

@@ -262,7 +262,6 @@ class Sync : Object {
 		}
 		string url = this.get_url_from_name(pkg.repo_name) + pkgname;
 		try  {
-			print(CURSOR);
 			Log.debug("Sync", "Download [%s] from [%s] local:(%s)", pkg.name, url, pkg.is_local ? "true" : "false");
 			if (pkg.is_local == true) {
 				var file_list = GLib.File.new_for_path(url);
@@ -272,10 +271,8 @@ class Sync : Object {
 			}
 			else
 				Http.download(url, output, false, cancel);
-			print(ENDCURSOR);
 		}
 		catch (Error e) {
-			print(ENDCURSOR);
 			if (e is TlsError) {
 				e.message += "try to install " + BOLD + PURPLE + "glib-networking" + NONE + " package";
 			}
