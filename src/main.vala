@@ -44,7 +44,7 @@ public class Main : Object {
 	const OptionEntry[] options = {
 		// Special options hidden
 		{ "simple-print", '\0', OptionFlags.HIDDEN, OptionArg.NONE, ref simple_print, "simple print used by other program", null },
-		{ "supraforce", 's', OptionFlags.HIDDEN, OptionArg.NONE, ref supraforce, "force the operation without update check", null },
+		{ "supraforce", '\0', OptionFlags.HIDDEN, OptionArg.NONE, ref supraforce, "force the operation without update check", null },
 		// Normal Options
 		{ "prefix", 'p', OptionFlags.NONE, OptionArg.STRING, ref prefix, COLOR + "(All) " + NONE + " the path of the suprapack folder root", "PATH TO THE FOLDER" },
 		{ "debug", '\0', OptionFlags.NONE, OptionArg.NONE, ref _debug, COLOR + "(All)" + NONE + " add the debug mode", "DEBUG"},
@@ -60,9 +60,10 @@ public class Main : Object {
 		{ null }
 	};
 
-	bool all_cmd (string []commands) throws Error {
+	public static OptionContext opt_context;
 
-		var opt_context = new OptionContext ();
+	bool all_cmd (string []commands) throws Error {
+		opt_context = new OptionContext ();
 		opt_context.add_main_entries (options, null);
 		opt_context.set_help_enabled(false);
 		opt_context.set_ignore_unknown_options(true);
