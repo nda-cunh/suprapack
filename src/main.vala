@@ -39,24 +39,26 @@ public class Main : Object {
 	public static bool _debug = false;
 	public static bool _recursive = false;
 	public static bool create_suprapack_profile = false;
+	public static string? build_target = null;
 
 
 	const OptionEntry[] options = {
 		// Special options hidden
-		{ "simple-print", '\0', OptionFlags.HIDDEN, OptionArg.NONE, ref simple_print, "simple print used by other program", null },
-		{ "supraforce", '\0', OptionFlags.HIDDEN, OptionArg.NONE, ref supraforce, "force the operation without update check", null },
+		{ "simple-print", '\0', OptionFlags.HIDDEN, OptionArg.NONE, out simple_print, "simple print used by other program", null },
+		{ "supraforce", '\0', OptionFlags.HIDDEN, OptionArg.NONE, out supraforce, "force the operation without update check", null },
 		// Normal Options
-		{ "prefix", 'p', OptionFlags.NONE, OptionArg.STRING, ref prefix, COLOR + "(All) " + NONE + " the path of the suprapack folder root", "PATH TO THE FOLDER" },
-		{ "debug", '\0', OptionFlags.NONE, OptionArg.NONE, ref _debug, COLOR + "(All)" + NONE + " add the debug mode", "DEBUG"},
-		{ "refresh", 'r', OptionFlags.NONE, OptionArg.NONE, ref refresh, COLOR + "(All)" + NONE + " refresh the list of packages", null },
-		{ "force", 'f', OptionFlags.NONE, OptionArg.NONE, ref force, COLOR + "(Install, Uninstall, Download)" + NONE + " force the operation", null },
-		{ "yes", 'y', OptionFlags.NONE, OptionArg.NONE, ref yes, COLOR + "(All)" + NONE + " answer yes to all questions", null },
-		{ "no-fakeroot", '\0', OptionFlags.NONE, OptionArg.NONE, ref no_fakeroot, COLOR + "(Build)" + NONE + " don't build package with fakeroot", null },
-		{ "strap", '\0', OptionFlags.NONE, OptionArg.STRING, ref strap, COLOR + "(All)" + NONE + " like PacStrap install to another root", "PREFIX"},
-		{ "install", '\0', OptionFlags.NONE, OptionArg.NONE, ref build_and_install, COLOR + "(Build)" + NONE + " build and install the package", null },
-		{ "build-output", '\0', OptionFlags.NONE, OptionArg.STRING, ref build_output, COLOR + "(Build)" + NONE + " build output", null },
-		{ "no-recursive", '\0', OptionFlags.NONE, OptionArg.NONE, ref _recursive, COLOR + "(Uninstall)" + NONE + " remove the recursive", null},
-		{ "regenerate_suprapack_profile", '\0', OptionFlags.NONE, OptionArg.NONE, ref create_suprapack_profile, COLOR + "(Config)" + NONE + " regenerate the suprapack profile", null},
+		{ "prefix", 'p', OptionFlags.NONE, OptionArg.STRING, out prefix, COLOR + "(All) " + NONE + " the path of the suprapack folder root", "PATH TO THE FOLDER" },
+		{ "debug", '\0', OptionFlags.NONE, OptionArg.NONE, out _debug, COLOR + "(All)" + NONE + " add the debug mode", "DEBUG"},
+		{ "refresh", 'r', OptionFlags.NONE, OptionArg.NONE, out refresh, COLOR + "(All)" + NONE + " refresh the list of packages", null },
+		{ "force", 'f', OptionFlags.NONE, OptionArg.NONE, out force, COLOR + "(Install, Uninstall, Download)" + NONE + " force the operation", null },
+		{ "yes", 'y', OptionFlags.NONE, OptionArg.NONE, out yes, COLOR + "(All)" + NONE + " answer yes to all questions", null },
+		{ "no-fakeroot", '\0', OptionFlags.NONE, OptionArg.NONE, out no_fakeroot, COLOR + "(Build)" + NONE + " don't build package with fakeroot", null },
+		{ "strap", '\0', OptionFlags.NONE, OptionArg.STRING, out strap, COLOR + "(All)" + NONE + " like PacStrap install to another root", "PREFIX"},
+		{ "install", '\0', OptionFlags.NONE, OptionArg.NONE, out build_and_install, COLOR + "(Build)" + NONE + " build and install the package", null },
+		{ "build-output", '\0', OptionFlags.NONE, OptionArg.STRING, out build_output, COLOR + "(Build)" + NONE + " build output", null },
+		{ "no-recursive", '\0', OptionFlags.NONE, OptionArg.NONE, out _recursive, COLOR + "(Uninstall)" + NONE + " remove the recursive", null},
+		{ "target", '\0', OptionFlags.NONE, OptionArg.STRING, out build_target, COLOR + "(Build)" + NONE + " set the build target", null},
+		{ "regenerate_suprapack_profile", '\0', OptionFlags.NONE, OptionArg.NONE, out create_suprapack_profile, COLOR + "(Config)" + NONE + " regenerate the suprapack profile", null},
 		{ null }
 	};
 
@@ -85,6 +87,7 @@ public class Main : Object {
 		config.build_and_install = build_and_install;
 		config.build_output = build_output ?? ".";
 		config.is_recursive_uninstall = !_recursive;
+		config.build_target = build_target;
 
 		// Create source profile if not exist
 		if (FileUtils.test(@"$HOME/.suprapack_profile", FileTest.EXISTS) == false || create_suprapack_profile == true) {

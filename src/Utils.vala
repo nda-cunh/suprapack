@@ -293,32 +293,69 @@ namespace Utils {
 	 * like x86-Linux, amd64-Linux, i686-Linux, i386-Darwin, amd64-Darwin, arm64-Darwin
 	 * @return the architecture
 	 */
-	public unowned string get_arch () {
+	public unowned string get_arch_host () {
 		utsname name;
 		utsname.uname(out name);
 
 		// Linux
 		if (name.sysname == "Linux") {
 			if (name.machine == "x86_64")
-				return "amd64-Linux";
+				return "amd64-linux";
 			if (name.machine == "x86")
-				return "x86-Linux";
+				return "x86-linux";
 			if (name.machine == "i686")
-				return "i686-Linux";
+				return "i686-linux";
 		}
 		// Apple Darwin
 		if (name.sysname == "Darwin") {
 			if (name.machine == "arm")
-				return "arm64-Darwin";
+				return "arm64-darwin";
 			if (name.machine == "arm64")
-				return "arm64-Darwin";
+				return "arm64-darwin";
 			if (name.machine == "i386")
-				return "i386-Darwin";
+				return "i386-darwin";
 			if (name.machine == "x86_64")
-				return "amd64-Darwin";
+				return "amd64-darwin";
 		}
 		return "any";
 	}
+
+	/**
+	 * Magik detection of architecture
+	 * input: armmd64-Linoux -> output: arm64-linux
+	 * input: Linoux-arm644 -> output: arm64-linux
+	 */
+	public string get_arch_magik (string input) {
+		if (input == null || input == "") return "any";
+
+		string clean_input = input.down();
+		int max_score = 0;
+		string best_match = "any";
+
+		string[] archs = {"amd64", "x86", "i686", "i386", "arm64"};
+		string[] oss = {"linux", "darwin"};
+
+		foreach (unowned string a in archs) {
+			foreach (unowned string o in oss) {
+				string standard = a + "-" + o;
+				string reversed = o + "-" + a;
+
+				int score_std = BetterSearch.get_score_sync(clean_input, standard);
+				if (score_std > max_score) {
+					max_score = score_std;
+					best_match = standard;
+				}
+
+				int score_rev = BetterSearch.get_score_sync(clean_input, reversed);
+				if (score_rev > max_score) {
+					max_score = score_rev;
+					best_match = standard;
+				}
+			}
+		}
+		return (max_score >= 20) ? best_match : "any";
+	}
+
 
 
 	/**

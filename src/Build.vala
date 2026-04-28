@@ -116,20 +116,26 @@ namespace Build {
 		var usrdir_postinstall = @"$usr_dir/post_install.sh";
 		if (FileUtils.test(usrdir_postinstall, FileTest.EXISTS))
 			FileUtils.chmod(usrdir_postinstall, 0777);
-		var name_pkg = @"$(pkg.name)_$(pkg.version)_$(pkg.arch)";
+		string arch_normalize;
+		if (config.build_target != null) {
+			arch_normalize = Utils.get_arch_magik(config.build_target);
+		}
+		else {
+			arch_normalize = Utils.get_arch_magik(pkg.arch);
+		}
+
+		var name_pkg = @"$(pkg.name)_$(pkg.version)_$(arch_normalize)";
 		var package_dest = @"$(config.build_output)/$(name_pkg).suprapack";
 		DirUtils.create_with_parents (config.build_output, 0755);
 		var loop = new MainLoop();
 		var thread = new Thread<void> (null, () => {
 			// compress the package with fakeroot or not
-				if (config.use_fakeroot == true) {
-
+			if (config.use_fakeroot == true) {
 				if (Utils.run({"fakeroot", "tar", "--zstd", "-cf", package_dest, "-C", usr_dir, "."}, {}, true) != 0)
 					error("unable to create package\npackage => %s", name_pkg);
 			}
 			else {
-
-			if (Utils.run({"tar", "--zstd", "-cf", package_dest, "-C", usr_dir, "."}, {}, true) != 0)
+				if (Utils.run({"tar", "--zstd", "-cf", package_dest, "-C", usr_dir, "."}, {}, true) != 0)
 					error("unable to create package\npackage =>  %s", name_pkg);
 			}
 			loop.quit();
@@ -166,7 +172,6 @@ namespace Build {
 	 * autoconfig the package
 	 * autoconfig is a script that will be executed before the installation
 	 * it will replace the $PREFIX in the pkg-config files
-	 * and add the sed command to replace the $PREFIX in the pkg-config files
 	 * in the pre_install.sh script
 	 *
 	 * @param pkgdir the directory of the package
