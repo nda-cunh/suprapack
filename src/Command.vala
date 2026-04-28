@@ -577,7 +577,7 @@ namespace Cmd {
 		stdout.printf("\t  " + COM + " you have RTFM... so you are a real\n");
 		stdout.printf("\n");
 		stdout.printf(BOLD + YELLOW + "[Special argument]\n" + NONE);
-		stdout.printf("\n");
+		stdout.printf("%s", Main.opt_context.get_help (true, null));
 		stdout.printf(BOLD + YELLOW + "[Dev Only]\n" + NONE);
 		stdout.printf(p_suprapack + " build " + CYAN + "[PREFIX]\n");
 		stdout.printf("\t" + COM + " build a suprapack you need a prefix look note part\n");
@@ -609,7 +609,6 @@ namespace Cmd {
 		});
 		loop.run();
 		Process.exit(status);
-		return true;
 	}
 
 	private const string p_suprapack = BOLD + "suprapack" + NONE;
