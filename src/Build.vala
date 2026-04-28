@@ -162,7 +162,6 @@ namespace Build {
 		return (n != 0);
 	}
 
-
 	/**
 	 * autoconfig the package
 	 * autoconfig is a script that will be executed before the installation
@@ -172,55 +171,36 @@ namespace Build {
 	 *
 	 * @param pkgdir the directory of the package
 	 */
-	private void autoconfig (string pkgdir) throws Error {
-		var result = new StringBuilder();
-		var pkgdir_preinstall = pkgdir + "/pre_install.sh";
+	private void autoconfig(string pkgdir) throws Error {
+		var directory = File.new_for_path(pkgdir);
+		process_directory(directory);
+	}
 
-		string contents;
-		autoconfig_iter_dir (result, @"$pkgdir/lib/pkgconfig/");
-		autoconfig_iter_dir (result, @"$pkgdir/share/pkgconfig/");
-		autoconfig_iter_dir (result, @"$pkgdir/include/pkgconfig/");
-		if (result.str != "") {
-			if (FileUtils.test (pkgdir_preinstall, FileTest.EXISTS)) {
-				FileUtils.get_contents (pkgdir_preinstall, out contents);
-				FileUtils.set_contents (pkgdir_preinstall, contents + result.str);
-			}
-			else {
-				FileUtils.set_contents (pkgdir_preinstall, "#!/bin/bash\n" + result.str);
+	private void process_directory(File directory) throws Error {
+		var enumerator = directory.enumerate_children(FileAttribute.STANDARD_NAME + "," + FileAttribute.STANDARD_TYPE, 0);
+		FileInfo info;
+
+		while ((info = enumerator.next_file()) != null) {
+			var child = directory.get_child(info.get_name());
+
+			if (info.get_file_type() == FileType.DIRECTORY) {
+				process_directory(child);
+			} else if (info.get_name().has_suffix(".pc")) {
+				patch_pc_file(child);
 			}
 		}
 	}
 
-	private void autoconfig_iter_dir (StringBuilder result, string file_directory) throws Error {
-		Dir dir;
+	private void patch_pc_file(File file) throws Error {
 		try {
-			dir = Dir.open(file_directory);
-		} catch (Error e) {
-			return ;
+			uint8[] content;
+			file.load_contents(null, out content, null);
+			var regex = new Regex("^prefix=.*", RegexCompileFlags.MULTILINE);
+			string new_content = regex.replace((string)content, -1, 0, "prefix=${pcfiledir}/../..");
+			file.replace_contents(new_content.data, null, false, FileCreateFlags.NONE, null);
 		}
-		var regex = new Regex("""^prefix.*?$""", RegexCompileFlags.MULTILINE);
-		unowned string filename;
-		string contents;
-
-		while ((filename = dir.read_name ()) != null) {
-			var output = @"$file_directory/$filename";
-			Log.debug("pkg-config %s", output);
-			FileUtils.get_contents (output, out contents);
-			contents = regex.replace (contents, contents.length, 0, "prefix=$PREFIX");
-			FileUtils.set_contents (output, contents);
-			result.append ("sed -i \"s|\\$PREFIX|$(echo $prefix)|g\" ${SRCDIR}/");
-			var index = 0;
-			index = file_directory.last_index_of ("include/");
-			if (index == -1)
-				index = file_directory.last_index_of ("share/");
-			if (index == -1)
-				index = file_directory.last_index_of ("lib/");
-			if (index == -1)
-				warning ("index == -1 error in pkg-config transform");
-
-			result.append (file_directory.offset(index));
-			result.append (filename);
-			result.append_c ('\n');
+		catch (RegexError e) {
+			warning("Erreur Regex sur %s: %s", file.get_path(), e.message);
 		}
 	}
 }
