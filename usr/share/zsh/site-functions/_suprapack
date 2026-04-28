@@ -3,7 +3,7 @@
 _suprapack() {
 	local -a commands
 	
-	_arguments '1:commands:(add install uninstall download update search list list_files info config prepare remove build)'
+	_arguments '1:commands:(add install uninstall download update search list list_files info config prepare remove build extract)'
 	case "$words[2]" in
 		add|install)
 			_arguments "*:commands:($(suprapack sync_get_comp))"
@@ -19,6 +19,9 @@ _suprapack() {
 			;;
 		build)
 			_arguments '*:options:_suprapack_options_build'
+			_files -/
+			;;
+		extract)
 			_files -/
 			;;
 		update)

@@ -129,6 +129,7 @@ errordomain ErrorSP {
 	BADFILE,
 	REPOSITORY_NOT_FOUND,
 	TLS_ERROR,
+	EXTRACT
 
 }
 

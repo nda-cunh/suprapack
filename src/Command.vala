@@ -188,6 +188,25 @@ namespace Cmd {
 		return true;
 	}
 
+	bool extract (string []av) throws Error {
+		if (av.length == 2)
+			error("`suprapack extract [...]`");
+		unowned string name = av[2];
+
+		string dest;
+		if (av.length == 4)
+			dest = Path.build_filename ("./", av[3]);
+		else {
+			var sp = name.split("_");
+			var pkgname = sp[0];
+			var pkgver =  sp[1];
+			dest = Path.build_filename("./", pkgname + "-" + pkgver);
+		}
+		Log.suprapack(@"Extract %s to %s", name, dest);
+		Build.extract_package(name, dest);
+		return true;
+	}
+
 
 	/**
 	 * The Command info of suprapack

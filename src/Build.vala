@@ -150,6 +150,21 @@ namespace Build {
 		}
 	}
 
+	public void extract_package (string package_path, string dest) throws Error {
+		if (!FileUtils.test(package_path, FileTest.EXISTS))
+			throw new ErrorSP.EXTRACT("Package %s doesn't exist", package_path);
+
+		// Si la destination n'existe pas, on tente de la créer au lieu de crash
+		if (!FileUtils.test(dest, FileTest.EXISTS)) {
+			DirUtils.create_with_parents(dest, 0755);
+		}
+
+		if (!FileUtils.test(dest, FileTest.IS_DIR))
+			throw new ErrorSP.EXTRACT("Destination %s is not a directory", dest); // C'est ici que ça bloque car dest = package_path
+
+		if (Utils.run({"tar", "--zstd", "-xf", package_path, "-C", dest}, {}, true) != 0)
+			throw new ErrorSP.EXTRACT("unable to extract package %s to %s", package_path, dest);
+	}
 	/**
 	 * check if the directory is a good directory
 	 * a good directory is a directory with bin, lib, share, etc

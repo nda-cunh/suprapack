@@ -155,6 +155,7 @@ public class Main : Object {
 		cmd_table["uninstall"] = Cmd.uninstall;
 		cmd_table["update"] = Cmd.update;
 		cmd_table["version"] = Cmd.version;
+		cmd_table["extract"] = Cmd.extract;
 
 
 		if (av1 in cmd_table) {
