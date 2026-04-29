@@ -220,6 +220,7 @@ namespace Http {
 		string line;
 		size_t bytes = 0;
 		string? current_etag = null;
+		bool is_finish = false;
 		while ((line = input_stream.read_line_utf8(null, cancel)) != null) {
 			/* Header Part */
 			{
@@ -258,7 +259,12 @@ namespace Http {
 					if (no_print == false)
 						print_download (name_file, actual, totalBytes);
 					try {
-						len = yield input_stream.read_async (buffer[0:SIZE_BUFFER - 1], Priority.HIGH, cancel);
+						size_t to_read = (bytes < SIZE_BUFFER) ? bytes : SIZE_BUFFER;
+						if (to_read <= 0) {
+							is_finish = true;
+							break;
+						}
+						len = yield input_stream.read_async (buffer[0:to_read], Priority.HIGH, cancel);
 
 						if (len > 0) {
 							buffer[len] = '\0';
@@ -268,16 +274,22 @@ namespace Http {
 						}
 					}
 					catch (Error e) {
-						if (bytes == 0)
+						printerr ("\n\nBytes left: %zu\n\n\n", bytes);
+						if (bytes == 0) {
+							is_finish = true;
 							break;
-						throw new HttpError.ERR ("Error reading data: %s %s", e.message, Log.vala_line());
+						}
+						throw new HttpError.ERR ("Error %zu reading data: %s %s", bytes, e.message, Log.vala_line());
 					}
 				} while (len > 0);
 
 			}
-			if (current_etag != null) {
-				save_etag_to_disk(target, current_etag);
-			}
+			// quit if the download is finish
+			if (is_finish == true)
+				break;
+		}
+		if (current_etag != null) {
+			save_etag_to_disk(target, current_etag);
 		}
 		return ;
 	}
