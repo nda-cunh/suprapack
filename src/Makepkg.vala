@@ -303,6 +303,6 @@ public class Makepkg : Object {
 		}
 
 		/* build the usr folder created in pkgdir/usr */
-		Build.create_package (@"$pkgdir/usr");
+		Build.create_package_from_dir (@"$pkgdir/usr");
 	}
 }

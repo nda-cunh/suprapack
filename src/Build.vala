@@ -32,24 +32,9 @@ namespace Build {
 	 *
 	 * @param usr_dir the directory to create the package
 	 */
-	public void create_package(string usr_dir) throws Error {
+	public void create_package_from_dir (string usr_dir) throws Error {
 		if (!FileUtils.test(usr_dir, FileTest.IS_DIR)) {
 			new Makepkg (usr_dir);
-			return ;
-		}
-		if (FileUtils.test(@"$usr_dir/PKGBUILD", FileTest.EXISTS)) {
-			// move to usr_dir
-			var last_dir = Environment.get_current_dir();
-			if (config.build_output == ".") {
-				config.build_output = last_dir;
-			}
-			print ("Using PKGBUILD in %s\n", @"$last_dir$usr_dir/PKGBUILD");
-			var new_pwd = @"$last_dir/$usr_dir";
-			Environment.set_variable("PWD", new_pwd, true);
-			PWD = new_pwd;
-			Environment.set_current_dir(new_pwd);
-			new Makepkg (@"$new_pwd/PKGBUILD");
-			Environment.set_current_dir(last_dir);
 			return ;
 		}
 
@@ -149,6 +134,28 @@ namespace Build {
 			install();
 		}
 	}
+
+
+	/**
+	 * Create a package from a PKGBUILD file
+	 * the PKGBUILD file must be in the usr_dir
+	 *
+	 * @param usr_dir the directory where the PKGBUILD file is located
+	 */
+	public void create_package_from_pkgbuild (string usr_dir) throws Error {
+		var last_dir = Environment.get_current_dir();
+		if (config.build_output == ".") {
+			config.build_output = last_dir;
+		}
+		print ("Using PKGBUILD in %s\n", @"$last_dir$usr_dir/PKGBUILD");
+		var new_pwd = @"$last_dir/$usr_dir";
+		Environment.set_variable("PWD", new_pwd, true);
+		PWD = new_pwd;
+		Environment.set_current_dir(new_pwd);
+		new Makepkg (@"$new_pwd/PKGBUILD");
+		Environment.set_current_dir(last_dir);
+	}
+
 
 	public void extract_package (string package_path, string dest) throws Error {
 		if (!FileUtils.test(package_path, FileTest.EXISTS))
