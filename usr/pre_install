@@ -32,6 +32,8 @@ else
     echo "Supravim https://pub-55fb6b54929c4e71a16bc01b43b593fb.r2.dev/" >> "$REPO_LIST"
 fi
 
+rm -rf "/tmp/*_$USER_list"
+
 if ! command -v suprapack >/dev/null 2>&1; then
     if command -v zenity >/dev/null 2>&1; then
         zenity --info --text='first installation of suprapack.\nfor best results, restart your session or use `source ~/.profile`. ' --title=Suprapack 2>/dev/null &
