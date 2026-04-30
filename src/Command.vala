@@ -380,8 +380,8 @@ namespace Cmd {
 	 *
 	 * prepare the repository (for dev)
 	 */
-	public bool prepare () throws Error {
-		Repository.prepare();
+	public bool prepare (string []av) throws Error {
+		Repository.prepare(av);
 		return true;
 	}
 

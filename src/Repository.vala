@@ -42,29 +42,45 @@ namespace Repository {
 		}
 	}
 
-	// Only for dev.  This function prepare the repository
-	public void prepare () {
-		var pwd = Environment.get_current_dir();
-		var lst = list_file_in_dir(pwd);
-		lst.sort(strcmp);
-		var fs = FileStream.open(@"$pwd/list", "w");
-		if (fs == null)
-			error("Cant create %s/list", pwd);
-		foreach (unowned var file in lst) {
-			string lore = "";
-			try {
-				int status;
-				Process.spawn_command_line_sync(@"tar -xf '$(file)' ./info", null, null, out status);
-				if (status != 0)
-					throw new ShellError.FAILED ("can't open it");
-				var pkg = Package.from_file("./info");
-				lore = pkg.description;
-			}
-			catch (Error e) {
-				printerr(e.message);
-			}
-			fs.printf("%s %s\n", file, lore);
+	public string extract_info (string file) {
+		int status;
+		string lore;
+		try {
+			Process.spawn_command_line_sync(@"tar -xf '$(file)' ./info", null, null, out status);
+			if (status != 0)
+				throw new ShellError.FAILED ("can't open it");
+			var pkg = Package.from_file("./info");
+			lore = pkg.description;
+		}
+		catch (Error e) {
+			printerr(e.message);
+			return "";
 		}
 		FileUtils.remove("./info");
+		var name = Path.get_basename (file);
+		return "%s %s\n".printf(name, lore);
+	} 
+
+	// Only for dev.  This function prepare the repository
+	public void prepare (string [] args) throws Error {
+		if (args.length >= 3) {
+			foreach (var file in args[2:]) {
+				var ext = extract_info (file);
+				print("%s", ext);
+			}
+		}
+		else {
+			var pwd = Environment.get_current_dir();
+			var lst = list_file_in_dir(pwd);
+			lst.sort(strcmp);
+			var fs = FileStream.open(@"$pwd/list", "w");
+			if (fs == null)
+				error("Cant create %s/list", pwd);
+
+			foreach (unowned var file in lst) {
+				var desc = extract_info (file);
+				fs.puts(desc);
+			}
+		}
 	}
 }

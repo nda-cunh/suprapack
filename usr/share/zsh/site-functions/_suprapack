@@ -20,6 +20,10 @@ _suprapack() {
 		build)
 			_arguments '*:options:_suprapack_options_build'
 			_files -/
+			_files -g 'PKGBUILD'
+			;;
+		prepare)
+			_files -g '*.suprapack'
 			;;
 		extract)
 			_files -/
