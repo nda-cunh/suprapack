@@ -53,7 +53,7 @@ namespace Cmd {
 		if (av.length == 2)
 			error("suprapack download <pkg>");
 
-		foreach (var pkg in av[2:av.length]) {
+		foreach (unowned var pkg in av[2:av.length]) {
 			var supralist = Sync.get_from_pkg(pkg);
 			Log.download(@"%s %s", supralist.name, supralist.version);
 			var path = Sync.download_package(pkg);
@@ -405,7 +405,7 @@ namespace Cmd {
 		var list = Sync.get_list_package();
 		var installed = Query.get_all_installed_pkg();
 
-		foreach(var i in list) {
+		foreach (var i in list) {
 			if (i.name.has_prefix("plugin-"))
 				print_supravim_plugin(ref i, (i.name in installed));
 		}
@@ -437,7 +437,7 @@ namespace Cmd {
 			try {
 				string regex_str = av[2].replace("*", ".*");
 				var regex = new Regex(regex_str, RegexCompileFlags.OPTIMIZE);
-				foreach(var i in list) {
+				foreach (var i in list) {
 					if ((regex.match(i.name) || regex.match(i.version) || regex.match(i.description)))
 						print_search(ref i, (i.name in installed));
 				}
@@ -492,7 +492,7 @@ namespace Cmd {
 			error("(%s) is not installed", av[2]);
 
 
-		foreach (var i in av[3: av.length])
+		foreach (unowned var i in av[3: av.length])
 			av_binary += i;
 		if (config.is_shell)
 			Shell.run_shell(av_binary);
