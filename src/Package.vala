@@ -106,9 +106,11 @@ public struct Package {
 			print("Can be empty if %s is the binary name\n", this.name);
 			this.binary = Utils.get_input("Binary: ", false);
 			this.arch = Utils.get_input("Arch ((default)auto, any, amd64): ");
-			this.arch = Utils.get_arch_magik (this.arch);
 			if (this.arch == "" || this.arch == "auto") {
 				this.arch = Utils.get_arch_host();
+			}
+			else {
+				this.arch = Utils.get_arch_magik (this.arch);
 			}
 			this.size_tar = "";
 			this.size_installed = "";
@@ -132,7 +134,7 @@ public struct Package {
 			value = line.offset(line.index_of_char(':') + 1);
 			if (line.has_prefix("name")) {
 				this.name = value.strip();
-				this.name = /\f\r\n\t\v /.replace(name, -1, 0, "");
+				this.name = /\f\r\n\t\v /.replace(this.name, -1, 0, "");
 			}
 			else if (line.has_prefix("version")) {
 				this.version = value.strip();
