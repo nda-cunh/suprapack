@@ -571,49 +571,50 @@ namespace Cmd {
 	 * @return true if the help was printed successfully
 	 */
 	public bool help (string []av) throws Error {
-		stdout.printf(BOLD + YELLOW + "[SupraPack] ----- Help -----\n\n");
-		stdout.printf("\t" + p_suprapack + " (add | install) [package name]\n");
-		stdout.printf("\t  " + COM + " install a package from a repository\n");
-		stdout.printf("\t" + p_suprapack + " [(add | install)] [file.suprapack]\n");
-		stdout.printf("\t  " + COM + " install a package from a file (suprapack)\n");
-		stdout.printf("\t" + p_suprapack + " (remove | uninstall) [package name]\n");
-		stdout.printf("\t  " + COM + " remove a package\n");
-		stdout.printf("\t" + p_suprapack + " download [package name]\n");
-		stdout.printf("\t  " + COM + " download the suprapack file, but do not install\n");
-		stdout.printf("\t" + p_suprapack + " update\n");
-		stdout.printf("\t  " + COM + " update all your package\n");
-		stdout.printf("\t" + p_suprapack + " update [package name]\n");
-		stdout.printf("\t  " + COM + " update a package\n");
-		stdout.printf("\t" + p_suprapack + " search <pkg>\n");
-		stdout.printf("\t  " + COM + " search a package in the repo you can use patern for search\n");
-		stdout.printf("\t  " + BOLD + GREY + " Exemple:" + COM + " suprapack search " + CYAN + "'plugin*lsp' \n");
-		stdout.printf("\t" + p_suprapack + " list_files <pkg>\n");
-		stdout.printf("\t  " + COM + " list all file instaled by pkg\n");
-		stdout.printf("\t" + p_suprapack + " list <pkg>\n");
-		stdout.printf("\t  " + COM + " list your installed package\n");
-		stdout.printf("\t" + p_suprapack + " info [package name]\n");
-		stdout.printf("\t  " + COM + " print info of package name\n");
-		stdout.printf("\t" + p_suprapack + " config [config name] [config value]\n");
-		stdout.printf("\t  " + COM + " update a config in your user.conf\n");
-		stdout.printf("\t" + p_suprapack + " <help>\n");
-		stdout.printf("\t  " + COM + " you have RTFM... so you are a real\n");
-		stdout.printf("\n");
-		stdout.printf(BOLD + YELLOW + "[Special argument]\n" + NONE);
-		stdout.printf("%s", Main.opt_context.get_help (true, null));
-		stdout.printf(BOLD + YELLOW + "[Dev Only]\n" + NONE);
-		stdout.printf(p_suprapack + " build " + CYAN + "[PREFIX]\n");
-		stdout.printf("\t" + COM + " build a suprapack you need a prefix look note part\n");
-		stdout.printf("\t" + COM + " you can add a post_install or pre_install or uninstall file\n");
-		stdout.printf("\t" + COM + " install script can use $$SRCDIR and $$PKGDIR\n");
-		stdout.printf(p_suprapack + " prepare\n");
-		stdout.printf("\t" + COM + " prepare your repository\n");
-		stdout.printf("\t" + COM + " to run in your folder full of suprapack files\n");
-		stdout.printf("\t" + COM + " this command generate a list file\n");
-		stdout.printf("\n");
-		stdout.printf(BOLD + YELLOW + "[Note]\n" + NONE);
-		stdout.printf(WHITE + "PREFIX is a folder with this directory like: \n" + NONE);
-		stdout.printf(CYAN + "'bin' 'share' 'lib'\n" + NONE);
-		stdout.printf(BOLD + WHITE + "Example: " + CYAN + "suprapatate/bin/suprapatate" + NONE + " `suprapack build suprapatate`\n");
+		const string help1 = BOLD + YELLOW + "[SupraPack] ----- Help -----\n\n" +
+		"\t" + p_suprapack + " (add | install) [package name]\n" +
+		"\t  " + COM + " install a package from a repository\n" +
+		"\t" + p_suprapack + " [(add | install)] [file.suprapack]\n" +
+		"\t  " + COM + " install a package from a file (suprapack)\n" +
+		"\t" + p_suprapack + " (remove | uninstall) [package name]\n" +
+		"\t  " + COM + " remove a package\n" +
+		"\t" + p_suprapack + " download [package name]\n" +
+		"\t  " + COM + " download the suprapack file, but do not install\n" +
+		"\t" + p_suprapack + " update\n" +
+		"\t  " + COM + " update all your package\n" +
+		"\t" + p_suprapack + " update [package name]\n" +
+		"\t  " + COM + " update a package\n" +
+		"\t" + p_suprapack + " search <pkg>\n" +
+		"\t  " + COM + " search a package in the repo you can use patern for search\n" +
+		"\t  " + BOLD + GREY + " Exemple:" + COM + " suprapack search " + CYAN + "'plugin*lsp' \n" +
+		"\t" + p_suprapack + " list_files <pkg>\n" +
+		"\t  " + COM + " list all file instaled by pkg\n" +
+		"\t" + p_suprapack + " list <pkg>\n" +
+		"\t  " + COM + " list your installed package\n" +
+		"\t" + p_suprapack + " info [package name]\n" +
+		"\t  " + COM + " print info of package name\n" +
+		"\t" + p_suprapack + " config [config name] [config value]\n" +
+		"\t  " + COM + " update a config in your user.conf\n" +
+		"\t" + p_suprapack + " <help>\n" +
+		"\t  " + COM + " you have RTFM... so you are a real\n" +
+		"\n" + BOLD + YELLOW + "[Special argument]\n"
+		 + "%s" +
+		BOLD + YELLOW + "[Dev Only]\n" + NONE +
+		p_suprapack + " build " + CYAN + "[PREFIX]\n" +
+		"\t" + COM + " build a suprapack you need a prefix look note part\n" +
+		"\t" + COM + " you can add a post_install or pre_install or uninstall file\n" +
+		"\t" + COM + " install script can use $$SRCDIR and $$PKGDIR\n" +
+		p_suprapack + " prepare\n" +
+		"\t" + COM + " prepare your repository\n" +
+		"\t" + COM + " to run in your folder full of suprapack files\n" +
+		"\t" + COM + " this command generate a list file\n" +
+		"\n" +
+		BOLD + YELLOW + "[Note]\n" + NONE +
+		WHITE + "PREFIX is a folder with this directory like: \n" + NONE +
+		CYAN + "'bin' 'share' 'lib'\n" + NONE +
+		BOLD + WHITE + "Example: " + CYAN + "suprapatate/bin/suprapatate" + NONE + " `suprapack build suprapatate`\n";
+
+		stdout.printf(help1, Main.opt_context.get_help (true, null));
 		return true;
 	}
 
