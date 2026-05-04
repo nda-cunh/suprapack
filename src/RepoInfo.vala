@@ -40,7 +40,7 @@ public class RepoInfo : Object {
 	}
 
 	/* fetch the 'list' file  LOCAL or HTTP */
-	public void fetch_list (string url, string output) throws Error {
+	private void fetch_list (string url, string output) throws Error {
 		string url_list = url;
 		Log.debug("URL %s %s", url_list, output);
 		if (url.has_prefix ("http")) {

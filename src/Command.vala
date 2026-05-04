@@ -531,7 +531,7 @@ namespace Cmd {
 		}
 		// update pkg_name
 		else {
-			string tmp;
+			string? tmp;
 			foreach (unowned var i in av[2:av.length]) {
 				if (Query.is_exist(i) == false) {
 					tmp = BetterSearch.search_good_package_from_query(i, true);

@@ -7,7 +7,7 @@ else
 fi
 
 if [ "$(id -u)" -eq 0 ]; then
-    echo "Please do not run this script as root."
+    echo "Root mode detected, installing for all users."
     mkdir -p /usr/.suprapack
     REPO_LIST=/usr/.suprapack/repo.list
 else
@@ -21,13 +21,7 @@ fpath+=($HOME/.local/share/zsh/site-functions)' "$HOME/.zshrc"
     REPO_LIST="$HOME/.local/.suprapack/repo.list"
 fi
 
-if [ -f "$REPO_LIST" ]; then
-    echo "Updating repository URLs..."
-    
-    $SED_I "s|Cosmos https://gitlab.com/supraproject/suprastore_repository/-/raw/master/cosmos/|Cosmos https://pub-bdf6ee863f034a7c9317a95dd598f914.r2.dev/|g" "$REPO_LIST"
-    
-    $SED_I "s|Supravim https://gitlab.com/supraproject/suprastore_repository/-/raw/master/supravim/|Supravim https://pub-55fb6b54929c4e71a16bc01b43b593fb.r2.dev/|g" "$REPO_LIST"
-else
+if [ ! -f "$REPO_LIST" ]; then
     echo "Cosmos https://pub-bdf6ee863f034a7c9317a95dd598f914.r2.dev/" > "$REPO_LIST"
     echo "Supravim https://pub-55fb6b54929c4e71a16bc01b43b593fb.r2.dev/" >> "$REPO_LIST"
 fi

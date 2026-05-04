@@ -186,7 +186,7 @@ public class Main : Object {
 
 	// INIT
 	public Main (string []args) {
-		unowned string gio_module_path = Utils.get_gio_module_dir ();
+		unowned string? gio_module_path = Utils.get_gio_module_dir ();
 
 		if (gio_module_path == null) {
 			warning ("gio module not found");

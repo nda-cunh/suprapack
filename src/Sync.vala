@@ -44,7 +44,9 @@ class Sync : Object {
 	}
 
 
-	private void init_all_repository() {
+	private bool init_retry = false;
+
+	private void init_all_repository() throws Error {
 		string contents;
 		var regex_repo = /(?P<name>[^\s]+)\s*(?P<url>[^\s]+)/;
 		MatchInfo match_info;
@@ -58,9 +60,9 @@ class Sync : Object {
 				// is a comment
 			}
 			else if (regex_repo.match(line, 0, out match_info)) {
-				count++;
-				string name = match_info.fetch_named("name");
-				string url = match_info.fetch_named("url");
+				count += 1;
+				string? name = match_info.fetch_named("name");
+				string? url = match_info.fetch_named("url");
 				if (!url.has_suffix ("/")) {
 					warning ("Bad Format in %s/repo.list", config.prefix);
 					printerr(" \033[33;1m%d\033[0m | %s\033[91m/\033[0m\n", count, line);
@@ -81,6 +83,16 @@ class Sync : Object {
 			}
 			else
 				warning ("Can't read [%s] in %s/repo.list", line, config.prefix);
+		}
+		if (count == 0 && init_retry == false) {
+			init_retry = true;
+			warning ("No repository found in %s/repo.list inject Cosmos Repository", config.prefix);
+			FileUtils.get_contents(config.repo_list, out contents);
+			contents += "Cosmos https://pub-bdf6ee863f034a7c9317a95dd598f914.r2.dev/
+Supravim https://pub-55fb6b54929c4e71a16bc01b43b593fb.r2.dev/
+";
+			FileUtils.set_contents(config.repo_list, contents);
+			init_all_repository();
 		}
 	}
 
