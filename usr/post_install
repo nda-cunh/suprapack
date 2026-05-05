@@ -26,11 +26,12 @@ else
     LOAD_STR='[ -f "$HOME/.suprapack_profile" ] && . "$HOME/.suprapack_profile"'
     
     # Load suprapack_profile in various shell configuration files if not already present
-    TARGET_FILES="$HOME/.profile $HOME/.bash_profile $HOME/.bashrc $HOME/.zprofile $HOME/.zshrc"
+    TARGET_FILES="$HOME/.bashrc $HOME/.zshrc"
 
     for f in $TARGET_FILES; do
         if [ -f "$f" ]; then
             if ! grep -q ".suprapack_profile" "$f"; then
+				echo "Loading suprapack_profile in $f"
                 echo "" >> "$f"
                 echo "# Added by suprapack installer" >> "$f"
                 echo "$LOAD_STR" >> "$f"
@@ -38,14 +39,6 @@ else
             fi
         fi
     done
-
-    # If no shell config files exist, create .profile and add the load string
-    if [ ! -f "$HOME/.profile" ] && [ ! -f "$HOME/.bash_profile" ] && [ ! -f "$HOME/.zprofile" ]; then
-        echo "$LOAD_STR" > "$HOME/.profile"
-    fi
-
-    # Move .suprapack to .local/.suprapack if it exists and we're not root
-    [ -d "$HOME/.suprapack" ] && mv "$HOME/.suprapack" "$HOME/.local/" 2> /dev/null || true
 fi
 
 # Update MIME database and desktop database
