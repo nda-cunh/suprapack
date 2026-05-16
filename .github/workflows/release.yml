@@ -183,8 +183,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            artifacts/suprapack-linux-amd64/**
-            artifacts/suprapack-linux-arm64/**
-            artifacts/suprapack-macos-amd64/**
-            artifacts/suprapack-macos-arm64/**
-            artifacts/suprapack-windows-amd64/**
+            artifacts/suprapack-linux-amd64/suprapack
+            artifacts/suprapack-linux-arm64/suprapack
+            artifacts/suprapack-macos-amd64/suprapack
+            artifacts/suprapack-macos-arm64/suprapack
+            artifacts/suprapack-windows-amd64/suprapack.exe
