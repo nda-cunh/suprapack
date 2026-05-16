@@ -1,0 +1,190 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-linux-amd64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y meson ninja-build pkg-config gcc valac libglib2.0-dev
+
+      - name: Build
+        run: |
+          meson setup build/linux-amd64
+          meson compile -C build/linux-amd64
+
+      - name: Collect artifacts
+        run: |
+          mkdir -p artifacts/linux-amd64
+          cp build/linux-amd64/src/suprapack artifacts/linux-amd64/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: suprapack-linux-amd64
+          path: artifacts/linux-amd64/
+
+  build-linux-arm64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo dpkg --add-architecture arm64
+          sudo apt-get update
+          sudo apt-get install -y \
+            meson ninja-build valac \
+            gcc-aarch64-linux-gnu g++-aarch64-linux-gnu \
+            pkg-config pkg-config-aarch64-linux-gnu \
+            libc6-dev-arm64-cross libglib2.0-dev:arm64
+
+      - name: Create Meson cross file
+        run: |
+          mkdir -p cross
+          cat > cross/arm64.txt << 'EOF'
+          [binaries]
+          c = 'aarch64-linux-gnu-gcc'
+          cpp = 'aarch64-linux-gnu-g++'
+          ar = 'aarch64-linux-gnu-ar'
+          strip = 'aarch64-linux-gnu-strip'
+          pkgconfig = 'aarch64-linux-gnu-pkg-config'
+
+          [host_machine]
+          system = 'linux'
+          cpu_family = 'aarch64'
+          cpu = 'aarch64'
+          endian = 'little'
+
+          [properties]
+          needs_exe_wrapper = true
+          EOF
+
+      - name: Build
+        run: |
+          meson setup build/linux-arm64 --cross-file=cross/arm64.txt
+          meson compile -C build/linux-arm64
+
+      - name: Collect artifacts
+        run: |
+          mkdir -p artifacts/linux-arm64
+          cp build/linux-arm64/src/suprapack artifacts/linux-arm64/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: suprapack-linux-arm64
+          path: artifacts/linux-arm64/
+
+  build-macos-amd64:
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: brew install meson ninja vala glib pkg-config
+
+      - name: Build
+        run: |
+          meson setup build/macos-amd64
+          meson compile -C build/macos-amd64
+
+      - name: Collect artifacts
+        run: |
+          mkdir -p artifacts/macos-amd64
+          cp build/macos-amd64/src/suprapack artifacts/macos-amd64/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: suprapack-macos-amd64
+          path: artifacts/macos-amd64/
+
+  build-macos-arm64:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: brew install meson ninja vala glib pkg-config
+
+      - name: Build
+        run: |
+          meson setup build/macos-arm64
+          meson compile -C build/macos-arm64
+
+      - name: Collect artifacts
+        run: |
+          mkdir -p artifacts/macos-arm64
+          cp build/macos-arm64/src/suprapack artifacts/macos-arm64/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: suprapack-macos-arm64
+          path: artifacts/macos-arm64/
+
+  build-windows-amd64:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-meson
+            mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-vala
+            mingw-w64-x86_64-glib2
+            mingw-w64-x86_64-pkgconf
+
+      - name: Build
+        shell: msys2 {0}
+        run: |
+          meson setup build/windows-amd64
+          meson compile -C build/windows-amd64
+
+      - name: Collect artifacts
+        shell: msys2 {0}
+        run: |
+          mkdir -p artifacts/windows-amd64
+          cp build/windows-amd64/src/suprapack.exe artifacts/windows-amd64/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: suprapack-windows-amd64
+          path: artifacts/windows-amd64/
+
+  release:
+    runs-on: ubuntu-latest
+    needs:
+      - build-linux-amd64
+      - build-linux-arm64
+      - build-macos-amd64
+      - build-macos-arm64
+      - build-windows-amd64
+    steps:
+      - uses: actions/download-artifact@v4.1.7
+        with:
+          path: artifacts
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/suprapack-linux-amd64/suprapack
+            artifacts/suprapack-linux-arm64/suprapack
+            artifacts/suprapack-macos-amd64/suprapack
+            artifacts/suprapack-macos-arm64/suprapack
+            artifacts/suprapack-windows-amd64/suprapack.exe
