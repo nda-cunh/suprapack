@@ -21,10 +21,14 @@ fpath+=($HOME/.local/share/zsh/site-functions)' "$HOME/.zshrc"
     REPO_LIST="$HOME/.local/.suprapack/repo.list"
 fi
 
-if [ ! -f "$REPO_LIST" ]; then
-    echo "Cosmos https://pub-bdf6ee863f034a7c9317a95dd598f914.r2.dev/" > "$REPO_LIST"
-    echo "Supravim https://pub-55fb6b54929c4e71a16bc01b43b593fb.r2.dev/" >> "$REPO_LIST"
+COSMOS_LINE="Cosmos https://pub-bdf6ee863f034a7c9317a95dd598f914.r2.dev/"
+SUPRAVIM_LINE="Supravim https://pub-55fb6b54929c4e71a16bc01b43b593fb.r2.dev/"
+
+if [ ! -f "$REPO_LIST" ] || ! grep -Fxq "$COSMOS_LINE" "$REPO_LIST" || ! grep -Fxq "$SUPRAVIM_LINE" "$REPO_LIST"; then
+    echo "$COSMOS_LINE" > "$REPO_LIST"
+    echo "$SUPRAVIM_LINE" >> "$REPO_LIST"
 fi
+
 
 rm -rf "/tmp/*_$USER_list"
 
