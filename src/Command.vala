@@ -438,7 +438,8 @@ namespace Cmd {
 				string regex_str = av[2].replace("*", ".*");
 				var regex = new Regex(regex_str, RegexCompileFlags.OPTIMIZE);
 				foreach (var i in list) {
-					if ((regex.match(i.name) || regex.match(i.version) || regex.match(i.description)))
+					var desc = i.description.down ();
+					if ((regex.match(i.name) || regex.match(i.version) || regex.match(desc)))
 						print_search(ref i, (i.name in installed));
 				}
 			}
