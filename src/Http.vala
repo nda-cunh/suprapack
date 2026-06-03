@@ -213,8 +213,15 @@ namespace Http {
 		string name_file;
 		name_file = Uri.unescape_string(target[target.last_index_of_char ('/') + 1:]);
 		name_file = name_file.to_ascii ();
+		if (name_file.has_suffix (".suprapack")) {
+			name_file = name_file[0:-10];
+			int idx = name_file.last_index_of_char ('_');
+			if (idx != -1) {
+				name_file = name_file[0:idx];
+			}
+		}
 		if (name_file.length >= 25)
-			name_file = name_file[0:25] + "..";
+			name_file = name_file[0:12] + "..";
 
 		/* Get All bytes Data */
 		string line;
@@ -302,13 +309,14 @@ namespace Http {
 	 * @param max the max size of the file
 	 */
 	private void print_download(string name_file, double actual, double max) {
+		uint8[] progress_bar = "[                    ] \0".data;
 		const double MIB = 1048576.0;
 		double percent = (100 * actual) / max;
+
 		if (config.simple_print) {
-			print ("download: [%u]\n", (uint)percent);
+			stdout.printf("download: [%u]\n", (uint)percent);
 			return ;
 		}
-		uint8[] progress_bar = "[                    ] \0".data;
 
 		if (max <= 0.0) {
 			stderr.printf("%-50s %8s\r", name_file, "%.2f Mib / ??? Mib     ".printf(actual / MIB));
@@ -320,8 +328,9 @@ namespace Http {
 		modify_percent_bar(progress_bar, percent);
 		var part2 = "%.2f Mib / %.2f Mib %s %.1f%%".printf((actual / MIB), (max / MIB), ((string)progress_bar), percent);
 		stderr.printf("%-27s %70s\r", name_file, part2);
+
 		if (percent == 100.0)
-			stderr.printf("\r\n");
+			stderr.printf("\n");
 	}
 
 
