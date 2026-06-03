@@ -44,7 +44,25 @@ class Sync : Object {
 	}
 
 
+	private bool is_forbidden_link (string contents) {
+		const string bad_link[] = {
+			"https://gitlab.com/supraproject/suprastore_repository/-/raw/master/cosmos/",
+			"https://gitlab.com/supraproject/suprastore_repository/-/raw/master/supravim/"
+		};
+		foreach (var link in bad_link) {
+			if (link in contents)
+				return true;
+		}
+		return false;
+	}
 	private bool init_retry = false;
+
+	private void inject_new_repo () throws Error {
+		string contents = "Cosmos https://pub-bdf6ee863f034a7c9317a95dd598f914.r2.dev/
+Supravim https://pub-55fb6b54929c4e71a16bc01b43b593fb.r2.dev/
+";
+		FileUtils.set_contents(config.repo_list, contents);
+	}
 
 	private void init_all_repository() throws Error {
 		string contents;
@@ -52,7 +70,13 @@ class Sync : Object {
 		MatchInfo match_info;
 		FileUtils.get_contents(config.repo_list, out contents);
 
+		if (is_forbidden_link (contents)) {
+			inject_new_repo();
+			init_all_repository();
+			return;
+		}
 		int count = 0;
+		int count_line = 0;
 		foreach (unowned var line in contents.split("\n")) {
 			if (line._strip() == "")
 				continue;
@@ -60,13 +84,13 @@ class Sync : Object {
 				// is a comment
 			}
 			else if (regex_repo.match(line, 0, out match_info)) {
-				count += 1;
+				count_line += 1;
 				string? name = match_info.fetch_named("name");
 				string? url = match_info.fetch_named("url");
 				if (!url.has_suffix ("/")) {
-					warning ("Bad Format in %s/repo.list", config.prefix);
-					printerr(" \033[33;1m%d\033[0m | %s\033[91m/\033[0m\n", count, line);
-					printerr(" %*s | \033[91m%*s %s\033[0m\n\n", count.to_string().length, "", line.length + 1, "^", "~~ need terminate by  '/'");
+					warning ("Bad Format in %s", config.repo_list);
+					printerr(" \033[33;1m%d\033[0m | %s\033[91m/\033[0m\n", count_line, line);
+					printerr(" %*s | \033[91m%*s %s\033[0m\n\n", count_line.to_string().length, "", line.length + 1, "^", "~~ need terminate by  '/'");
 				}
 				try {
 					RepoInfo tmp_rep;
@@ -75,25 +99,24 @@ class Sync : Object {
 					else
 						tmp_rep = new RepoInfo(name, url, true);
 					_repo += (owned)tmp_rep;
+					++count;
 				}
 				catch (Error e) {
-					warning ("Can't read [%s] in %s/repo.list", line, config.prefix);
-					debug (e.message);
+					warning ("Can't read [%s] in %s (%s)", line, config.repo_list, e.message);
 				}
 			}
 			else
-				warning ("Can't read [%s] in %s/repo.list", line, config.prefix);
+				warning ("Can't read [%s] in %s", line, config.repo_list);
 		}
 		if (count == 0 && init_retry == false) {
 			init_retry = true;
-			warning ("No repository found in %s/repo.list inject Cosmos Repository", config.prefix);
-			FileUtils.get_contents(config.repo_list, out contents);
-			contents += "Cosmos https://pub-bdf6ee863f034a7c9317a95dd598f914.r2.dev/
-Supravim https://pub-55fb6b54929c4e71a16bc01b43b593fb.r2.dev/
-";
-			FileUtils.set_contents(config.repo_list, contents);
+			warning ("No repository found in %s inject Cosmos Repository", config.repo_list);
+			inject_new_repo();
 			init_all_repository();
+			return;
 		}
+		if (count == 0)
+			throw new ErrorSP.FAILED(@"No repository found in %s", config.repo_list);
 	}
 
 	// Default private Constructor
@@ -118,7 +141,7 @@ Supravim https://pub-55fb6b54929c4e71a16bc01b43b593fb.r2.dev/
 				repo.refresh_repo ();
 				FileUtils.get_contents(repo.list, out contents);
 			}
-			foreach (var pkg in contents.split("\n")) {
+			foreach (unowned var pkg in contents.split("\n")) {
 				if (SupraList.regex.match(pkg)) {
 					var lst = SupraList(repo.name, pkg, repo.local);
 					if (Config.is_my_arch(lst.arch))
