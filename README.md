@@ -107,8 +107,8 @@ suprapack config [config name] [config value]
 ## RepositoryList '~/.config/suprapack/repo.list'
 an example of RepoListL
 ```
-Cosmos https://gitlab.com/supraproject/suprastore_repository/-/raw/master/cosmos/
-Supravim https://gitlab.com/supraproject/suprastore_repository/-/raw/master/supravim/
+Cosmos https://pub-bdf6ee863f034a7c9317a95dd598f914.r2.dev/
+Supravim https://pub-55fb6b54929c4e71a16bc01b43b593fb.r2.dev/
 ```
 you can add a repository with NAME and the url/directory of the repo
 
