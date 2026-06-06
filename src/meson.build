@@ -9,7 +9,6 @@ if need_bootstrap
     output: [
       'BetterSearch.c',
       'Build.c',
-      'Command.c',
       'Config.c',
       'ConfigEnv.c',
       'ConfigUser.c',
@@ -37,7 +36,9 @@ else
     files(
       'BetterSearch.vala',
       'Build.vala',
-      'Command.vala',
+      'CommandPackage.vala',
+      'CommandRepo.vala',
+      'CommandSystem.vala',
       'Config.vala',
       'ConfigEnv.vala',
       'ConfigUser.vala',

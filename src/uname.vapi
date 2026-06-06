@@ -57,3 +57,20 @@ namespace SupraUnix {
 			return false;
 	}
 }
+
+[CCode (cheader_filename = "sys/ioctl.h,unistd.h")]
+namespace Terminal {
+	[CCode (cname = "TIOCGWINSZ", has_type_id = false)]
+	public const int TIOCGWINSZ;
+
+	[CCode (cname = "struct winsize")]
+	public struct winsize {
+		ushort ws_row;
+		ushort ws_col;
+		ushort ws_xpixel;
+		ushort ws_ypixel;
+	}
+
+	[CCode (cname = "ioctl")]
+	public int ioctl (int fd, int request, out winsize ws);
+}

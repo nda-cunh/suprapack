@@ -5,7 +5,9 @@ FLAGS=-X -DGETTEXT_PACKAGE=suprapack -X -O2 --disable-warnings --pkg=gio-2.0 -X 
 VAPI =	src/uname.vapi
 SRC = src/BetterSearch.vala \
 		src/Build.vala \
-		src/Command.vala \
+		src/CommandPackage.vala \
+		src/CommandRepo.vala \
+		src/CommandSystem.vala \
 		src/Config.vala \
 		src/ConfigUser.vala \
 		src/ConfigEnv.vala \
