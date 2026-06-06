@@ -41,7 +41,7 @@ namespace Query{
 	 *
 	 * @param name_pkg: the package name to remove
 	 */
-	public void uninstall (string name_pkg) {
+	public void uninstall (string name_pkg) throws Error {
 		int g_last_size = 0;
 
 		if (Query.is_exist(name_pkg) == false)
@@ -62,7 +62,7 @@ namespace Query{
 		var config_prefix_len = config.prefix.length;
 		var bs = new StringBuilder.sized (256);
 		const string remove = BOLD + YELLOW + "[Remove]" + NONE + " ";
-		var lst = Query.get_from_pkg(name_pkg).get_installed_files();
+		var lst = pkg.get_installed_files();
 		for (int i = 0; i != lst.length; ++i) {
 			int file_len = lst[i].length;
 			int calc = g_last_size - file_len;

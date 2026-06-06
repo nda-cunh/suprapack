@@ -10,10 +10,10 @@ public string[] get_all_options() {
 	foreach (unowned var line in lines) {
 		if (line == "")
 			continue;
-		try {
-			string env_contents;
-			var env_file = Path.build_filename (global::config.prefix, ".suprapack", line, "env");
-			if (FileUtils.test (env_file, FileTest.EXISTS)) {
+		string env_contents;
+		var env_file = Path.build_filename (global::config.prefix, ".suprapack", line, "env");
+		if (FileUtils.test (env_file, FileTest.EXISTS)) {
+			try {
 				FileUtils.get_contents (env_file, out env_contents);
 				var env_lines = env_contents.split ("\n");
 				foreach (unowned var env_line in env_lines) {
@@ -22,8 +22,9 @@ public string[] get_all_options() {
 					result.add (env_line);
 				}
 			}
-		}
-		catch (Error e) {
+			catch (Error e) {
+				warning ("Error reading %s: %s", env_file, e.message);
+			}
 		}
 	}
 	return (owned)result.data;
@@ -64,11 +65,14 @@ public string[] get_all_options_parsed() {
 
 private string get () {
 	var file = Path.build_filename (global::config.prefix, ".suprapack", ".env");
-	string contents;
-	if (FileUtils.test (file, FileTest.EXISTS))
-		FileUtils.get_contents (file, out contents);
-	else
-		contents = "";
+	string contents = "";
+	try {
+		if (FileUtils.test (file, FileTest.EXISTS))
+			FileUtils.get_contents (file, out contents);
+	}
+	catch (Error e) {
+		warning ("Error reading %s: %s", file, e.message);
+	}
 	return contents;
 }
 
@@ -78,18 +82,24 @@ public void add (string package_name) {
 	var file = Path.build_filename (global::config.prefix, ".suprapack", ".env");
 	// add the package name to the file if not exist
 	config.need_generate_profile = true;
+	DirUtils.create_with_parents (Path.build_filename (global::config.prefix, ".suprapack"), 0755);
 	string contents;
-	if (FileUtils.test (file, FileTest.EXISTS)) {
-		FileUtils.get_contents (file, out contents);
-		var lines = contents.split ("\n");
-		if (package_name in lines)
-			return;
-		contents += package_name + "\n";
+	try {
+		if (FileUtils.test (file, FileTest.EXISTS)) {
+			FileUtils.get_contents (file, out contents);
+			var lines = contents.split ("\n");
+			if (package_name in lines)
+				return;
+			contents += package_name + "\n";
+		}
+		else {
+			contents = package_name + "\n";
+		}
+		FileUtils.set_contents (file, contents);
 	}
-	else {
-		contents = package_name + "\n";
+	catch (Error e) {
+		warning ("Error updating %s: %s", file, e.message);
 	}
-	FileUtils.set_contents (file, contents);
 } 
 
 public void remove (string package_name) {

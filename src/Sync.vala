@@ -98,7 +98,7 @@ Supravim https://pub-55fb6b54929c4e71a16bc01b43b593fb.r2.dev/
 						tmp_rep = new RepoInfo(name, url, false);
 					else
 						tmp_rep = new RepoInfo(name, url, true);
-					_repo += (owned)tmp_rep;
+					repo += (owned)tmp_rep;
 					++count;
 				}
 				catch (Error e) {
@@ -133,19 +133,19 @@ Supravim https://pub-55fb6b54929c4e71a16bc01b43b593fb.r2.dev/
 
 		/* init List Property package-1.0.suprapack*/
 		// var regex = /[a-zA-Z0-9]+[-][a-zA-Z0-9.]+[.]suprapack/;
-		foreach (unowned var repo in _repo) {
-			FileUtils.get_contents(repo.list, out contents);
+		foreach (unowned var current_repo in repo) {
+			FileUtils.get_contents(current_repo.list, out contents);
 
 			if (contents[0] == '\0') {
-				warning("Can't read %s Retry ", repo.list);
-				repo.refresh_repo ();
-				FileUtils.get_contents(repo.list, out contents);
+				warning("Can't read %s Retry ", current_repo.list);
+				current_repo.refresh_repo ();
+				FileUtils.get_contents(current_repo.list, out contents);
 			}
 			foreach (unowned var pkg in contents.split("\n")) {
 				if (SupraList.regex.match(pkg)) {
-					var lst = SupraList(repo.name, pkg, repo.local);
+					var lst = SupraList(current_repo.name, pkg, current_repo.local);
 					if (Config.is_my_arch(lst.arch))
-						_list += (owned)lst;
+						list += (owned)lst;
 				}
 				else if (pkg != "")
 					warning(pkg);
@@ -213,9 +213,9 @@ Supravim https://pub-55fb6b54929c4e71a16bc01b43b593fb.r2.dev/
 	 * @return string the url of the repo
 	 */
 	private unowned string? get_url_from_name (string repo_name) {
-		for (int i = 0; i < _repo.length; ++i) {
-			if (_repo[i].name == repo_name) {
-				return _repo[i].url;
+		for (int i = 0; i < repo.length; ++i) {
+			if (repo[i].name == repo_name) {
+				return repo[i].url;
 			}
 		}
 		return null;
@@ -250,8 +250,8 @@ Supravim https://pub-55fb6b54929c4e71a16bc01b43b593fb.r2.dev/
 	public static void refresh_list () throws Error {
 		if (singleton == null)
 			singleton = new Sync();
-		foreach (unowned var i in repo) {
-			i.refresh_repo();
+		foreach (unowned var current_repo in repo) {
+			current_repo.refresh_repo();
 		}
 		singleton = new Sync();
 	}
@@ -316,6 +316,6 @@ Supravim https://pub-55fb6b54929c4e71a16bc01b43b593fb.r2.dev/
 		return output;
 	}
 
-	private static SupraList []list {get;set;}
-	private static RepoInfo []repo {get;set;}
+	private static SupraList[] list;
+	private static RepoInfo[] repo;
 }

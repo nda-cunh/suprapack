@@ -82,7 +82,7 @@ private void install_files(GenericArray<string> list, int len) {
 
 
 // Create the package information in .suprapack/name_pkg/info
-private void post_install(GenericArray<string> list, string tmp_dir, ref Package pkg) {
+private void post_install(GenericArray<string> list, string tmp_dir, ref Package pkg) throws Error {
 	var packinfo = Path.build_filename(config.path_suprapack_cache, pkg.name);
 	var info_file = Path.build_filename(packinfo, "info");
 	var env_src = Path.build_filename(tmp_dir, "env");
