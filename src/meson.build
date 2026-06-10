@@ -1,3 +1,37 @@
+source_names = [
+  'BetterSearch',
+  'Build',
+  'CommandPackage',
+  'CommandRepo',
+  'CommandSystem',
+  'Config',
+  'ConfigEnv',
+  'ConfigUser',
+  'Http',
+  'Install',
+  'Log',
+  'Makepkg',
+  'Package',
+  'Query',
+  'QueueSet',
+  'RepoInfo',
+  'Repository',
+  'Run',
+  'SupraList',
+  'Sync',
+  'Uninstall',
+  'Utils',
+  'main',
+]
+
+vala_sources = []
+bootstrap_outputs = []
+foreach source_name : source_names
+  vala_sources += files(source_name + '.vala')
+  bootstrap_outputs += source_name + '.c'
+endforeach
+vala_sources += files('uname.vapi')
+
 sources = []
 
 if need_bootstrap 
@@ -6,60 +40,12 @@ if need_bootstrap
 
   boot_strap = custom_target('tar_gz',
     input: files('../bootstrap.tar.gz'),
-    output: [
-      'BetterSearch.c',
-      'Build.c',
-      'Config.c',
-      'ConfigEnv.c',
-      'ConfigUser.c',
-      'Http.c',
-      'Install.c',
-      'Log.c',
-      'Makepkg.c',
-      'Package.c',
-      'Query.c',
-      'QueueSet.c',
-      'RepoInfo.c',
-      'Repository.c',
-      'Run.c',
-      'SupraList.c',
-      'Sync.c',
-      'Uninstall.c',
-      'Utils.c',
-      'main.c',
-      ],
+    output: bootstrap_outputs,
     command: [find_program('tar'), '--strip-components=1', '-xf', '@INPUT@', '-C', '@OUTDIR@'],
   )
   sources = boot_strap.to_list()
 else
-  sources = [
-    files(
-      'BetterSearch.vala',
-      'Build.vala',
-      'CommandPackage.vala',
-      'CommandRepo.vala',
-      'CommandSystem.vala',
-      'Config.vala',
-      'ConfigEnv.vala',
-      'ConfigUser.vala',
-      'Http.vala',
-      'Install.vala',
-      'Log.vala',
-      'Makepkg.vala',
-      'Package.vala',
-      'Query.vala',
-      'QueueSet.vala',
-      'RepoInfo.vala',
-      'Repository.vala',
-      'Run.vala',
-      'SupraList.vala',
-      'Sync.vala',
-      'Uninstall.vala',
-      'Utils.vala',
-      'main.vala',
-      'uname.vapi',
-      )
-  ]
+  sources = vala_sources
 endif
 
 executable('suprapack',
