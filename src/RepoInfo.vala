@@ -65,9 +65,14 @@ public class RepoInfo : Object {
 		}
 	}
 
+	/* cache file keyed by name AND url so a moved repository invalidates the cache */
+	private string get_cache_path () {
+		return @"/tmp/$(this.name)_$(USERNAME)_$(this.url.hash())_list";
+	}
+
 	/* force download the 'list' file */
 	public void refresh_repo() throws Error  {
-		string list_file = @"/tmp/$(this.name)_$(USERNAME)_list";
+		string list_file = get_cache_path();
 		FileUtils.remove(list_file);
 		try {
 			fetch_list(this.url, list_file);
@@ -86,7 +91,7 @@ public class RepoInfo : Object {
 
 	private void init_list () throws Error {
 		if (_list == null) {
-			string list_file = @"/tmp/$(this.name)_$(USERNAME)_list";
+			string list_file = get_cache_path();
 			bool should_download = true;
 			if (FileUtils.test (list_file, FileTest.EXISTS)) {
 				var stat = Stat.l(list_file);
