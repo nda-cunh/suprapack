@@ -24,19 +24,29 @@ if [ "$(id -u)" -eq 0 ]; then
 else
     # 
     LOAD_STR='[ -f "$HOME/.suprapack_profile" ] && . "$HOME/.suprapack_profile"'
-    
-    # Load suprapack_profile in various shell configuration files if not already present
-    TARGET_FILES="$HOME/.bashrc $HOME/.zshrc"
+
+    # Detect the login-shell profile (sourced by display managers / login shells)
+    if [ "$(uname)" = "Darwin" ]; then
+        LOGIN_PROFILE="$HOME/.zprofile"
+    else
+        LOGIN_PROFILE="$HOME/.profile"
+    fi
+
+    # Load suprapack_profile in interactive and login shell configs
+    TARGET_FILES="$HOME/.bashrc $HOME/.zshrc $LOGIN_PROFILE"
 
     for f in $TARGET_FILES; do
-        if [ -f "$f" ]; then
-            if ! grep -q ".suprapack_profile" "$f"; then
-				echo "Loading suprapack_profile in $f"
-                echo "" >> "$f"
-                echo "# Added by suprapack installer" >> "$f"
-                echo "$LOAD_STR" >> "$f"
-                echo "Updated: $f"
-            fi
+        if [ "$f" = "$LOGIN_PROFILE" ]; then
+            touch "$f"
+        elif [ ! -f "$f" ]; then
+            continue
+        fi
+        if ! grep -q ".suprapack_profile" "$f"; then
+            echo "Loading suprapack_profile in $f"
+            echo "" >> "$f"
+            echo "# Added by suprapack installer" >> "$f"
+            echo "$LOAD_STR" >> "$f"
+            echo "Updated: $f"
         fi
     done
 fi
@@ -54,3 +64,4 @@ fi
 
 # Regenerate suprapack profile
 $PREFIX/bin/suprapack --regenerate_suprapack_profile
+

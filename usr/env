@@ -3,7 +3,6 @@ LD_LIBRARY_PATH = @prefix@/lib
 PKG_CONFIG_PATH = @prefix@/share/pkgconfig:@prefix@/lib/pkgconfig
 XDG_DATA_DIRS = @prefix@/share
 XDG_CONFIG_DIRS = @prefix@/etc
-LD_LIBRARY_PATH = @prefix@/lib
 LIBRARY_PATH = @prefix@/lib
 C_INCLUDE_PATH = @prefix@/include
 CPLUS_INCLUDE_PATH = @prefix@/include

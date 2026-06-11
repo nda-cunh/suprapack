@@ -42,10 +42,11 @@ public class Config : Object {
 		var sb = new StringBuilder("# Prefix: ");
 		sb.append((string)this.prefix);
 		sb.append_c('\n');
+		// Seed XDG_DATA_DIRS with the XDG spec defaults when unset, so sourcing
+		// this file early (e.g. from .profile before the display manager set it)
+		// never truncates the system dirs and breaks GTK/fonts.
+		sb.append("export XDG_DATA_DIRS=\"${XDG_DATA_DIRS:-/usr/local/share:/usr/share}\"\n");
 		var contents = ConfigEnv.get_all_options_parsed ();
-		if (contents.length == 0) {
-			return;
-		}
 		// each option is 2 elements in the array: name an value
 		for (uint i = 0; i < contents.length; i += 2) {
 			unowned string name = contents[i];
@@ -86,7 +87,8 @@ public class Config : Object {
 			warning("GIO_MODULE_DIR is not set, some applications may not work correctly");
 			sb.append("# GIO_MODULE_DIR is not set, some applications may not work correctly\n");
 		}
-		sb.append(@"fpath=($prefix/share/zsh/site-functions $$fpath)\n");
+		// fpath array syntax is zsh-only: guard + eval so sourcing from POSIX sh (dash) doesn't abort
+		sb.append(@"[ -n \"$$ZSH_VERSION\" ] && eval 'fpath=($prefix/share/zsh/site-functions $$fpath)' || true\n");
 		FileUtils.set_contents(profile, sb.str);
 	}
 
