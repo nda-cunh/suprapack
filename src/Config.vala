@@ -37,6 +37,20 @@ public class Config : Object {
 		queue_pkg_uninstall = new PackageSet();
 	}
 
+	// Regenerate the profile through the installed binary when possible:
+	// after a self-update the running process is still the old version, and
+	// regenerating in-process would overwrite the profile with the old format.
+	public void regenerate_profile () throws Error {
+		var bin = Path.build_filename(this.prefix, "bin", "suprapack");
+		if (FileUtils.test(bin, FileTest.IS_EXECUTABLE)) {
+			int status;
+			Process.spawn_sync(null, {bin, "-p", this.prefix, "--regenerate_suprapack_profile"}, null, SpawnFlags.STDOUT_TO_DEV_NULL, null, null, null, out status);
+			if (Process.exit_status(status) == 0)
+				return;
+		}
+		create_source_profile();
+	}
+
 	public void create_source_profile () throws Error {
 		var profile = @"$HOME/.suprapack_profile";
 		var sb = new StringBuilder("# Prefix: ");

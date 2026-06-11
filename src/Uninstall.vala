@@ -55,7 +55,7 @@ namespace Uninstall {
 			}
 		}
 		if (config.need_generate_profile == true)
-			config.create_source_profile();
+			config.regenerate_profile();
 		return true;
 	}
 

@@ -338,7 +338,7 @@ public void install () throws Error {
 		throw new ErrorSP.CANCEL("Cancelling...");
 	}
 	if (config.need_generate_profile == true)
-		config.create_source_profile();
+		config.regenerate_profile();
 	
 }
 
