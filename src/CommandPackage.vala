@@ -55,111 +55,14 @@ namespace Cmd {
 		}
 	}
 
-	private void prepare_install (string name_search, string? name_repo = null, bool is_wanted = false) throws Error{
-		if (name_search == "")
-			return;
-		force_suprapack_update();
-
-		if (name_search.has_suffix(".suprapack")) {
-			if (!FileUtils.test(name_search, FileTest.EXISTS))
-				throw new ErrorSP.NOT_FOUND(name_search);
-			SupraList pkg = SupraList("Local", name_search, true);
-			pkg.is_wanted = is_wanted;
-			add_queue_list(pkg, name_search);
-			return;
-		}
-
-		SupraList[] queue = {};
-		var list = Sync.get_list_package (name_repo ?? "");
-		foreach (unowned var pkg in list) {
-			if (pkg.name == name_search) {
-				queue += pkg;
-			}
-		}
-
-		SupraList pkg;
-		if (queue.length == 0) {
-			if (Query.is_exist(name_search) == true) {
-				throw new ErrorSP.ACCESS("Can't found %s but exist in local", name_search);
-			}
-			throw new ErrorSP.NOT_FOUND(name_search);
-		}
-		else if (queue.length == 1){
-			pkg = queue[0];
-		}
-		else {
-			if (config.force == true) {
-				var lst = Utils.sort_supralist_version(queue);
-				pkg = lst[lst.length - 1];
-			}
-			else {
-				Log.conflict("Similar package are found");
-				for (int i = 0; i < queue.length; i++) {
-					print("%s", BOLD);
-					print("%4d) " + PURPLE + "%s/" + WHITE + "%s [%s]" + NONE + "\n", i, queue[i].repo_name, queue[i].name, queue[i].version);
-				}
-				print("please choose one: ");
-				var nb = int.parse(stdin.read_line());
-				if (nb < 0 || nb > queue.length - 1) {
-					warning("Cancelling...");
-					return ;
-				}
-				pkg = queue[nb];
-			}
-		}
-
-		var output = Sync.download(pkg);
-		pkg.is_wanted = is_wanted;
-		add_queue_list(pkg, output);
-	}
-
-	private void add_queue_list(SupraList pkg, string output) throws Error {
-		Log.debug ("Add in queue: %s", pkg.name);
-		Process.spawn_command_line_sync(@"tar -xf $(output) ./info");
-		Package pkgtmp = Package.from_file("./info");
-		FileUtils.unlink("./info");
-		pkgtmp.output = output;
-		pkgtmp.repo = pkg.repo_name;
-		pkgtmp.is_wanted = pkg.is_wanted;
-		config.queue_pkg.add(pkgtmp);
-		try {
-			foreach (unowned var i in pkgtmp.get_dependency()) {
-				if (config.queue_pkg.contains_name(i)) {
-					continue;
-				}
-				if (Query.is_exist(i) && config.force == false) {
-					if (Sync.check_update(i))
-						prepare_install(i);
-					continue;
-				}
-				else
-					prepare_install(i);
-			}
-			foreach (unowned var i in pkgtmp.optional_dependency.split(" ")) {
-				if (config.queue_pkg.contains_name(i)) {
-					continue;
-				}
-				if (Sync.exist(i) == false) {
-					Log.skip("\033[95m Optional Dependency %s not found" + NONE, i);
-					continue;
-				}
-				else {
-					var pkg_opt = Sync.get_from_pkg(i);
-					Log.info("Optional Dependency %s", pkg_opt.name);
-					if (Utils.stdin_bool_choose("Would you like to install this Optional Dependency ? [Y/n]", true)) {
-						prepare_install(i);
-					}
-					else {
-						Log.skip(" Optional Dependency %s", i);
-					}
-				}
-			}
-		}
-		catch (Error e) {
-			debug("Error while preparing queue: %s", e.message);
-		}
-	}
-
+	/**
+	 * The Command install of suprapack
+	 *
+	 * install a package from a repository or a file
+	 *
+	 * @param av: argv of command
+	 * @return true if the install was successful
+	 */
 	public bool install (string []av) throws Error {
 		if (av.length == 2)
 			error("`suprapack install [...]`");
