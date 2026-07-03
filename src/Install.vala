@@ -379,24 +379,43 @@ private void prepare_install (string name_search, string? name_repo = null, bool
 	}
 	// if multiple package found
 	else {
-		// if Force search auto best package
-		if (config.force == true) {
-			var lst = Utils.sort_supralist_version(queue);
+		// Keep only the best version per repository, so several versions of
+		// the same package inside a repo (e.g. lua 5.4 and 5.3) never trigger
+		// a choice: only the best one is kept.
+		SupraList[] candidates = {};
+		foreach (unowned var cand in queue) {
+			bool found = false;
+			for (int i = 0; i < candidates.length; i++) {
+				if (candidates[i].repo_name == cand.repo_name) {
+					candidates[i] = Utils.max_version_supralist(candidates[i], cand);
+					found = true;
+					break;
+				}
+			}
+			if (!found)
+				candidates += cand;
+		}
+
+		// Only one repo provides this package (possibly with several versions):
+		// pick the best version directly, no choice needed.
+		if (candidates.length == 1 || config.force == true) {
+			var lst = Utils.sort_supralist_version(candidates);
 			pkg = lst[lst.length - 1];
 		}
+		// The package exists in several repos: the choice only exists here.
 		else {
 			Log.conflict("Similar package are found");
-			for (int i = 0; i < queue.length; i++) {
+			for (int i = 0; i < candidates.length; i++) {
 				print("%s", BOLD);
-				print("%4d) " + PURPLE + "%s/" + WHITE + "%s [%s]" + NONE + "\n", i, queue[i].repo_name, queue[i].name, queue[i].version);
+				print("%4d) " + PURPLE + "%s/" + WHITE + "%s [%s]" + NONE + "\n", i, candidates[i].repo_name, candidates[i].name, candidates[i].version);
 			}
 			print("please choose one: ");
 			var nb = int.parse(stdin.read_line());
-			if (nb < 0 || nb > queue.length - 1) {
+			if (nb < 0 || nb > candidates.length - 1) {
 				info("Cancelling...");
 				return ;
 			}
-			pkg = queue[nb];
+			pkg = candidates[nb];
 		}
 	}
 
