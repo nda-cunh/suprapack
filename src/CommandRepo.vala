@@ -38,7 +38,6 @@ namespace Cmd {
 	}
 
 	public bool search_supravim_plugin (string []av) throws Error {
-		force_suprapack_update();
 		var list = Sync.get_list_package();
 		var installed = Query.get_all_installed_pkg();
 
@@ -60,7 +59,6 @@ namespace Cmd {
 	}
 
 	public bool search (string []av) throws Error {
-		force_suprapack_update();
 		var list = Sync.get_list_package();
 		var installed = Query.get_all_installed_pkg();
 		if (av.length == 2) {

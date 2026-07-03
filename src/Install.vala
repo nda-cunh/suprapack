@@ -139,7 +139,6 @@ private void script_post_install(string dir) throws Error {
 
 // install package suprapack
 public void install_suprapackage(Package suprapack) throws Error {
-	force_suprapack_update();
 	unowned string output = suprapack.output;
 
 	if (FileUtils.test(output, FileTest.EXISTS)) {
@@ -190,22 +189,19 @@ public void install_suprapackage(Package suprapack) throws Error {
 }
 
 
-private void force_suprapack_update () throws Error {
+public void force_suprapack_update (string? target = null) throws Error {
 	if (!Query.is_exist("suprapack"))
 		return ;
-	if (config.supraforce == false && Sync.check_update("suprapack")) {
-		info("Canceling... An update of suprapack is here");
-		Process.spawn_command_line_sync(@"$(config.prefix)/bin/suprapack --force --supraforce add suprapack");
-		var cmd_str = string.joinv(" ", config.cmd);
-		Process.spawn_command_line_sync(cmd_str);
-		Process.exit(0);
+	if (target == "suprapack")
+		return ;
+	if (Sync.check_update("suprapack")) {
+		Log.suprapack("A new version of " + BOLD + "suprapack" + NONE + " is available.");
+		printerr("           Update it first with:  " + BOLD + GREEN + "suprapack add suprapack" + NONE + "\n");
+		throw new ErrorSP.CANCEL("update suprapack before installing or updating other packages");
 	}
 }
 
-
 public void install () throws Error {
-	force_suprapack_update();
-
 	print("\nresolving dependencies...\n");
 
 	if (config.queue_pkg.size == 0){
@@ -345,8 +341,8 @@ public void install () throws Error {
 private void prepare_install (string name_search, string? name_repo = null, bool is_wanted = false) throws Error{
 	if (name_search == "")
 		return;
-	// Check and update if 'Suprapack' have the last version
-	force_suprapack_update();
+	// Check that suprapack itself is up to date (blocks if not, unless we target suprapack)
+	force_suprapack_update(name_search);
 
 	// Check if the package is a local file (file.suprapack)
 	if (name_search.has_suffix(".suprapack")) {

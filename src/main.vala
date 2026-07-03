@@ -32,7 +32,6 @@ public class Main : Object {
 	public static bool no_fakeroot = false;
 	public static bool yes = false;
 	public static bool simple_print = false;
-	public static bool supraforce = false;
 	public static string? strap = null;
 	public static bool build_and_install = false;
 	public static string? build_output = null;
@@ -45,7 +44,6 @@ public class Main : Object {
 	const OptionEntry[] options = {
 		// Special options hidden
 		{ "simple-print", '\0', OptionFlags.HIDDEN, OptionArg.NONE, out simple_print, "simple print used by other program", null },
-		{ "supraforce", '\0', OptionFlags.HIDDEN, OptionArg.NONE, out supraforce, "force the operation without update check", null },
 		// Normal Options
 		{ "prefix", 'p', OptionFlags.NONE, OptionArg.STRING, out prefix, COLOR + "(All) " + NONE + " the path of the suprapack folder root", "PATH TO THE FOLDER" },
 		{ "debug", '\0', OptionFlags.NONE, OptionArg.NONE, out _debug, COLOR + "(All)" + NONE + " add the debug mode", "DEBUG"},
@@ -81,7 +79,6 @@ public class Main : Object {
 			config.change_strap(strap);
 		config.force = force;
 		config.allays_yes = yes;
-		config.supraforce = supraforce;
 		config.simple_print = simple_print;
 		config.use_fakeroot = !no_fakeroot;
 		config.build_and_install = build_and_install;

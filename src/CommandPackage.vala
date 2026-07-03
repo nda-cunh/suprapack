@@ -43,18 +43,6 @@ namespace Cmd {
 		return true;
 	}
 
-	public void force_suprapack_update () throws Error {
-		if (!Query.is_exist("suprapack"))
-			return ;
-		if (config.supraforce == false && Sync.check_update("suprapack")) {
-			Log.info("Canceling... An update of suprapack is here");
-			Process.spawn_command_line_sync(@"$(config.prefix)/bin/suprapack --force --supraforce add suprapack");
-			var cmd_str = string.joinv(" ", config.cmd);
-			Process.spawn_command_line_sync(cmd_str);
-			Process.exit(0);
-		}
-	}
-
 	/**
 	 * The Command install of suprapack
 	 *
@@ -81,7 +69,7 @@ namespace Cmd {
 				}
 			}
 			catch (Error e) {
-				if (e is ErrorSP.FAILED) {
+				if (e is ErrorSP.FAILED || e is ErrorSP.CANCEL) {
 					throw e;
 				}
 				else if (e is ErrorSP.NOT_FOUND) {
@@ -256,10 +244,11 @@ namespace Cmd {
 	}
 
 	public bool update (string []av) throws Error {
-		force_suprapack_update();
 		unowned string pkg_name;
 
 		if (av.length == 2) {
+			// Block the whole "update all" if suprapack itself is out of date.
+			force_suprapack_update();
 			var Qpkg = Query.get_all_installed_pkg();
 			foreach (unowned var pkg in Qpkg) {
 				try {

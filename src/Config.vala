@@ -272,8 +272,6 @@ public class Config : Object {
 	public string strap			{get; private set;}
 	// Force the installation of the package with all dependencies
 	public bool force			{get; set; default=false;}
-	// Force the installation of the package without check an update
-	public bool supraforce		{get; set; default=false;}
 	// Used by other program, it print 0,1,2,3,4,5 instead % for download and install
 	public bool simple_print	{get; set; default=false;}
 	// if the user want to use fakeroot when building the package
