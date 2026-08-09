@@ -386,6 +386,8 @@ namespace Utils {
 
 	public unowned string? get_gio_module_dir () {
 		const string[] candidate_paths = {
+			"/usr/lib64/gio/modules",
+			"/usr/lib32/gio/modules",
 			"/usr/lib/gio/modules",
 			"/usr/lib/x86_64-linux-gnu/gio/modules",
 			"/usr/lib/aarch64-linux-gnu/gio/modules",
