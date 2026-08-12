@@ -244,8 +244,6 @@ namespace Cmd {
 	}
 
 	public bool update (string []av) throws Error {
-		unowned string pkg_name;
-
 		if (av.length == 2) {
 			// Block the whole "update all" if suprapack itself is out of date.
 			force_suprapack_update();
@@ -264,19 +262,30 @@ namespace Cmd {
 			return true;
 		}
 		else {
-			string? tmp;
+			string? pkg_name;
 			foreach (unowned var i in av[2:av.length]) {
 				if (Query.is_exist(i) == false) {
-					tmp = BetterSearch.search_good_package_from_query(i, true);
-					if (tmp == null) {
+					pkg_name = BetterSearch.search_good_package_from_query(i, true);
+					if (pkg_name == null) {
 						warning ("Cancelling ...");
 						return false;
 					}
 				}
 				else
-					tmp = i;
-				pkg_name = tmp;
+					pkg_name = i;
+				try {
+					if (Sync.check_update(pkg_name))
+						prepare_install(pkg_name, Sync.get_from_pkg(pkg_name).repo_name);
+					else
+						Log.info("%s is already up to date", pkg_name);
+				}
+				catch (Error e) {
+					if (e is ErrorSP.CANCEL)
+						throw e;
+					warning("Error: %s", e.message);
+				}
 			}
+			global::install();
 			return true;
 		}
 	}

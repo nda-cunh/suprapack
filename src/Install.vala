@@ -196,6 +196,14 @@ public void force_suprapack_update (string? target = null) throws Error {
 		return ;
 	if (Sync.check_update("suprapack")) {
 		Log.suprapack("A new version of " + BOLD + "suprapack" + NONE + " is available.");
+		if (config.allays_yes || Utils.stdin_bool_choose(":: Update " + BOLD + GREEN + "suprapack" + NONE + " now ? [Y/n] ", true)) {
+			/* Everything already queued is dropped: it will be resolved again by the new suprapack */
+			config.queue_pkg = new PackageSet();
+			config.queue_pkg_uninstall = new PackageSet();
+			prepare_install("suprapack", null, true);
+			install();
+			throw new ErrorSP.CANCEL("suprapack has been updated, please re-run your command");
+		}
 		printerr("           Update it first with:  " + BOLD + GREEN + "suprapack add suprapack" + NONE + "\n");
 		throw new ErrorSP.CANCEL("update suprapack before installing or updating other packages");
 	}
