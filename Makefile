@@ -56,9 +56,9 @@ install: suprapack
 	@mkdir -p usr/bin
 	@cp ./suprapack usr/bin/suprapack
 ifeq ($(shell id -u), 0)
-	@./suprapack build usr --yes --no-fakeroot --install --supraforce --prefix=/usr
+	@./suprapack build usr --yes --no-fakeroot --install --prefix=/usr
 else 
-	@./suprapack build usr --yes --no-fakeroot --install --supraforce
+	@./suprapack build usr --yes --no-fakeroot --install
 endif
 
 run: $(NAME) 
