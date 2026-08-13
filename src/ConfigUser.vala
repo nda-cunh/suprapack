@@ -36,8 +36,8 @@ public class ConfigUser {
 		{"print", '\0', OptionFlags.NONE, OptionArg.NONE, ref is_print, "print the actual configuration", null },
 		{"prefix", 'p', OptionFlags.NONE, OptionArg.STRING, ref _prefix_, "Path to the folder", "PATH"},
 		{"is_cached", 'c', OptionFlags.NONE, OptionArg.STRING, ref _is_cached_, "Keep the package in the cache", "bool"},
-		{"show_script", 's', OptionFlags.NONE, OptionArg.STRING, ref _show_script_, "Show the script before installing", "bool"},
-		{"profile_priority", 's', OptionFlags.NONE, OptionArg.STRING, ref _profile_priority_, "Set the profile priority (high or low)", "PROFILE_PRIORITY"},
+		{"show_script", '\0', OptionFlags.NONE, OptionArg.STRING, ref _show_script_, "Show the script before installing", "bool"},
+		{"profile_priority", '\0', OptionFlags.NONE, OptionArg.STRING, ref _profile_priority_, "Set the profile priority (high or low)", "PROFILE_PRIORITY"},
 		{null}
 	};
 
