@@ -219,7 +219,7 @@ public class Config : Object {
 	public static bool is_my_arch (string _arch) throws Error {
 		unowned string arch_actual = Utils.get_arch_host ();
 		var arch = _arch.down();
-		if ("any" in arch)
+		if ("any" == arch)
 			return true;
 		if (arch == arch_actual)
 			return true;
