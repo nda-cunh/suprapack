@@ -220,51 +220,6 @@ namespace Utils {
 
 
 	/**
-	 * Compare two versions
-	 *
-	 * @param v1 the first version
-	 * @param v2 the second version
-	 * @return true if v1 is greater than v2
-	 */
-	public bool compare_versions (string v1, string v2) {
-		if (v1 == v2)
-			return false;
-		var s1 = v1.split(".");
-		var s2 = v2.split(".");
-
-		int i = 0;
-		while (i < s1.length && i < s2.length) {
-			int a = int.parse(s1[i]);
-			int b = int.parse(s2[i]);
-			if (a > b)
-				return true;
-			else if (a < b)
-				return false;
-			++i;
-		}
-		if (i < s1.length)
-			return have_only_zero (s1, i);
-		return false;
-	}
-
-	/**
-	 * Check if the array have only zero
-	 *
-	 * @param sp the array to check
-	 * @param index the index to start
-	 * @return true if the array have only zero
-	 */
-	private bool have_only_zero (string []sp, int index) {
-		var regex = /^[0]+$/;
-		while (index < sp.length) {
-			if (!regex.match (sp[index]))
-				return true;
-			++index;
-		}
-		return false;
-	}
-
-	/**
 	 * Prepare the environment for the command
 	 *
 	 * Add the SRCDIR, PKGDIR, PREFIX, srcdir, pkgdir, prefix and PATH

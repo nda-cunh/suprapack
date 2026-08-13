@@ -25,6 +25,7 @@ SRC = src/BetterSearch.vala \
 		src/Sync.vala \
 		src/Uninstall.vala \
 		src/Utils.vala \
+		src/Version.vala \
 		src/main.vala \
 
 all: install 

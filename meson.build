@@ -13,3 +13,7 @@ add_project_arguments('--target-glib=auto', language: 'vala')
 
 subdir('src')
 subdir('po')
+
+if not need_bootstrap
+  subdir('tests')
+endif

@@ -21,6 +21,7 @@ source_names = [
   'Sync',
   'Uninstall',
   'Utils',
+  'Version',
   'main',
 ]
 
@@ -46,6 +47,23 @@ if need_bootstrap
   sources = boot_strap.to_list()
 else
   sources = vala_sources
+endif
+
+if not need_bootstrap
+  version_lib = static_library('supraversion',
+    files('Version.vala'),
+    c_args: ['-w'],
+    vala_header: 'supraversion.h',
+    vala_vapi: 'supraversion.vapi',
+    dependencies : [
+      dependency('glib-2.0'),
+      dependency('gobject-2.0')
+    ],
+    install : false)
+
+  version_dep = declare_dependency(
+    link_with: version_lib,
+    include_directories: include_directories('.'))
 endif
 
 executable('suprapack',
