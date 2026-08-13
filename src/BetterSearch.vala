@@ -42,6 +42,8 @@ namespace BetterSearch {
 	}
 
 	private string? search_end (string? best_result, string package, bool choose) {
+		if (best_result == null)
+			return null;
 		var str = (YELLOW + "[SupraPack]" + NONE + " Package " + BOLD + PURPLE + "%s" + NONE + " not found ! Did you mean " + BOLD + PURPLE + "%s ?" + NONE + " %s:").printf(package, best_result, choose ? "[Y/n]" : "[y/N]");
 		if (Utils.stdin_bool_choose (str, choose))
 			return best_result;
