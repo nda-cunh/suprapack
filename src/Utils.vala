@@ -305,6 +305,10 @@ namespace Utils {
 				return "x86-linux";
 			if (name.machine == "i686")
 				return "i686-linux";
+			if (name.machine == "i386")
+				return "i386-linux";
+			if (name.machine == "aarch64" || name.machine == "aarch64_be" || name.machine == "arm64")
+				return "arm64-linux";
 		}
 		// Apple Darwin
 		if (name.sysname == "Darwin") {
