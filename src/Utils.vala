@@ -208,12 +208,8 @@ namespace Utils {
 			FileInfo info = null;
 			while (((info = enumerator.next_file ()) != null)) {
 				if (info.get_file_type () == FileType.DIRECTORY) {
-					var thread = new Thread<long>(null, () => {
-							File subdir = file.resolve_relative_path(info.get_name());
-							var subdir_size = size_folder_it(subdir);
-							return (long)subdir_size;
-							});
-					result += (int64)thread.join();
+					File subdir = file.resolve_relative_path (info.get_name ());
+					result += size_folder_it (subdir);
 				} else {
 					result += info.get_size ();
 				}
