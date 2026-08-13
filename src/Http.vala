@@ -45,16 +45,17 @@ namespace Http {
 		SIZE_MISMATCH   // La taille reçue ne correspond pas au Content-Length
 	}
 
+	private const int MAX_REDIRECT = 5;
+
 	/**
 	 * Download a file from the internet
 	 *
 	 * @param url the url of the file
 	 * @param output the output file
 	 * @param no_print if true, don't print the download progress
-	 * @param rec if true, retry the download ( set only by download function d'ont use it )
 	 * @param cancel a cancellable object
 	 */
-	public void download (string url, string output, bool no_print = false, Cancellable? cancel = null, bool rec = false) throws Error {
+	public void download (string url, string output, bool no_print = false, Cancellable? cancel = null) throws Error {
 		Error? err = null;
 		var loop = new MainLoop ();
 
@@ -76,7 +77,7 @@ namespace Http {
 			print (HIDECURSOR);
 		s.attach(GLib.MainContext.default());
 
-		_download.begin(url, output, false, rec, cancel, (obj, res) => {
+		_download.begin(url, output, no_print, MAX_REDIRECT, cancel, (obj, res) => {
 			try {
 				if (cancel.is_cancelled ()) {
 						FileUtils.remove (output);
@@ -109,8 +110,7 @@ namespace Http {
 
 
 
-	private async void _download (string url, string? output = null, bool no_print = false, bool rec = false, Cancellable? cancel = null) throws Error {
-		const size_t SIZE_BUFFER = 16777216;
+	private async void _download (string url, string target, bool no_print = false, int redirect_left = MAX_REDIRECT, Cancellable? cancel = null) throws Error {
 		unowned string	host;
 		unowned string	query;
 		unowned string	path;
@@ -122,13 +122,6 @@ namespace Http {
 		query = uri.get_query ();
 		path = uri.get_path ();
 		port = uri.get_port ();
-
-
-		string target;
-		if (output == null && rec == false)
-			target = path[path.last_index_of_char('/') + 1:];
-		else
-			target = (!)output;
 
 		/* Open Connection-Files */
 
@@ -162,11 +155,13 @@ namespace Http {
 
 
 		/* ERROR HTTP check 404, 400, 502 ...  */
+		int status;
 		{
 			string error = input_stream.read_line_utf8(null, cancel);
 			error = error.offset(error.index_of_char(' '));
 			int err =  int.parse(error);
 			var err_msg = error.replace("\r", "");
+			status = err;
 
 			switch (err) {
 				case 304:
@@ -207,98 +202,160 @@ namespace Http {
 			}
 		}
 
+		/* Header Part */
+		size_t bytes = 0;
+		bool has_length = false;
+		bool chunked = false;
+		string? location = null;
+		string? current_etag = null;
+		{
+			string? line;
+			while ((line = input_stream.read_line_utf8(null, cancel)) != null) {
+				if (line == "\r" || line == "")
+					break;
+				Log.debug("download", "HEADER: [%s]", line);
+				int sep = line.index_of_char(':');
+				if (sep == -1)
+					continue;
+				string key = line[0:sep].ascii_down();
+				string val = line.offset(sep + 1)._strip();
+
+				switch (key) {
+					case "content-length":
+						bytes = (size_t)uint64.parse(val);
+						has_length = true;
+						break;
+					case "transfer-encoding":
+						chunked = val.ascii_down().contains("chunked");
+						break;
+					case "location":
+						location = val;
+						break;
+					case "etag":
+						current_etag = val;
+						break;
+				}
+			}
+		}
+
+		if (status >= 300 && status < 400) {
+			if (location == null)
+				throw new HttpError.ERR("redirect %d without a Location header for %s (%s)", status, url, Log.vala_line());
+			if (redirect_left <= 0)
+				throw new HttpError.ERR("too many redirects for %s (%s)", url, Log.vala_line());
+			var next = Uri.resolve_relative(url, location, UriFlags.SCHEME_NORMALIZE | UriFlags.ENCODED);
+			Log.debug("download", "redirect to %s", next);
+			yield _download(next, target, no_print, redirect_left - 1, cancel);
+			return ;
+		}
+
 		var fs = FileStream.open (target, "w");
 		if (fs == null)
 			throw new HttpError.WRITE_FAILED("Impossible to create target_file: (%s) file", target);
-		string name_file;
-		name_file = Uri.unescape_string(target[target.last_index_of_char ('/') + 1:]);
-		name_file = name_file.to_ascii ();
-		if (name_file.has_suffix (".suprapack")) {
-			name_file = name_file[0:-10];
-			int idx = name_file.last_index_of_char ('_');
-			if (idx != -1) {
-				name_file = name_file[0:idx];
-			}
-		}
-		if (name_file.length >= 25)
-			name_file = name_file[0:12] + "..";
+		string name_file = display_name (target);
 
-		/* Get All bytes Data */
-		string line;
-		size_t bytes = 0;
-		string? current_etag = null;
-		bool is_finish = false;
-		while ((line = input_stream.read_line_utf8(null, cancel)) != null) {
-			/* Header Part */
-			{
-				uint8 buffer [2048];
-				Log.debug("download", "HEADER: [%s]", line);
-				if (line.has_prefix("Content-Length: "))
-					line.scanf("Content-Length: %zu", out bytes);
-				if (line.has_prefix("ETag: ") || line.has_prefix("etag:")) {
-					line.scanf("ETag: %s", out buffer);
-					current_etag = line[5:]._strip(); // Enlever "ETag: " et les espaces
-				}
+		/* Data Part */
+		if (chunked == true)
+			yield read_chunked (input_stream, fs, name_file, no_print, cancel);
+		else
+			yield read_identity (input_stream, fs, name_file, no_print, has_length, bytes, target, cancel);
 
-				else if (line.has_prefix ("Transfer-Encoding:")) {
-					line.scanf("Transfer-Encoding: %s", out buffer);
-					if (((string)buffer).ascii_down () == "chunked") {
-						Log.debug("download", "Retry chunked not supported");
-						download(url, output, no_print, null, true);
-						return ;
-					}
-				}
-				else if (line.has_prefix("Location: ")) {
-					line.scanf("Location: %s", out buffer);
-					Log.debug("download", "redirect to %s", (string)buffer);
-					download((string)buffer, output, no_print, null, true);
-					return ;
-				}
-			}
-
-			/* Data Part */
-			if (line == "\r") {
-				var buffer = new uint8[SIZE_BUFFER];
-				double totalBytes = bytes;
-				double actual = 0;
-				size_t len = 0;
-				do {
-					if (no_print == false)
-						print_download (name_file, actual, totalBytes);
-					try {
-						size_t to_read = (bytes < SIZE_BUFFER) ? bytes : SIZE_BUFFER;
-						if (to_read <= 0) {
-							is_finish = true;
-							break;
-						}
-						len = yield input_stream.read_async (buffer[0:to_read], Priority.HIGH, cancel);
-
-						if (len > 0) {
-							buffer[len] = '\0';
-							bytes -= len;
-							actual += len;
-							fs.write (buffer[0:len], 1);
-						}
-					}
-					catch (Error e) {
-						printerr ("\n\nBytes left: %zu\n\n\n", bytes);
-						if (bytes == 0) {
-							is_finish = true;
-							break;
-						}
-						throw new HttpError.ERR ("Error %zu reading data: %s %s", bytes, e.message, Log.vala_line());
-					}
-				} while (len > 0);
-
-			}
-			// quit if the download is finish
-			if (is_finish == true)
-				break;
-		}
 		if (current_etag != null) {
 			save_etag_to_disk(target, current_etag);
 		}
 		return ;
+	}
+
+	private string display_name (string target) {
+		string name = Uri.unescape_string (target[target.last_index_of_char ('/') + 1:]);
+		name = name.to_ascii ();
+		if (name.has_suffix (".suprapack")) {
+			name = name[0:-10];
+			int idx = name.last_index_of_char ('_');
+			if (idx != -1)
+				name = name[0:idx];
+		}
+		if (name.length >= 25)
+			name = name[0:12] + "..";
+		return name;
+	}
+
+	private async void read_identity (DataInputStream ins, FileStream fs, string name_file, bool no_print, bool has_length, size_t bytes, string target, Cancellable? cancel) throws Error {
+		const size_t SIZE_BUFFER = 262144;
+		var buffer = new uint8[SIZE_BUFFER];
+		double totalBytes = bytes;
+		double actual = 0;
+		size_t len = 0;
+
+		do {
+			if (no_print == false)
+				print_download (name_file, actual, totalBytes);
+			if (has_length == true && bytes == 0)
+				break;
+			try {
+				size_t to_read = has_length ? size_t.min (bytes, SIZE_BUFFER) : SIZE_BUFFER;
+				len = yield ins.read_async (buffer[0:to_read], Priority.HIGH, cancel);
+				if (len > 0) {
+					if (has_length == true)
+						bytes -= len;
+					actual += len;
+					fs.write (buffer[0:len], 1);
+				}
+			}
+			catch (Error e) {
+				throw new HttpError.ERR ("Error %zu reading data: %s %s", bytes, e.message, Log.vala_line());
+			}
+		} while (len > 0);
+
+		if (has_length == true && bytes != 0)
+			throw new HttpError.SIZE_MISMATCH ("%s: %zu bytes missing out of %.0f (%s)", target, bytes, totalBytes, Log.vala_line());
+		if (no_print == false) {
+			print_download (name_file, actual, totalBytes);
+			stderr.printf ("\n");
+		}
+	}
+
+	private async void read_chunked (DataInputStream ins, FileStream fs, string name_file, bool no_print, Cancellable? cancel) throws Error {
+		var buffer = new uint8[65536];
+		double actual = 0;
+
+		for (;;) {
+			string? head = ins.read_line_utf8 (null, cancel);
+			if (head == null)
+				throw new HttpError.SIZE_MISMATCH ("chunked: stream cut before the last chunk (%s)", Log.vala_line ());
+
+			int semi = head.index_of_char (';');
+			if (semi != -1)
+				head = head[0:semi];
+
+			size_t remain = (size_t)uint64.parse (head._strip (), 16);
+			Log.debug ("download", "chunk of %zu bytes", remain);
+			if (remain == 0)
+				break;
+
+			while (remain > 0) {
+				if (no_print == false)
+					print_download (name_file, actual, 0);
+				size_t len = yield ins.read_async (buffer[0:size_t.min (remain, buffer.length)], Priority.HIGH, cancel);
+				if (len == 0)
+					throw new HttpError.SIZE_MISMATCH ("chunked: %zu bytes left in the chunk (%s)", remain, Log.vala_line ());
+				fs.write (buffer[0:len], 1);
+				remain -= len;
+				actual += len;
+			}
+			ins.read_line_utf8 (null, cancel);
+		}
+
+		string? trailer;
+		while ((trailer = ins.read_line_utf8 (null, cancel)) != null) {
+			if (trailer == "\r" || trailer == "")
+				break;
+			Log.debug ("download", "TRAILER: [%s]", trailer);
+		}
+		if (no_print == false) {
+			print_download (name_file, actual, 0);
+			stderr.printf ("\n");
+		}
 	}
 
 	/**
@@ -309,28 +366,27 @@ namespace Http {
 	 * @param max the max size of the file
 	 */
 	private void print_download(string name_file, double actual, double max) {
-		uint8[] progress_bar = "[                    ] \0".data;
 		const double MIB = 1048576.0;
+
+		if (max <= 0.0) {
+			if (config.simple_print == false)
+				stderr.printf("%-50s %8s\r", name_file, "%.2f Mib / ??? Mib     ".printf(actual / MIB));
+			return;
+		}
+
 		double percent = (100 * actual) / max;
 
 		if (config.simple_print) {
 			stdout.printf("download: [%u]\n", (uint)percent);
 			return ;
 		}
-
-		if (max <= 0.0) {
-			stderr.printf("%-50s %8s\r", name_file, "%.2f Mib / ??? Mib     ".printf(actual / MIB));
-			return;
-		}
 		if (actual > max)
 			actual = max;
 
+		uint8[] progress_bar = "[                    ] \0".data;
 		modify_percent_bar(progress_bar, percent);
 		var part2 = "%.2f Mib / %.2f Mib %s %.1f%%".printf((actual / MIB), (max / MIB), ((string)progress_bar), percent);
 		stderr.printf("%-27s %70s\r", name_file, part2);
-
-		if (percent == 100.0)
-			stderr.printf("\n");
 	}
 
 
