@@ -147,12 +147,13 @@ namespace Build {
 		if (config.build_output == ".") {
 			config.build_output = last_dir;
 		}
-		print ("Using PKGBUILD in %s\n", @"$last_dir$usr_dir/PKGBUILD");
-		var new_pwd = @"$last_dir/$usr_dir";
+		var new_pwd = Path.build_filename(last_dir, usr_dir);
+		var pkgbuild_path = Path.build_filename(new_pwd, "PKGBUILD");
+		print ("Using PKGBUILD in %s\n", pkgbuild_path);
 		Environment.set_variable("PWD", new_pwd, true);
 		PWD = new_pwd;
 		Environment.set_current_dir(new_pwd);
-		new Makepkg (@"$new_pwd/PKGBUILD");
+		new Makepkg (pkgbuild_path);
 		Environment.set_current_dir(last_dir);
 	}
 
@@ -161,7 +162,6 @@ namespace Build {
 		if (!FileUtils.test(package_path, FileTest.EXISTS))
 			throw new ErrorSP.EXTRACT("Package %s doesn't exist", package_path);
 
-		// Si la destination n'existe pas, on tente de la créer au lieu de crash
 		if (!FileUtils.test(dest, FileTest.EXISTS)) {
 			DirUtils.create_with_parents(dest, 0755);
 		}

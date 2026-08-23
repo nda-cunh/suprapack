@@ -85,8 +85,8 @@ public class Makepkg : Object {
 		MatchInfo match_info;
 		string contents;
 		var env = Environ.get ();
-		srcdir = @"$PWD/src";
-		pkgdir = @"$PWD/pkg";
+		srcdir = Path.build_filename(PWD, "src");
+		pkgdir = Path.build_filename(PWD, "pkg");
 
 		Process.spawn_command_line_sync (@"rm -rf $(pkgdir)");
 		DirUtils.create_with_parents (srcdir, 0755);
@@ -201,8 +201,10 @@ public class Makepkg : Object {
 			url = Utils.strip (url);
 			output = Utils.strip (output);
 
-			output = @"$srcdir/$output";
-			print(output);
+			output = Path.build_filename (srcdir, output);
+			print("--> %s\n", output);
+
+
 			debug("Source: %s", url);
 			/* Download with git binary */
 			if (regex_git_url.match (url, 0, out match_info)) {
@@ -246,7 +248,8 @@ public class Makepkg : Object {
 			/* Simple copy */
 			else {
 				print("%s\n", output);
-				var file_src = @"$PWD/$url";
+				// var file_src = @"$PWD/$url";
+				var file_src = Path.build_filename (PWD, url);
 				debug("Copy %s to -> %s", file_src, output);
 				try {
 					var @in = File.new_for_path (file_src);
