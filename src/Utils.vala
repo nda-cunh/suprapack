@@ -349,6 +349,10 @@ namespace Utils {
 			"/usr/lib/arm-linux-gnueabihf/gio/modules",
 			"/usr/lib/arm-linux-gnueabi/gio/modules",
 			"/usr/lib/i386-linux-gnu/gio/modules",
+			// macOS
+			"/opt/homebrew/lib/gio/modules", // Apple Silicon
+			"/usr/local/lib/gio/modules",    // Intel Homebrew
+			"/opt/local/lib/gio/modules",    // MacPorts
 		};
 
 		foreach (unowned string path in candidate_paths) {
@@ -356,8 +360,20 @@ namespace Utils {
 				return path;
 			}
 		}
-
-		return null;
+		try {
+			const string cmd = "pkg-config --variable=giomoduledir gio-2.0";
+			string standard_output;
+			string standard_error;
+			int wait_status;
+			Process.spawn_command_line_sync (cmd, out standard_output, out standard_error, out wait_status);
+			memory_tmp = standard_output.strip();
+			return memory_tmp;
+		}
+		catch (Error e) {
+			printerr("Error executing command: %s\n", e.message);
+			return null;
+		}
 	}
+	public string? memory_tmp = null;
 
 }
