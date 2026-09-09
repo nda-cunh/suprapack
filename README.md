@@ -14,7 +14,8 @@
 ```bash
 git clone https://gitlab.com/nda-cunh/suprapack
 cd suprapack
-make install
+meson build --prefix=$HOME/.local
+ninja install -C build
 ```
 
 # For simple user :
