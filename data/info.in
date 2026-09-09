@@ -1,0 +1,9 @@
+name: @name@ 
+version: @version@
+author: nda-cunh
+binary: @name@ 
+description: @description@
+dependency: 
+arch: 
+exclude_package: 
+optional_dependency: 

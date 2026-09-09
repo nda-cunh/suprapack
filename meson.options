@@ -1,2 +1,3 @@
 option('bootstrap', type : 'feature', value : 'disabled', description : 'Use C sources instead of Vala Source')
+option('suprapack', type : 'boolean', value : false, description : 'generate the suprapack info file')
 

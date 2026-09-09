@@ -17,3 +17,5 @@ subdir('po')
 if not need_bootstrap
   subdir('tests')
 endif
+
+subdir('data')
