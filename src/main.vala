@@ -86,6 +86,12 @@ public class Main : Object {
 		config.is_recursive_uninstall = !_recursive;
 		config.build_target = build_target;
 
+		// check if the code is running on MacOs or on Root
+		if (Utils.is_macos() == true || Utils.is_root() == true) {
+			config.use_fakeroot = false;
+		}
+
+
 		// Create source profile if not exist
 		if (FileUtils.test(@"$HOME/.suprapack_profile", FileTest.EXISTS) == false || create_suprapack_profile == true) {
 			config.create_source_profile();

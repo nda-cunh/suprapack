@@ -312,6 +312,15 @@ namespace Utils {
 	}
 
 
+	public bool is_macos () {
+		utsname name;
+		utsname.uname(out name);
+		return name.sysname == "Darwin";
+	}
+
+	public bool is_root () {
+		return Environment.get_user_name() == "root";
+	}
 
 	/**
 	 * Convert a byte to a human readable string
