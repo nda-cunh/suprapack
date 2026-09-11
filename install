@@ -1,0 +1,33 @@
+#!/bin/sh
+
+VERSION=$(curl -s https://gitlab.com/nda-cunh/suprapack/-/raw/master/meson.build | head -n 5 | grep -o "version: [^,]\+" | grep -o "[0-9.]\+")
+OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+ARCH_NAME=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')
+SUPRAPACK_NAME="suprapack_${VERSION}_${ARCH_NAME}-${OS}.suprapack"
+SUPRAPACK_URL=https://github.com/nda-cunh/package-build/releases/latest/download/$SUPRAPACK_NAME
+
+if command -v curl >/dev/null 2>&1; then
+	curl -L -o $SUPRAPACK_NAME $SUPRAPACK_URL
+elif command -v wget >/dev/null 2>&1; then
+	wget -O $SUPRAPACK_NAME $SUPRAPACK_URL
+else
+	echo "Error: curl or wget is required to download the suprapack."
+	exit 1
+fi
+
+# test if suprapack is curl is successful else exit with error
+
+if [ $? -ne 0 ]; then
+	echo "Error: Failed to download the suprapack."
+	exit 1
+fi
+
+echo "Downloaded $SUPRAPACK_NAME successfully."
+
+# install it first create a new temporary directory and extract the suprapack into it 
+
+TEMP_DIR=$(mktemp -d)
+echo "Extracting $SUPRAPACK_NAME to temporary directory $TEMP_DIR"
+tar -I zstd -xf $SUPRAPACK_NAME -C $TEMP_DIR
+
+$TEMP_DIR/bin/suprapack install ./$SUPRAPACK_NAME 

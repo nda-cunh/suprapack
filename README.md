@@ -9,6 +9,19 @@
 - glib-networking
 - zstd
 
+#### Just Install without compiling
+
+This download and install suprapack in your $HOME/.local/bin
+work only for:
+- Linux-amd64
+- Linux-arm64
+- Darwin-amd64 (MacOS)
+- Darwin-arm64 (MacOS)
+
+```bash
+curl https://gitlab.com/nda-cunh/suprapack/-/raw/master/install | sh
+```
+
 #### Compiling and install
 
 ```bash
