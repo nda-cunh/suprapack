@@ -383,6 +383,6 @@ namespace Utils {
 			return null;
 		}
 	}
-	public string? memory_tmp = null;
+	private string? memory_tmp = null;
 
 }
