@@ -114,15 +114,7 @@ namespace Build {
 		DirUtils.create_with_parents (config.build_output, 0755);
 		var loop = new MainLoop();
 		var thread = new Thread<void> (null, () => {
-			// compress the package with fakeroot or not
-			if (config.use_fakeroot == true) {
-				if (Utils.run({"fakeroot", "tar", "--zstd", "-cf", package_dest, "-C", usr_dir, "."}, {}, true) != 0)
-					error("unable to create package\npackage => %s", name_pkg);
-			}
-			else {
-				if (Utils.run({"tar", "--zstd", "-cf", package_dest, "-C", usr_dir, "."}, {}, true) != 0)
-					error("unable to create package\npackage =>  %s", name_pkg);
-			}
+			Suprapack.ZSTD.create_package(package_dest, usr_dir);
 			loop.quit();
 		});
 		Utils.loading.begin();
@@ -167,10 +159,8 @@ namespace Build {
 		}
 
 		if (!FileUtils.test(dest, FileTest.IS_DIR))
-			throw new ErrorSP.EXTRACT("Destination %s is not a directory", dest); // C'est ici que ça bloque car dest = package_path
-
-		if (Utils.run({"tar", "--zstd", "-xf", package_path, "-C", dest}, {}, true) != 0)
-			throw new ErrorSP.EXTRACT("unable to extract package %s to %s", package_path, dest);
+			throw new ErrorSP.EXTRACT("Destination %s is not a directory", dest);
+		Suprapack.ZSTD.extract (package_path, dest);
 	}
 	/**
 	 * check if the directory is a good directory

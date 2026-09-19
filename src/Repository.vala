@@ -46,10 +46,8 @@ namespace Repository {
 		int status;
 		string lore;
 		try {
-			Process.spawn_command_line_sync(@"tar -xf '$(file)' ./info", null, null, out status);
-			if (status != 0)
-				throw new ShellError.FAILED ("can't open it");
-			var pkg = Package.from_file("./info");
+			var info_file = Suprapack.ZSTD.get_info(file);
+			var pkg = Package.from_string (info_file);
 			lore = pkg.description;
 		}
 		catch (Error e) {

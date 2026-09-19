@@ -149,8 +149,7 @@ public void install_suprapackage(Package suprapack) throws Error {
 		throw new ErrorSP.ACCESS("%s n'existe pas", output);
 	var tmp_dir = DirUtils.make_tmp("suprastore_XXXXXX");
 	Log.suprapack("Extraction de " + CYAN + "%s" + NONE, output);
-	if (Utils.run({"tar", "-xf", output, "-C", tmp_dir}, {}, true) != 0)
-		throw new ErrorSP.FAILED("unable to decompress package\npackage => %s", output);
+	Suprapack.ZSTD.extract(output, tmp_dir);
 
 	debug ("Extracted in %s/info (%s)", tmp_dir, output);
 	var pkg = Package.from_file(@"$tmp_dir/info");
@@ -440,10 +439,10 @@ private void prepare_install (string name_search, string? name_repo = null, bool
 private void add_queue_list(SupraList pkg, string output) throws Error {
 	Log.debug ("Add in queue: %s", pkg.name);
 	// get the info file of the package
-	Process.spawn_command_line_sync(@"tar -xf $(output) ./info");
+
+	Package pkgtmp = Package.from_string(Suprapack.ZSTD.get_info(output));
+
 	// Create the package object with the info file
-	Package pkgtmp = Package.from_file("./info");
-	FileUtils.unlink("./info");
 	pkgtmp.output = output;
 	pkgtmp.repo = pkg.repo_name;
 	pkgtmp.is_wanted = pkg.is_wanted;

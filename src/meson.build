@@ -1,4 +1,5 @@
 vala_srcs = files(
+  'Archive.vala',
   'BetterSearch.vala',
   'Build.vala',
   'CommandPackage.vala',
@@ -24,15 +25,36 @@ vala_srcs = files(
   'Version.vala',
   'main.vala',
   'uname.vapi'
-)
+  )
 
 executable('suprapack',
   vala_srcs,
   c_args: ['-w', '-DGETTEXT_PACKAGE="suprapack"'],
-  # vala_args: '--enable-experimental',
+  vala_args: ['--pkg=libarchive'],
   dependencies : [
     dependency('glib-2.0'),
     dependency('gobject-2.0'),
     dependency('gio-2.0'),
-  ],
+    dependency('libzstd', static: true, default_options: ['forcefallback=true']),
+    dependency('libarchive', static: true, default_options: [
+      'default_library=static',
+      'progs=[]',
+      'zstd=enabled',
+      'zlib=disabled',
+      'bz2lib=disabled',
+      'libb2=disabled',
+      'iconv=disabled',
+      'lz4=disabled',
+      'lzma=disabled',
+      'lzo2=disabled',
+      'cng=disabled',
+      'openssl=disabled',
+      'xml2=disabled',
+      'expat=disabled',
+      'regex=disabled',
+      'xattr=disabled',
+      'acl=disabled',
+      'tests=disabled',
+      ]),
+    ],
   install : true)

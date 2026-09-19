@@ -56,6 +56,22 @@ public struct Package {
 
 	bool is_wanted;
 
+	public void init () {
+		this.is_wanted = false;
+		this.name = "";
+		this.author = "";
+		this.version = "";
+		this.description = "";
+		this.binary = "";
+		this.dependency = "";
+		this.installed_files = "";
+		this.optional_dependency = "";
+		this.exclude_package = "";
+		this.size_tar = "";
+		this.size_installed = "";
+		this.arch = "";
+	}
+
 	public string[] get_all_dependency () {
 		var bs = new StrvBuilder();
 		bs.addv (get_dependency ());
@@ -106,6 +122,7 @@ public struct Package {
 
 	private static Package build_from_string (string contents) throws Error {
 		Package result = {}; 
+		result.init ();
 		unowned string @value;
 
 		var lines = contents.split("\n");

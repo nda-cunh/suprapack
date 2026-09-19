@@ -35,8 +35,7 @@ namespace Cmd {
 			file.copy(filed, FileCopyFlags.OVERWRITE);
 			if (config.force == true) {
 				var dir_target =  @"./$(supralist.name)-$(supralist.version)";
-				DirUtils.create(dir_target, 0755);
-				Process.spawn_command_line_sync(@"tar -xf $(filed.get_path()) -C $(dir_target)");
+				Suprapack.ZSTD.extract (filed.get_path(), dir_target);
 			}
 		}
 
@@ -64,7 +63,7 @@ namespace Cmd {
 					string name_repo = match_info.fetch_named("repo");
 					prepare_install(name_pkg, name_repo, true);
 				}
-				else if (i.has_suffix(".suprapack")){
+				else if (i.has_suffix(".suprapack")) {
 					prepare_install(i, null, true);
 				}
 			}
@@ -126,18 +125,24 @@ namespace Cmd {
 
 	public bool info (string []av) throws Error {
 		string tmp;
+		Package info;
 		if (av.length == 2)
 			error("`suprapack info [...]`");
-		if (Query.is_exist (av[2]) == false) {
+		if (FileUtils.test(av[2], FileTest.EXISTS) && av[2].has_suffix(".suprapack")) {
+			info = Package.from_string (Suprapack.ZSTD.get_info (av[2]));
+		}
+		else if (Query.is_exist (av[2]) == false) {
 			tmp = BetterSearch.search_good_package_from_query (av[2], true);
 			if (tmp == null) {
 				warning ("Cancelling ...");
 				return false;
 			}
+			info = Query.get_from_pkg(tmp);
 		}
-		else
+		else {
 			tmp = av[2];
-		var info = Query.get_from_pkg(tmp);
+			info = Query.get_from_pkg(tmp);
+		}
 		print(BOLD + "Nom                      : " + NONE + "%s\n", info.name);
 		print(BOLD + "Version                  : " + NONE + "%s\n", info.version);
 		print(BOLD + "Description              : " + NONE + "%s\n", info.description);

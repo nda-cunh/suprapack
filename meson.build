@@ -5,6 +5,9 @@ i18n = import('i18n')
 add_project_arguments('--enable-experimental', language: 'vala')
 add_project_arguments('--target-glib=auto', language: 'vala')
 
+vapi_dir = meson.current_source_dir() / 'vapi'
+add_project_arguments(['--vapidir', vapi_dir], language: 'vala')
+
 subdir('src')
 subdir('po')
 
