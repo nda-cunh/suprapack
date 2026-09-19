@@ -56,22 +56,6 @@ public struct Package {
 
 	bool is_wanted;
 
-	public void init () {
-		this.is_wanted = false;
-		this.name = "";
-		this.author = "";
-		this.version = "";
-		this.description = "";
-		this.binary = "";
-		this.dependency = "";
-		this.installed_files = "";
-		this.optional_dependency = "";
-		this.exclude_package = "";
-		this.size_tar = "";
-		this.size_installed = "";
-		this.arch = "";
-	}
-
 	public string[] get_all_dependency () {
 		var bs = new StrvBuilder();
 		bs.addv (get_dependency ());
@@ -120,60 +104,101 @@ public struct Package {
 		}
 	}
 
-	public Package.from_file (string info_file) throws Error {
-		string contents;
+	private static Package build_from_string (string contents) throws Error {
+		Package result = {}; 
 		unowned string @value;
 
-		init();
-		FileUtils.get_contents(info_file, out contents);
 		var lines = contents.split("\n");
 
 		foreach (unowned var line in lines) {
 			if (line == "[FILES]")
 				break;
-			value = line.offset(line.index_of_char(':') + 1);
-			if (line.has_prefix("name")) {
-				this.name = value.strip();
-				this.name = /\f\r\n\t\v /.replace(this.name, -1, 0, "");
+
+			int index = line.index_of_char(':');
+			if (index == -1)
+				continue;
+
+			value = line.offset(index + 1)._strip();
+			char c = line[0];
+
+			switch (c) {
+				case 'n':
+					if (line.has_prefix("name")) {
+						result.name = /\f\r\n\t\v /.replace(value, -1, 0, "");
+					}
+					break;
+				case 'v':
+					if (line.has_prefix("version")) {
+						result.version = /[^0-9.]/.replace(value, -1, 0, "");
+					}
+					break;
+				case 'a':
+					if (line.has_prefix("arch")) {
+						result.arch = value;
+						if (result.arch == "" || result.arch == "auto") {
+							result.arch = Utils.get_arch_host();
+						}
+					}
+					else if (line.has_prefix("author"))
+						result.author = value;
+					break;
+				case 'd':
+					if (line.has_prefix("dependency"))
+						result.dependency = value;
+					else if (line.has_prefix("description"))
+						result.description = value;
+					break;
+				case 's':
+					if (line.has_prefix("size_tar"))
+						result.size_tar = value;
+					else if (line.has_prefix("size_installed"))
+						result.size_installed = value;
+					break;
+				case 'o':
+					if (line.has_prefix("optional_dependency"))
+						result.optional_dependency = value;
+					break;
+				case 'e':
+					if (line.has_prefix("exclude_package"))
+						result.exclude_package = value;
+					break;
+				case 'b':
+					if (line.has_prefix("binary"))
+						result.binary = value;
+					break;
+				case 'w':
+					if (line.has_prefix("wanted"))
+						result.is_wanted = value == "yes" ? true : false;
+					break;
+				default:
+					break;
 			}
-			else if (line.has_prefix("version")) {
-				this.version = value.strip();
-				this.version = /[^0-9.]/.replace(this.version, -1, 0, "");
-			}
-			else if (line.has_prefix("arch")) {
-				this.arch = value.strip();
-				if (this.arch == "" || this.arch == "auto") {
-					this.arch = Utils.get_arch_host();
-				}
-			}
-			else if (line.has_prefix("author"))
-				this.author = value.strip();
-			else if (line.has_prefix("description"))
-				this.description = value.strip();
-			else if (line.has_prefix("binary"))
-				this.binary = value.strip();
-			else if (line.has_prefix("dependency"))
-				this.dependency = value.strip();
-			else if (line.has_prefix("optional_dependency"))
-				this.optional_dependency = value.strip();
-			else if (line.has_prefix("size_tar"))
-				this.size_tar = value.strip();
-			else if (line.has_prefix("size_installed"))
-				this.size_installed = value.strip();
-			else if (line.has_prefix("exclude_package"))
-				this.exclude_package = value.strip();
-			else if (line.has_prefix("wanted"))
-				this.is_wanted = value.strip() == "yes" ? true : false;
 		}
+		// End of parsing the info file
+
 		if ("[FILES]" in contents) {
 			value = contents.offset(contents.index_of("[FILES]") + 8);
-			installed_files = value;
+			result.installed_files = value;
 		}
-		if (this.arch == "") {
-			this.arch = Utils.get_arch_host();
-		}
-		if (this.binary == "")
-			this.binary = this.name;
+
+		if (result.arch == "")
+			result.arch = Utils.get_arch_host();
+
+		if (result.binary == "")
+			result.binary = result.name;
+
+		return result;
+	}
+
+	public static Package from_file (string info_file) throws Error {
+		string contents;
+		FileUtils.get_contents(info_file, out contents);
+
+		return Package.build_from_string (contents);
+	}
+
+	public static Package from_string (string contents) throws Error {
+		return Package.build_from_string (contents);
 	}
 
 	/**
