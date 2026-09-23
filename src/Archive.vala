@@ -1,4 +1,4 @@
-namespace Suprapack.ZSTD {
+	namespace Suprapack.ZSTD {
 	public errordomain Error {
 		CANT_OPEN_ARCHIVE,
 			INFO_NOT_FOUND,
@@ -62,7 +62,7 @@ namespace Suprapack.ZSTD {
 				if (bytes_read < 0) {
 					throw new ZSTD.Error.CANT_OPEN_ARCHIVE ("Failed to read 'info' entry from archive: [%s] (%s)", archive_path, reader.error_string());
 				}
-				return (string)content;
+				return ((string)content).dup ();
 			} else {
 				reader.read_data_skip();
 			}
@@ -88,12 +88,13 @@ namespace Suprapack.ZSTD {
 		Environment.set_current_dir (usr_dir);
 
 		try {
+			uint8 buffer[8192];
 			if (FileUtils.test ("info", FileTest.EXISTS)) {
 				Posix.Stat st;
 				Posix.lstat ("info", out st);
 
 				var entry = new Archive.Entry ();
-				entry.set_pathname ("info");
+				entry.set_pathname ("./info");
 				disk_reader.entry_from_file (entry, -1, st);
 				entry.set_uid (0);
 				entry.set_gid (0);
@@ -104,7 +105,6 @@ namespace Suprapack.ZSTD {
 
 				var file = File.new_for_path ("info");
 				var stream = file.read ();
-				uint8 buffer[8192];
 				ssize_t bytes_read;
 				while ((bytes_read = stream.read (buffer)) > 0) {
 					writer.write_data (buffer[0:bytes_read]);
