@@ -74,6 +74,7 @@
 		var writer = new Archive.Write ();
 		writer.set_format_pax_restricted ();
 		writer.add_filter_zstd ();
+		writer.set_filter_option ("zstd", "compression-level", @"$(config.ZSTD_COMPRESSION_LEVEL)");
 
 		string abs_dest = File.new_for_path (package_dest).get_path ();
 

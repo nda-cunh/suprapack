@@ -39,6 +39,7 @@ public class Main : Object {
 	public static bool _recursive = false;
 	public static bool create_suprapack_profile = false;
 	public static string? build_target = null;
+	public static int ZSTD_COMPRESSION_LEVEL = 10;
 
 
 	const OptionEntry[] options = {
@@ -57,6 +58,9 @@ public class Main : Object {
 		{ "no-recursive", '\0', OptionFlags.NONE, OptionArg.NONE, out _recursive, COLOR + "(Uninstall)" + NONE + " remove the recursive", null},
 		{ "target", '\0', OptionFlags.NONE, OptionArg.STRING, out build_target, COLOR + "(Build)" + NONE + " set the build target", null},
 		{ "regenerate_suprapack_profile", '\0', OptionFlags.NONE, OptionArg.NONE, out create_suprapack_profile, COLOR + "(Config)" + NONE + " regenerate the suprapack profile", null},
+
+
+		{ "zstd-compression-level", '\0', OptionFlags.NONE, OptionArg.INT, out ZSTD_COMPRESSION_LEVEL, COLOR + "(Build)" + NONE + " set the zstd compression level", "LEVEL"},
 		{ null }
 	};
 
@@ -85,6 +89,7 @@ public class Main : Object {
 		config.build_output = build_output ?? ".";
 		config.is_recursive_uninstall = !_recursive;
 		config.build_target = build_target;
+		config.ZSTD_COMPRESSION_LEVEL = ZSTD_COMPRESSION_LEVEL;
 
 		// check if the code is running on MacOs or on Root
 		if (Utils.is_macos() == true || Utils.is_root() == true) {
