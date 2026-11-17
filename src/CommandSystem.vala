@@ -112,8 +112,8 @@ namespace Cmd {
 		"\t  " + BOLD + GREY + " Exemple:" + COM + " suprapack search " + CYAN + "'plugin*lsp' \n" +
 		"\t" + p_suprapack + " list_files <pkg>\n" +
 		"\t  " + COM + " list all file instaled by pkg\n" +
-		"\t" + p_suprapack + " list <pkg>\n" +
-		"\t  " + COM + " list your installed package\n" +
+		"\t" + p_suprapack + " list [--sort=<name|size|version|author|description>] [pattern]\n" +
+		"\t  " + COM + " list installed packages; prefix the sort field with - for descending order\n" +
 		"\t" + p_suprapack + " info [package name]\n" +
 		"\t  " + COM + " print info of package name\n" +
 		"\t" + p_suprapack + " config [config name] [config value]\n" +

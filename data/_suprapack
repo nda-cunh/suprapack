@@ -2,25 +2,75 @@
 
 _suprapack() {
 	local -a commands
-	
-	_arguments '1:commands:(add install uninstall download update search list list_files info config prepare remove build extract)'
+
+	if (( CURRENT == 2 )); then
+		commands=(
+			"${(@f)$(suprapack shell_print_commands 2>/dev/null)}"
+		)
+		commands=(
+			'add:Install a package from a repository'
+			'build:Build a SupraPack package'
+			'config:Read or change the configuration'
+			'download:Download a package without installing it'
+			'extract:Extract a SupraPack archive'
+			'have_update:Check whether updates are available'
+			'help:Display help'
+			'info:Display package information'
+			'install:Install a package from a repository'
+			'list:List installed packages'
+			'list_files:List files installed by a package'
+			'prepare:Prepare a package repository'
+			'refresh:Refresh the package list'
+			'remove:Uninstall a package'
+			'run:Run an application'
+			'search:Search packages in repositories'
+			'search_supravim_plugin:Search SupraVim plugins'
+			'shell:Open a shell in a SupraPack environment'
+			'uninstall:Uninstall a package'
+			'update:Update installed packages'
+			'version:Display the SupraPack version'
+		)
+		_describe -t commands 'command' commands
+		return
+	fi
+
 	case "$words[2]" in
 		add|install)
-			_arguments "*:commands:($(suprapack sync_get_comp))"
-			_arguments '*:options:_suprapack_options_install'
+			_arguments \
+				'--prefix=[Change the prefix for the install]:prefix directory:_files -/' \
+				'--strap=[Change the target root]:prefix directory:_files -/' \
+				'--force[Force the install and reinstall dependencies]' \
+				'--yes[Answer yes to all questions]' \
+				'*:package:($(suprapack sync_get_comp 2>/dev/null))'
 			_files -g '*.suprapack'
 			;;
 		remove|uninstall)
-			_arguments "*:commands:($(suprapack query_get_comp))"
+			_arguments \
+				'--force[Force the uninstall]' \
+				'--yes[Answer yes to all questions]' \
+				'*:package:($(suprapack query_get_comp 2>/dev/null))'
 			;;
 		download)
-			_arguments "*:commands:($(suprapack sync_get_comp))"
-			_arguments '*:options:_suprapack_options_download'
+			_arguments \
+				'--prefix=[Change the prefix for the install]:prefix directory:_files -/' \
+				'--strap=[Change the target root]:prefix directory:_files -/' \
+				'--force[Force extraction of the package]' \
+				'--yes[Answer yes to all questions]' \
+				'*:package:($(suprapack sync_get_comp 2>/dev/null))'
 			;;
 		build)
-			_arguments '*:options:_suprapack_options_build'
-			_files -/
-			_files -g 'PKGBUILD'
+			_arguments \
+				'--no-fakeroot[Disable fakeroot]' \
+				'--build-output=[Change the build output directory]:output directory:_files -/' \
+				'--install[Build and install the package]' \
+				'--target=[Set the build target]:target' \
+				'--zstd-compression-level=[Set the Zstandard compression level]:level' \
+				'*:directory:_files -/'
+			;;
+		list)
+			_arguments \
+				'--sort=[Sort installed packages]:sort field:((name\:by\ package\ name size\:by\ package\ size version\:by\ package\ version author\:by\ package\ author description\:by\ package\ description -name\:descending\ by\ name -size\:descending\ by\ size -version\:descending\ by\ version -author\:descending\ by\ author -description\:descending\ by\ description))' \
+				'*:pattern'
 			;;
 		prepare)
 			_files -g '*.suprapack'
@@ -29,53 +79,18 @@ _suprapack() {
 			_files -/
 			;;
 		update)
-			_arguments "*:commands:($(suprapack query_get_comp))"
+			_arguments '*:package:($(suprapack query_get_comp 2>/dev/null))'
 			;;
 		list_files)
-			_arguments "*:commands:($(suprapack query_get_comp))"
+			_arguments '*:package:($(suprapack query_get_comp 2>/dev/null))'
 			;;
 		info)
-			_arguments "*:commands:($(suprapack query_get_comp))"
+			_arguments '*:package:($(suprapack query_get_comp 2>/dev/null))'
 			;;
 		config)
-			_arguments "*:commands:($(suprapack config --shell_print_hidden))"
+			_arguments '*:configuration option:($(suprapack config --shell_print_hidden 2>/dev/null))'
 			;;
 	esac
-}
-
-_suprapack_options_install() {
-	local -a options
-	options=(
-		'--prefix:Change the prefix for the install'
-		'--strap:Change the strap for the install'
-		'--force:Force the install and reinstall all dependencies'
-		'--yes:Say yes to all questions'
-	)
-
-	_describe 'option' options
-}
-
-_suprapack_options_download() {
-	local -a options
-	options=(
-		'--prefix:Change the prefix for the install'
-		'--strap:Change the strap for the install'
-		'--force:Force the exctraction of the package'
-		'--yes:Say yes to all questions'
-	)
-
-	_describe 'option' options
-}
-
-_suprapack_options_build() {
-	local -a options
-	options=(
-		'--no-fakeroot:Disable fakeroot'
-		'--build-output:Change the output for the build'
-		'--install:Build and install a package'
-	)
-
-	_describe 'option' options
 }
 
 _suprapack "$@"

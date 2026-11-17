@@ -33,6 +33,7 @@ public class Main : Object {
 	public static bool yes = false;
 	public static bool simple_print = false;
 	public static string? strap = null;
+	public static string? list_sort = null;
 	public static bool build_and_install = false;
 	public static string? build_output = null;
 	public static bool _debug = false;
@@ -53,6 +54,7 @@ public class Main : Object {
 		{ "yes", 'y', OptionFlags.NONE, OptionArg.NONE, out yes, COLOR + "(All)" + NONE + " answer yes to all questions", null },
 		{ "no-fakeroot", '\0', OptionFlags.NONE, OptionArg.NONE, out no_fakeroot, COLOR + "(Build)" + NONE + " don't build package with fakeroot", null },
 		{ "strap", '\0', OptionFlags.NONE, OptionArg.STRING, out strap, COLOR + "(All)" + NONE + " like PacStrap install to another root", "PREFIX"},
+		{ "sort", '\0', OptionFlags.NONE, OptionArg.STRING, out list_sort, COLOR + "(List)" + NONE + " sort installed packages by name, size, version, author or description; prefix with - for descending order", "FIELD" },
 		{ "install", '\0', OptionFlags.NONE, OptionArg.NONE, out build_and_install, COLOR + "(Build)" + NONE + " build and install the package", null },
 		{ "build-output", '\0', OptionFlags.NONE, OptionArg.STRING, out build_output, COLOR + "(Build)" + NONE + " build output", null },
 		{ "no-recursive", '\0', OptionFlags.NONE, OptionArg.NONE, out _recursive, COLOR + "(Uninstall)" + NONE + " remove the recursive", null},
@@ -165,6 +167,18 @@ public class Main : Object {
 		cmd_table["version"] = Cmd.version;
 		cmd_table["extract"] = Cmd.extract;
 
+
+		if (av1 == "shell_print_commands") {
+			FileUtils.close(2);
+			print("config\n");
+			foreach (unowned var command in cmd_table.get_keys()) {
+				if (!command.has_prefix("-") && command != "loading" &&
+				    command != "query_get_comp" && command != "sync_get_comp") {
+					print("%s\n", command);
+				}
+			}
+			return true;
+		}
 
 		if (av1 in cmd_table) {
 			CommandExecute cmd_execute = cmd_table[av1];

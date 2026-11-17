@@ -217,8 +217,54 @@ namespace Cmd {
 		return true;
 	}
 
+	private int compare_package (Package left, Package right, string field) {
+		switch (field) {
+		case "size":
+			var left_size = uint64.parse(left.size_installed);
+			var right_size = uint64.parse(right.size_installed);
+			return left_size < right_size ? -1 : (left_size > right_size ? 1 : strcmp(left.name, right.name));
+		case "version":
+			return strcmp(left.version, right.version);
+		case "author":
+			return strcmp(left.author, right.author);
+		case "description":
+			return strcmp(left.description, right.description);
+		case "name":
+		default:
+			return strcmp(left.name, right.name);
+		}
+	}
+
+	private Package[] sort_packages (Package[] packages, string field, bool descending) {
+		var sorted = packages.copy();
+
+		for (int i = 0; i < sorted.length - 1; i++) {
+			for (int j = 0; j < sorted.length - i - 1; j++) {
+				var comparison = compare_package(sorted[j], sorted[j + 1], field);
+				if ((descending && comparison < 0) || (!descending && comparison > 0)) {
+					var temporary = sorted[j];
+					sorted[j] = sorted[j + 1];
+					sorted[j + 1] = temporary;
+				}
+			}
+		}
+
+		return sorted;
+	}
+
 	public bool list (string []av) throws Error {
 		var installed = Query.get_all_package();
+		var sort = Main.list_sort ?? "name";
+		var descending = sort.has_prefix("-");
+
+		if (descending)
+			sort = sort.substring(1);
+
+		if (sort != "name" && sort != "size" && sort != "version" &&
+			sort != "author" && sort != "description") {
+			error("Invalid --sort field '%s'. Use name, size, version, author or description.", sort);
+		}
+
 		int width = 0;
 		int width_version = 0;
 		var str_regex = av[2]?.replace("*", ".*") ?? "";
@@ -229,6 +275,8 @@ namespace Cmd {
 				good += i;
 			}
 		}
+		good = sort_packages(good, sort, descending);
+
 		foreach (unowned var i in good) {
 			if (i.name.length > width)
 				width = i.name.length;
